@@ -1,0 +1,10 @@
+# 캡처/다운로드한 스크린샷은 저장소에 올리지 않는다 (저작권: 앱 제작사)
+*.png
+*.jpg
+*.jpeg
+*.webp
+captures/
+uploads*.json
+map*.json
+.DS_Store
+__pycache__/

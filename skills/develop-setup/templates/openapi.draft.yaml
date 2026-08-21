@@ -1,0 +1,20 @@
+# api/openapi.yaml — 백엔드 스펙이 없을 때 프론트가 쓰는 DRAFT. 최소(path 1·schema·Problem)로 시작하고
+# 백엔드 스펙이 나오면 이 파일을 그것으로 교체한다(develop-fe references/api-contract.md §6). DRAFT 표시는 description에.
+openapi: 3.1.0
+info: { title: {{PROJECT}} API, version: 0.0.1, description: "DRAFT — proposed by frontend; replace with backend spec" }
+servers: [{ url: /api/v1 }]
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      responses:
+        '200': { description: ok, content: { application/json: { schema: { type: object, required: [ok], properties: { ok: { type: boolean } } } } } }
+        '500': { $ref: '#/components/responses/Problem' }
+components:
+  schemas:
+    Problem:   # RFC 9457 — 에러 shape는 여기서 한 번만 정한다
+      type: object
+      required: [type, title, status]
+      properties: { type: {type: string}, title: {type: string}, status: {type: integer}, detail: {type: string} }
+  responses:
+    Problem: { description: error, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }

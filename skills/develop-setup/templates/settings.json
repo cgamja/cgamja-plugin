@@ -1,0 +1,42 @@
+{
+  "$comment": ".claude/settings.json — develop-fe 워크플로우 훅. 경로·명령은 프로젝트에 맞게 치환. 훅의 if 필터는 fail-open이라 hard deny는 permissions.deny에도 넣는다.",
+  "env": { "GIT_PAGER": "cat" },
+  "permissions": {
+    "deny": [
+      "Bash(git commit*--no-verify*)", "Bash(git commit*-n *)", "Bash(git push*--force*)", "Bash(git push*-f *)",
+      "Bash(*HUSKY=0*)", "Bash(*LEFTHOOK=0*)", "Bash(git config*core.hooksPath*)",
+      "Bash(*tee *package.json*)", "Bash(*sed -i*package.json*)", "Bash(*> package.json*)",
+      "Bash(*tee *pnpm-lock.yaml*)", "Bash(*> pnpm-lock.yaml*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "bash .claude/hooks/lint-file.sh", "timeout": 20 }]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "bash .claude/hooks/protect-files.sh", "timeout": 5 }]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "bash .claude/hooks/protect-bash.sh", "timeout": 5 }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{ "type": "command", "command": "bash .claude/hooks/verify-on-stop.sh", "timeout": 600 }]
+      }
+    ]
+  },
+  "$hooks_note": "아래 스펙의 구현체는 templates/hooks/*.sh — 그대로 .claude/hooks/ 에 복사한다(2026-08-21 스크래치에서 우회 재현·거부 검증). 스펙은 참고용.",
+  "$hooks_spec": {
+    "lint-file.sh": "stdin JSON의 tool_input.file_path가 ts/tsx면 prettier --write + eslint --fix 그 파일만. tsc 금지(느림).",
+    "protect-files.sh": "file_path가 package.json|*lock*|eslint.config.*|.env* 이면 exit 2 + '사용자에게 물어라'. src/api/**/*.gen.ts 이면 exit 2 + '생성물 — api/openapi.yaml을 고치고 pnpm api:gen'. *.test.*|*.browser.test.*|*.stories.*|e2e/*.spec.ts 는 env TDD_PHASE=red 면 허용, 아니면 permissionDecision 'ask'(사람이 diff 승인 = red 게이트, adr/0009).",
+    "protect-bash.sh": "command에 --no-verify|-n |HUSKY=0|LEFTHOOK=0|hooksPath|push --force|tee .*package.json|sed -i .*package.json|> package.json|pnpm add|npm i(nstall)? [^-] 패턴이면 exit 2 + 이유. (deny와 이중) **테스트 파일 쓰기 우회 차단**: command에 (sed -i|perl -pi|perl -i|tee|>|>>|cp |mv |python[^|]*open\\(.*'w'|cat <<) 와 (\\.test\\.|\\.browser\\.test\\.|\\.spec\\.|e2e/|\\.stories\\.) 가 함께 있으면 exit 2 + '테스트 파일은 Edit 도구로만 — 구현 턴엔 읽기전용'. command가 TDD_PHASE= 로 시작하거나 포함하면 exit 2 + 'TDD_PHASE는 사람이 세션 시작 시 정한다(TDD_PHASE=red claude). 인라인 설정 금지'. (2026-08-21 Tier-1 테스트에서 TDD_PHASE=red perl -pi 로 우회된 사례)",
+    "verify-on-stop.sh": "stop_hook_active==true면 exit 0. 이번 턴에 git diff --name-only로 코드 변경 없으면 exit 0. 있으면 pnpm verify; 실패 시 마지막 50줄을 stderr로, exit 2. 8회 연속 차단 후 Claude Code가 강제 종료함."
+  }
+}

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# cgamja 플러그인 bin/ — 플러그인이 켜져 있으면 Bash 도구 PATH에 들어간다.
+# `openspec`을 프로젝트에 고정된 devDependency(@fission-ai/openspec)로 실행한다. /opsx:* 명령이 bare `openspec`을 부르기 때문.
+if [ -x node_modules/.bin/openspec ]; then exec node_modules/.bin/openspec "$@"; fi
+if command -v pnpm >/dev/null && [ -f pnpm-lock.yaml ]; then exec pnpm exec openspec "$@"; fi
+exec npx -y @fission-ai/openspec@latest "$@"

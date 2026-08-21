@@ -1,0 +1,21 @@
+# lefthook.yml — 비대화형만. commitizen류 프롬프트 금지(에이전트·non-TTY에서 행).
+commit-msg:
+  commands:
+    commitlint:
+      run: {{PM}} exec commitlint --edit {1}
+pre-commit:
+  parallel: true
+  commands:
+    lint-staged:
+      glob: "*.{ts,tsx,js,json,md}"
+      run: {{PM}} exec eslint --fix {staged_files} && {{PM}} exec prettier --write {staged_files} && git add {staged_files}
+    no-test-edit-in-feat:
+      # 구현 커밋에 테스트 파일이 섞이면 경고(차단은 리뷰어 몫). 테스트 커밋은 test(scope):로 분리.
+      run: |
+        msg=$(cat .git/COMMIT_EDITMSG 2>/dev/null || true)
+        if echo "$msg" | grep -qE '^(feat|fix|refactor)' && git diff --cached --name-only | grep -qE '\.(browser\.)?test\.tsx?$'; then
+          echo "feat/fix 커밋에 테스트 파일이 포함됨 — test(scope): 커밋으로 분리하세요"; exit 1; fi
+pre-push:
+  commands:
+    verify:
+      run: {{PM}} verify

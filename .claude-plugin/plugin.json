@@ -1,0 +1,8 @@
+{
+  "name": "cgamja",
+  "description": "kangr 개인 Claude Code 플러그인 — develop-setup(프론트 프로젝트 1회 세팅: 규칙·린트·훅·OpenSpec·design/), develop-fe(프론트 개발 워크플로우: 티어 판정 → OpenSpec 스펙 → 테스트·스크린샷 증거 → 리뷰 → PR)",
+  "version": "0.1.0",
+  "author": {
+    "name": "kangr"
+  }
+}

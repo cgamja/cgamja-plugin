@@ -1,0 +1,54 @@
+# .github/workflows/ci.yml — verify는 package.json의 같은 스크립트. 여기서 목록을 다시 쓰지 않는다.
+name: ci
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify
+      - run: pnpm exec commitlint --from origin/main --to HEAD
+        if: github.event_name == 'pull_request'
+      - run: npx -y @fission-ai/openspec@latest validate --archived --strict
+        env: { OPENSPEC_TELEMETRY: "0" }
+      - run: pnpm exec jscpd src --threshold 3 --reporters console
+      - run: bash scripts/check-docs.sh   # CLAUDE.md/.claude/rules/docs 가 가리키는 경로·명령 존재 검사
+      - name: api contract — breaking change vs base   # api/openapi.yaml 없으면 삭제
+        if: github.event_name == 'pull_request'
+        uses: oasdiff/oasdiff-action/breaking@v0
+        with: { base: "origin/${{ github.base_ref }}:api/openapi.yaml", revision: "HEAD:api/openapi.yaml", fail-on: WARN }
+
+  browser-tests:   # 웹만. Expo는 삭제
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with: { path: ~/.cache/ms-playwright, key: pw-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }} }
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec vitest run --project browser   # 50파일 넘으면 --shard=1/2, 2/2 매트릭스
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+
+  # mutation:  # 주 1회 또는 src/domains/**/model 변경 시. Stryker는 unit(jsdom) 프로젝트만.
+  #   schedule: cron '0 3 * * 1'
+  #   run: pnpm exec stryker run
