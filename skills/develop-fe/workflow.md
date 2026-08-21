@@ -66,7 +66,7 @@
    - UI task: 뷰포트·다크모드·키보드 증거는 **`.claude/rules/platform.md` 프로필**대로(`references/platform-fit-frontend.md`; 없으면 웹 375/768/1280) `agent-browser`(`[TODO]`)로 찍고, 콘솔 에러 0. 접근성 증거: axe `serious+` 0건 + Tab 시퀀스 목록(`references/a11y-frontend.md` §3). 스냅샷이 있으면 `reference@2x.png`와 나란히 비교해 차이 나열 — 값은 스크린샷이 아니라 `getComputedStyle`로 확인(`figma-design-source.md` §6)
    - Figma 출력(`context.tsx`)은 참고지 복사 대상이 아니다: `leading-[22.126px]`류는 토큰으로, 토큰이 없으면 사용자에게 올린다. 아이콘·이미지는 export된 에셋을 받아 커밋(URL은 7일 만료)
    - 마지막 "Converge" 그룹: spec의 모든 시나리오 ↔ 코드 대조, 빠진 건 task로 append하고 마저 한다
-5. **`/review-fe code`** (Skill 도구로 `cgamja:review-fe`, change slug·티어를 넘긴다) — 렌즈(L1 정확성·중복 / L2 스펙 완전성 / L3 테스트 무결성 + UI면 L4 접근성·L5 플랫폼 + API면 L6 경계·계약)를 persona 서브에이전트로 병렬 실행해 한 표로 합친다(adr/0012 개정 1 — Tier-2는 `ce-code-review` 없이). **Agent 도구로 리뷰어를 즉석 제작하지 않는다**(2026-08-21 두 번 연속 이탈). blocker 있으면 반영 후 해당 렌즈만 재실행 1회. 그다음 `/ce-simplify-code` 1회
+5. **`/review-fe code`** (Skill 도구로 `cgamja:review-fe`, change slug·티어를 넘긴다) — 렌즈(L1 정확성·중복 / L2 스펙 완전성 / L3 테스트 무결성 + UI면 L4 접근성·L5 플랫폼 + API면 L6 경계·계약)를 persona 서브에이전트로 병렬 실행해 한 표로 합친다(adr/0012 개정 1 — Tier-2는 `ce-code-review` 없이). **Agent 도구로 리뷰어를 즉석 제작하지 않는다**(2026-08-21 두 번 연속 이탈). blocker 있으면 반영 후 해당 렌즈만 재실행 1회. `/ce-simplify-code`는 **선택**(사용자 요청 또는 jscpd 임계 초과 시 — sonnet 3에이전트 ≈200k에 적용 0~2건, adr/0012 개정 2)
 6. **Figma 대조** (Ready 화면일 때): 토큰 린트 0건 → computed style 5~10개 → 2x 픽셀/SSIM 97% 이상, EXPECTED/ACTUAL/DIFF 3장 저장. `get_screenshot` 1회로 기준 PNG 갱신 가능(`figma-design-source.md` §6)
 7. **`/opsx:archive`** → delta가 `openspec/specs/`에 병합 → 5장, 6장
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # PreToolUse (Edit|Write): 테스트 파일을 편집하려는데 이 세션에서 cgamja:test-fe 스킬을 부른 적이 없으면 상기(차단 아님).
-# 2026-08-21 Tier-2 실측: 본체가 workflow.md의 "Skill 도구로 test-fe" 한 줄을 무시하고 references를 직접 읽어 작성 → reports/develop-fe-tier2_2026-08-21_restructured.md 결함 2
+# 보강용(2026-08-21 실측에서는 세 런 모두 test-fe를 호출했다 — 처음엔 미호출로 오독). 호출 없이 테스트 파일부터 쓰는 경로만 막는다.
 source "$(dirname "$0")/_lib.sh"
 f="$(j tool_input.file_path)"
 grep -qE '(\.test\.|\.browser\.test\.|\.spec\.|/e2e/|\.stories\.)' <<<"$f" || exit 0

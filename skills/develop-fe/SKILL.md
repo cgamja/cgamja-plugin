@@ -32,7 +32,7 @@ hooks:
 에이전트 개발 방법론(SDD, Compound Engineering, Harness, Loop, EDD …)은 전부 같은 다섯 동작으로 환원된다 — 의도를 글로 고정, 편집 전 계획, **돌릴 수 있는 체크를 먼저**, 작성자와 검증자 분리, 컨텍스트 작게. 이 스킬은 그 다섯을 가장 싼 도구로 채운다: 스펙·tasks는 OpenSpec, 브레인스토밍·리뷰·학습·커밋·PR은 Compound Engineering 플러그인, 프론트 특화 규칙과 검증 스택은 여기서. 프론트엔드는 `tsc` 같은 오라클이 없어서 **스크린샷과 테스트 출력을 증거로 내는 것**이 핵심이다. 근거는 `references/methodologies.md`, 도구 선택 결정은 `adr/0001`.
 
 ## 시작 절차
-0. **세션 모델 확인**: 이 스킬은 `opus` 세션을 전제한다(`references/model-routing.md`, adr/0011 — 본체가 비용의 78%). Tier-3 brainstorm·디자인 갭 판단에 들어갈 때만 사용자에게 `/model fable`을 권한다. 세션이 fable이면 첫 보고에 그 사실과 예상 비용(Tier-2 $30+)을 한 줄 적는다.
+0. **예상 비용 한 줄**: Tier-2 한 change는 세션 모델과 무관하게 **≈$30~45**(2026-08-21 3런 실측, `reports/README.md`)다 — 리뷰 렌즈 6개×2회차·증거·변이 확인의 가격. 첫 보고에 티어와 함께 적는다. 더 싸게 하려면 티어를 낮추거나 `/review-fe --lens`로 렌즈를 줄이는 것이 사용자 선택.
 1. **`workflow.md` 0장(세션 시작)** 을 그대로 실행한다 — git 상태, 열린 OpenSpec change, `docs/solutions/` grep, typecheck.
 2. **티어를 판정**한다 (`workflow.md` 1장 표). 기준은 작업량이 아니라 불확실성·파급 범위. 1분 넘게 고민하지 말고 낮은 티어로 시작한다.
    - diff를 한 문장으로 말할 수 있다 → **Tier-1** (아티팩트 없음)

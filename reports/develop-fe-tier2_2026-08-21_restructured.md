@@ -13,7 +13,7 @@
 | 2 | 계약 상태 B → DRAFT 스텁 → `api:gen` → 생성물만 import | `chore(api)` 커밋이 첫 커밋, L6 렌즈 "생성물 밖 fetch 0" | ✅ |
 | 3 | 테스트 먼저 — `test()` 커밋이 `feat()`보다 앞 | `git log`: `eb2f97b test` → `20dc426 feat`, 이후 루프 2번 더 같은 순서 | ✅ (red 출력·이유 본문에 있음) |
 | 4 | `feat` diff에 테스트 파일 없음 | L3 렌즈 + `git show --stat` | ✅ |
-| 5 | **test-fe 스킬을 Skill 도구로 호출** | 트랜스크립트에 `cgamja:test-fe` 호출 | ❌ **본체가 `references/tdd-frontend.md`를 직접 읽고 작성** — 계층·쿼리 규칙은 지켰으나 스킬 경계 무시 |
+| 5 | **test-fe 스킬을 Skill 도구로 호출** | 트랜스크립트 `Skill(cgamja:test-fe)` 1회 | ✅ (최초 리포트에 ❌로 잘못 적음 — 최종 보고의 "본체가 직접 작성"을 스킬 미호출로 오독. 트랜스크립트 재확인으로 정정) |
 | 6 | **review-fe 스킬을 Skill 도구로 호출**, 렌즈 선택 보고 | 최종 보고의 렌즈 표 | ✅ L1 L2 L3 L4 L5 L6 (UI+API 조건 판정 정확) |
 | 7 | 렌즈마다 `model:` 명시 | 서브에이전트 표 | ✅ 표대로(opus/sonnet) |
 | 8 | persona 파일을 프롬프트로 사용(즉석 제작 아님) | `review_nudge.sh` 발동 0회, 렌즈 이름이 persona명과 일치 | ✅ |
@@ -38,7 +38,7 @@
 | # | 결함 | 심각도 | 조치 |
 |---|---|---|---|
 | 1 | **리뷰 비용 = 구현 비용 이상** — `review-lenses-frontend.md` §5 재검토 조건("리뷰 비용 > 구현 비용 2회") 1회째 | 높음 | 2차 실행(#2)을 **ce-code-review 병행 제거 변형**으로 돌려 persona만으로 blocker 누락이 생기는지 측정 → adr/0012 §3 개정 여부 결정 |
-| 2 | 테스트 task가 `test-fe` 스킬을 거치지 않음 — workflow.md 한 줄 지시("Skill 도구로 cgamja:test-fe")를 본체가 references 직접 읽기로 대체 | 중간 | `review_nudge.sh`처럼 **훅으로** — 테스트 파일 Edit 전 이번 세션에 `test-fe` Skill 호출이 없으면 additionalContext로 상기(차단 아님). adr/0007 범위 |
+| 2 | ~~테스트 task가 `test-fe`를 거치지 않음~~ → **오독**(세 런 모두 호출함). 추가한 `test_nudge.sh`는 보강용으로 유지(호출 전 Edit만 상기, 비용 0) | — | 훅 주석 정정 |
 | 3 | 본체가 구현·테스트 작성·스크린샷을 전부 직접 → sonnet/haiku 라우팅이 **실제로 적용된 구간 0** | 높음 | adr/0011의 한계 확인: 라우팅 표는 "뺄 때만" 적용된다. 선택지 (a) 세션 `/model opus` + 판단 순간만 fable (b) workflow.md 구현 task를 sonnet 서브에이전트 위임으로. **#2 결과 본 뒤 결정** |
 | 4 | blocker 루프 3차 진입 규칙을 자의로 건너뜀 | 낮음 | "2차 blocker가 **자기 반영으로 새로 생긴 스펙 문장**의 테스트 누락이면 직접 닫고 보고"를 review-fe에 예외로 명문화(현실적 경로) |
 | 5 | `/ce-simplify-code` 생략 | 낮음 | 2회 반복되면 workflow.md에서 Tier-2 선택 항목으로 내림 |
@@ -85,7 +85,7 @@
 | 5 | **실제 버그 2개** — '전체' 필터 항상 활성(`activeOptions.exact`), 동시 토글 시 alert 누락 — 스크린샷·L1에서 발견, red 테스트 후 수정 | ✅ |
 | 6 | L3 변이 확인 4건 전부 판별(onMutate/onError/isMutating 가드/exact 제거 → 각각 실패) | ✅ — **ce-code-review 없이 품질 유지** |
 | 7 | `/ce-simplify-code` 실행(reuse 1·quality 1, jscpd 5.0→2.0%) | ✅ (#1에서 빠진 것 회복) |
-| 8 | `test-fe` Skill 호출 | ❌ 여전히 직접(훅 `test_nudge.sh`는 이 런 이후 추가) |
+| 8 | `test-fe` Skill 호출 | ✅ (트랜스크립트 확인) |
 | 9 | 훅 오탐 2건 — lefthook `no-test-edit-in-feat`가 **직전 커밋 메시지**를 읽음 / `protect-bash` gen.ts 패턴이 `2>&1`을 `>`로 잡음 | 우회 없이 대처·메모리 기록 → **템플릿 수정 완료**(commit-msg `{1}`, fd 리다이렉트 제외) + 테스트 2개 |
 | 10 | 병합 스펙 106줄(80줄 규칙) | 관찰 — capability 분할 후보 |
 
@@ -109,3 +109,37 @@
 - Tier-3 1회에서 L1~L3 fable A/B
 - `test_nudge.sh` 효과 확인(다음 런에서 `test-fe` 호출 여부)
 - `openspec/specs/todos/spec.md` 80줄 초과 → capability 분할 규칙을 `openspec-setup.md`에
+
+---
+## #3 — Tier-2 `todos-delete-undo` (삭제 + 5초 되돌리기), **세션 opus** (adr/0011 개정 1 검증)
+- 같은 스크래치, #2 위에 16커밋 · `TDD_PHASE=red` headless · `--model claude-opus-5`
+- 소요: **$44.88** · assistant 메시지 357(#1 192, #2 269) · Bash 128회
+- 모델: opus(본체+L1/L2/L3/L6) $40.47 · sonnet(L4/L5/simplify) $4.29 · **haiku(증거 수집) $0.11 — 처음으로 haiku Explore 사용**
+- 결과: archive ✅ · verify 46/46 · e2e 4/4 · 스크린샷 25장(4뷰포트×6상태) · axe 24회 0건 · review-fe 1차 blocker **7** → 2차 3(예외 경로) → 0 · 변이 확인 5건
+- 품질 관찰: `pending`/`confirming` 분리(되돌린 척 지워지는 창 제거)를 L1·L2·L6가 독립적으로 지적 · L4가 WCAG 2.2.1(시간 제한) 제품 결정을 끌어냄 · 계약 위반 처리를 네 훅 전부로 확장
+- `test-fe`·`review-fe` Skill 호출 ✅, 모델 라우팅 표 준수 ✅
+
+## 세 런 비교 — 가설 기각
+| 런 | 세션 | 리뷰 구조 | 메시지 | 서브에이전트 | 비용 | 1차 blocker / 버그 |
+|---|---|---|---|---|---|---|
+| #1 목록+추가 | fable | persona + ce-code-review | 192 | 11 | $33.07 | 2 / 0 |
+| #2 토글+필터 | fable | persona만 | 269 | 13 | $45.65 | 3 / 2 |
+| #3 삭제+되돌리기 | **opus** | persona만 | 357 | 13 | $44.88 | 7 / 0 |
+
+- **"세션 opus면 절반" 가설 기각.** 비용은 세션 모델·ce-code-review 유무와 무관하게 $33~46. 상관은 **메시지 수**(192→269→357)와 비례 — 즉 비용 = **절차의 부피**(리뷰 2회차 × 6렌즈 ≈ 600~900k, simplify 3에이전트 ≈ 200k, 증거 20~25장 × 상태, blocker 반영 루프). #1이 싼 건 change가 작고 blocker가 적어서.
+- 모델별로는 #2 fable 본체 $35.6 vs #3 opus 본체+persona $40.5 — opus가 더 많이 일했다(357 msg, blocker 7). 모델을 낮추면 같은 절차를 더 많은 턴으로 수행해 비용이 보존됐다.
+- 따라서 adr/0011 개정 1("권장 opus")은 **근거 없음 → 철회**. 세션 모델은 사용자 선택. 비용 레버는 절차 부피.
+
+## 결정 (개정 2)
+1. **adr/0011**: 세션 모델 권고 철회 — fable/opus 비용 차이 측정 불가, 품질은 opus 런이 blocker를 더 잡았으나 change가 달라 비교 불가. 서브에이전트 라우팅(haiku/sonnet/opus 명시)은 3런 모두 작동 → 그 부분만 **채택**.
+2. **adr/0012 / review-lenses §5** "리뷰 비용 > 구현 비용" 조건 **3회 충족** → 절차 부피 축소를 **개정 2**로:
+   - `/ce-simplify-code`(sonnet 3에이전트 ≈200k, 런당 적용 0~2건)는 Tier-2 **선택 항목**(사용자 요청 시 또는 jscpd 임계 초과 시)
+   - 2차 재실행은 **blocker를 낸 렌즈만**(규칙 재확인) + 2차에서 새 blocker는 예외 경로 기본
+   - persona 프롬프트에 **토큰 예산**: "파일을 전부 읽지 말고 diff + 증거 묶음으로 시작, 필요한 파일만 연다" — L6 87k·L4 88k가 openapi·ADR·토큰 파일을 통째로 읽음
+   - 증거 상태 수는 유지(L5·L4가 실제 결함을 잡는 원천)
+3. **Tier-2 1회 ≈ $30~45는 이 엄격함의 가격**으로 사용자에게 명시(develop-fe 첫 보고에 예상 비용 한 줄). 더 싸게 하려면 티어를 낮추거나(Tier-1 증거만) 렌즈를 지정(`--lens`)하는 것이 사용자 선택.
+
+## 다음
+- 개정 2 적용 후 Tier-2 1회: 목표 $25 이하, 1차 blocker 발견율 유지
+- Tier-3 1회: L1~L3 fable A/B(미검증 표시 해소)
+- reports/README.md 런 비교표를 리포트마다 한 줄씩 갱신

@@ -16,6 +16,8 @@ tools: Read, Grep, Glob, Bash
 5. Expo: `SafeAreaView`/insets, `KeyboardAvoidingView`, 긴 목록이 `ScrollView` 안에 있나, `*.web.tsx`/`*.native.tsx` 분기 누락, Android 하드웨어 뒤로가기.
 6. 성능 증거: 프로필이 요구하는 수치(LCP/INP/CLS 또는 FPS)가 있는가. 없으면 should.
 
+**토큰 예산.** 넘겨받은 diff와 증거 묶음으로 시작하고, 판정에 필요한 파일만 연다 — 스펙·ADR·토큰·스크린샷을 통째로 읽지 않는다(목표 ≤50k, `review-lenses-frontend.md` §6).
+
 **읽기전용.** 저장소 파일을 쓰거나 고치지 않는다(변이 실험 포함 — 2026-08-21 A/B에서 리뷰어가 `TodoForm.tsx`를 고쳤다 되돌리는 동안 다른 세션이 같은 트리에서 작업 중이었다). "이 줄을 지우면 어떤 테스트가 잡는가"는 **제안란에 글로** 적는다. 실행은 `pnpm verify`·`pnpm test`·`git diff`·dev 서버 probe처럼 트리를 바꾸지 않는 것만.
 
 출력: `references/review-lenses-frontend.md` §4 형식. 증거 누락은 항상 맨 위에.

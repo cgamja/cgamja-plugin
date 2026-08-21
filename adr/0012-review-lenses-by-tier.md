@@ -1,6 +1,6 @@
 # 0012 — 리뷰는 티어별 렌즈 목록, 렌즈 = persona = 새 컨텍스트 서브에이전트
 
-- 상태: 제안(개정 1 — 2026-08-21 실측 후 §3)
+- 상태: 제안(개정 2 — 2026-08-21 3런 후 절차 부피 축소)
 - 날짜: 2026-08-21
 - 관련: 0001(ce-code-review 스펙 경로 필수), 0010, 0011 · 표 원문 `references/review-lenses-frontend.md`
 
@@ -11,7 +11,8 @@
 1. 리뷰 관점을 **렌즈 L1~L7**로 명명하고 렌즈마다 persona 파일(`agents/reviewer-*.md`) 하나. 렌즈는 "보는 것 / 보지 않는 것"을 둘 다 적는다 — 스타일 지적은 어떤 렌즈에도 없다.
 2. **티어가 렌즈 개수를 정한다**: Tier-1 L1 / Tier-2 L1 L2 L3 + UI면 L4 L5 + API면 L6 / Tier-3·PR 전부. 조건부 렌즈는 diff에 `*.tsx`·스크린샷이 있는지, `src/api`·`openapi.yaml`이 바뀌었는지로 기계적으로 판정한다.
 3. ~~`ce-code-review`는 대체가 아니라 병행~~ → **개정(2026-08-21)**: Tier-2는 **persona만**. `ce-code-review`는 Tier-3 통합·PR 모드에서 선택(docs/solutions·보안 관점이 필요할 때). 근거: 같은 날 Tier-2 두 번 — 병행 런에서 ce-code-review 고유 기여 2건(≈304k 토큰), persona-only 런에서 blocker 5·실제 버그 2를 놓치지 않음(`reports/develop-fe-tier2_2026-08-21_restructured.md`). 스펙 경로 필수 규칙(0001)과 훅의 bare 호출 거부는 유지.
-4. 출력 계약 하나(§4 표). review-fe가 합치고 blocker 있으면 반영 후 재실행 1회까지.
+4. 출력 계약 하나(§4 표). review-fe가 합치고 blocker 있으면 반영 후 **blocker를 낸 렌즈만** 재실행 1회까지.
+6. **개정 2(비용)**: 3런 모두 리뷰 비용 ≥ 구현 비용(§5 조건 3회) → `/ce-simplify-code`는 Tier-2 선택 항목, persona 토큰 예산(diff+증거로 시작, 렌즈당 ≤50k, `review-lenses-frontend.md` §6). 렌즈 수·증거 상태 수는 줄이지 않는다 — L4/L5/L3가 실제 결함(뷰포트 누락, 판별 불가 테스트, WCAG 2.2.1)을 잡은 원천이다.
 5. PR 리뷰 모드: 스펙이 없으므로 L2는 PR 본문의 What/Why를 스펙 대용으로. `--comment`로 PR에 쓰는 건 사용자 확인 후.
 
 ## 기각한 대안

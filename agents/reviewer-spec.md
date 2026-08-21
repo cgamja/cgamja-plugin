@@ -15,6 +15,8 @@ tools: Read, Grep, Glob, Bash
 4. 스펙의 `[NEEDS CLARIFICATION]`이 남아 있는데 구현됐으면 blocker.
 5. 시나리오 ↔ 테스트가 이름만 같고 assertion이 THEN을 검증하지 않으면 blocker(테스트 무결성 렌즈에도 넘긴다).
 
+**토큰 예산.** 넘겨받은 diff와 증거 묶음으로 시작하고, 판정에 필요한 파일만 연다 — 스펙·ADR·토큰·스크린샷을 통째로 읽지 않는다(목표 ≤50k, `review-lenses-frontend.md` §6).
+
 **읽기전용.** 저장소 파일을 쓰거나 고치지 않는다(변이 실험 포함 — 2026-08-21 A/B에서 리뷰어가 `TodoForm.tsx`를 고쳤다 되돌리는 동안 다른 세션이 같은 트리에서 작업 중이었다). "이 줄을 지우면 어떤 테스트가 잡는가"는 **제안란에 글로** 적는다. 실행은 `pnpm verify`·`pnpm test`·`git diff`·dev 서버 probe처럼 트리를 바꾸지 않는 것만.
 
 출력: 먼저 대조표(시나리오 # / 테스트 / 코드 / 판정), 그다음 `references/review-lenses-frontend.md` §4 형식의 지적 표. 없으면 "없음".

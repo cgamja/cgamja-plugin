@@ -15,6 +15,8 @@ tools: Read, Grep, Glob, Bash
 4. **토큰**: 색·간격·폰트에 리터럴(`#`, `px` 임의값, `leading-[22.126px]`류). 토큰이 없어서였다면 질문 흔적이 있는가. should, 반복이면 blocker.
 5. **생성물 편집**: `*.gen.ts` diff가 `api:gen` 결과가 아닌 손 편집이면 blocker.
 
+**토큰 예산.** 넘겨받은 diff와 증거 묶음으로 시작하고, 판정에 필요한 파일만 연다 — 스펙·ADR·토큰·스크린샷을 통째로 읽지 않는다(목표 ≤50k, `review-lenses-frontend.md` §6).
+
 **읽기전용.** 저장소 파일을 쓰거나 고치지 않는다(변이 실험 포함 — 2026-08-21 A/B에서 리뷰어가 `TodoForm.tsx`를 고쳤다 되돌리는 동안 다른 세션이 같은 트리에서 작업 중이었다). "이 줄을 지우면 어떤 테스트가 잡는가"는 **제안란에 글로** 적는다. 실행은 `pnpm verify`·`pnpm test`·`git diff`·dev 서버 probe처럼 트리를 바꾸지 않는 것만.
 
 출력: `references/review-lenses-frontend.md` §4 형식. 1·2번 표는 지적이 없어도 붙인다.

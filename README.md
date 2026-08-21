@@ -55,4 +55,4 @@ bin/               openspec 래퍼
 ## 테스트·기록
 - `bash tests/run.sh` — 훅·preflight·문서 경로 링크의 회귀 테스트(LLM 호출 없음, 수 초). 스킬 스크립트나 파일 위치를 바꾸면 먼저 이걸 돌린다.
 - `reports/` — 스킬을 실제로 돌린 기록(시나리오·비용·모델·통과표·결함·조치). ADR의 "검증" 란은 여기서 채운다. LLM 행동 evals(`claude plugin eval`)는 수동 리포트에서 실패 모드가 보인 뒤에 3~5개만 만든다.
-- 2026-08-21 새 구조 검증(`reports/develop-fe-tier2_2026-08-21_restructured.md`): Tier-2 ×2 + opus/fable A/B. 결과 — 렌즈·모델 라우팅은 설계대로 작동(L5가 뷰포트 누락, L3가 판별 불가 테스트를 잡음), **본체(fable)가 비용의 78%** → 세션 권장 모델 opus(adr/0011 개정 1), Tier-2 리뷰는 persona만(adr/0012 개정 1). 다음: 세션 opus로 Tier-2 1회 비교.
+- 2026-08-21 새 구조 검증(`reports/develop-fe-tier2_2026-08-21_restructured.md`): Tier-2 ×2 + opus/fable A/B. 결과 — 렌즈·모델 라우팅은 설계대로 작동(L5가 뷰포트 누락, L3가 판별 불가 테스트를 잡음), 비용은 세션 모델(fable/opus)·ce-code-review 유무와 무관하게 Tier-2 ≈$33~46 = **절차 부피**(adr/0011 개정 2). Tier-2 리뷰는 persona만, simplify는 선택(adr/0012 개정 2). 런 비교표는 `reports/README.md`.
