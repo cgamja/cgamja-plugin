@@ -14,6 +14,9 @@
 | 2026-08-21 | Tier-2 #2 토글+필터 | develop-fe + test-fe + review-fe | fable | persona만 | $45.65 | 52분/269msg | 버그 2·판별 불가 테스트 2 잡음; ce-code-review 없이 품질 유지 | [restructured](develop-fe-tier2_2026-08-21_restructured.md) |
 | 2026-08-21 | Tier-2 #3 삭제+되돌리기 | develop-fe + test-fe + review-fe | **opus** | persona만 | $44.88 | ~50분/357msg | "세션 opus=절반" 기각; 비용 = 절차 부피 | [restructured](develop-fe-tier2_2026-08-21_restructured.md) |
 
+## 스크래치 프로젝트
+`~/cgamja-scratch/todos-app` — 2026-08-21 런 4개가 쌓인 Vite+TanStack 프로젝트(51커밋, 브랜치 `feat/todos-list-create`, change 3개 archive). 다음 Tier-2/Tier-3 실험의 베이스. 런 원본 JSON·프롬프트·A/B 스크립트는 `~/cgamja-scratch/logs/`.
+
 ## 읽는 법
 - 비용은 `claude -p --output-format json`의 `total_cost_usd`, 모델별 분해는 `modelUsage`.
 - "메시지"는 트랜스크립트의 assistant 메시지 수(`num_turns`는 세그먼트 단위라 신뢰하지 않는다).
