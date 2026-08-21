@@ -20,7 +20,7 @@
 - 토큰만, 임의값 금지, 반응형 {{VIEWPORTS}}. Figma 토큰 파이프라인: `design/tokens.json` → `{{TOKENS_PATH}}`
 
 ## 테스트 / 커밋
-- `tdd-frontend.md`(develop-fe 스킬). TDD는 품질 기법이 아니라 **리뷰 게이트 + 변조 방지** — 실패 테스트를 사람이 보고 커밋한 뒤 구현
+- `references/tdd-frontend.md`(cgamja 플러그인). TDD는 품질 기법이 아니라 **리뷰 게이트 + 변조 방지** — 실패 테스트를 사람이 보고 커밋한 뒤 구현
 - `type(scope): 요약`. 테스트 커밋과 구현 커밋 분리(테스트 약화가 diff에 보이게)
 
 ## 이 문서의 rot 방지

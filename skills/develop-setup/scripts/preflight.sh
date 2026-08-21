@@ -21,6 +21,7 @@ echo "— 문서/규칙"
 row "CLAUDE.md"                  $([ -f CLAUDE.md ] && echo 0 || echo 1)                       "templates/CLAUDE.md"
 row "CLAUDE.md has no @import"   $([ -f CLAUDE.md ] && ! grep -qE '^@|[[:space:]]@[a-zA-Z./]' CLAUDE.md && echo 0 || echo 1) "@ import는 eager — 백틱 포인터로"
 row ".claude/rules/*.md"         $(ls .claude/rules/*.md >/dev/null 2>&1 && echo 0 || echo 1)  "templates/rules/"
+row ".claude/rules/platform.md"   $(has_file .claude/rules/platform.md && echo 0 || echo 1)  "templates/rules/platform-{web,expo}.md"
 row "docs/adr/0001-domain-structure.md" $(has_file docs/adr/0001-domain-structure.md && echo 0 || echo 1) "templates/adr-0001-domain-structure.md"
 row "docs/conventions.md"        $(has_file docs/conventions.md && echo 0 || echo 1)           "templates/conventions.md"
 

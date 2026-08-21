@@ -20,3 +20,5 @@ check "bash: cat test 2>&1 allow"         ""     "$(hook $B "$(bashcmd 'cat src/
 check "bash: vitest test >/dev/null allow" ""    "$(hook $B "$(bashcmd 'pnpm exec vitest run e2e/x.spec.ts >/dev/null 2>&1')")"
 check "bash: grep test 2>/dev/null allow"  ""    "$(hook $B "$(bashcmd 'grep -n it src/a.test.ts 2>/dev/null')")"
 check "bash: append >> test deny"         "읽기전용" "$(hook $B "$(bashcmd 'echo x >> src/a.test.ts')")"
+check "bash: gen.ts read with 2>&1 allow" "" "$(hook $B '{"session_id":"t","tool_input":{"command":"grep -n foo src/api/client.gen.ts 2>&1"}}')"
+check "bash: gen.ts redirect still deny" "deny" "$(hook $B '{"session_id":"t","tool_input":{"command":"echo x > src/api/client.gen.ts"}}')"

@@ -1,6 +1,6 @@
 # ADR — develop-fe 스킬의 결정 기록
 
-규약: 파일명 `NNNN-slug.md`, 상태 `제안`(검증 1~2회) → `채택`(3회 이상 유지) → `대체됨(→NNNN)` / `폐기`. 에이전트는 ADR을 법칙이 아니라 기본값으로 대한다. 새 결정은 SKILL.md/workflow.md에 바로 쓰지 말고 ADR 먼저 → 문서는 ADR을 참조. 같은 이탈이 2회 반복되면 ADR을 새 번호로 개정한다. 검증 단위는 "change 1개"(Tier-2/3) 또는 "task 10개"(Tier-1). 재검증 리서치의 판정 원문은 `references/verdicts-2026-08-21.md`.
+규약: 파일명 `NNNN-slug.md`, 상태 `제안`(검증 1~2회) → `채택`(3회 이상 유지) → `대체됨(→NNNN)` / `폐기`. 에이전트는 ADR을 법칙이 아니라 기본값으로 대한다. 새 결정은 SKILL.md/workflow.md에 바로 쓰지 말고 ADR 먼저 → 문서는 ADR을 참조. 같은 이탈이 2회 반복되면 ADR을 새 번호로 개정한다. 검증 단위는 "change 1개"(Tier-2/3) 또는 "task 10개"(Tier-1). 재검증 리서치의 판정 원문은 `references/verdicts-2026-08-21.md`. 이 디렉터리와 `references/`·`reports/`·`agents/`는 플러그인 루트에 있고 모든 스킬이 공유한다(0010).
 
 ## 목록
 | # | 제목 | 상태 | 검증 |
@@ -14,3 +14,6 @@
 | [0007](0007-skill-hooks.md) | 스킬 frontmatter 훅 — 금지 스킬 호출 차단(Skill 매처), 세팅 누락 경고(once) | 제안 | — |
 | [0008](0008-api-contract.md) | API 계약 — 원천은 `api/openapi.yaml` 하나, 상태 A/B/C/D 판정, orval 생성물만 import, retrofit은 별도 change | 제안 | — |
 | [0009](0009-red-gate-is-permission-ask.md) | red 게이트 = Edit 권한 `ask`(사람이 diff 승인), `TDD_PHASE`는 사람이 띄운 세션의 우회 키, Bash 테스트 쓰기는 항상 deny | 제안 | — |
+| [0010](0010-orchestrator-and-specialists.md) | develop-fe는 오케스트레이터, `test-fe`/`review-fe` 분리, references·adr·agents는 루트, `-fe` 접미사 유지, a11y 세 층, 플랫폼 프로필 | 제안 | — |
+| [0011](0011-model-routing.md) | 모델 라우팅 — 본체는 판단, 서브에이전트는 `model:` 명시(haiku 탐색 / sonnet 구현 / opus 리뷰) | 제안 | — |
+| [0012](0012-review-lenses-by-tier.md) | 리뷰 렌즈 L1~L7 = persona, 티어가 렌즈 수를 정함, ce-code-review 병행, PR 모드 | 제안 | — |

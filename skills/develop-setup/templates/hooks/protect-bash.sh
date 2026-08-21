@@ -9,7 +9,7 @@ fi
 if grep -qE 'tee [^|]*package\.json|sed -i[^|]*(package\.json|eslint\.config|lefthook\.yml)|> *(package\.json|pnpm-lock\.yaml|eslint\.config\.[a-z]+)|(pnpm|yarn|bun) (add|remove) |npm (i|install|uninstall) [^-]' <<<"$cmd"; then
   deny "[protect] 의존성·설정 파일을 쉘로 바꾸지 않는다 — 새 의존성은 사용자에게 먼저 물어라(CLAUDE.md)."
 fi
-if grep -qE 'src/api/[^ ]*\.gen\.ts' <<<"$cmd" && grep -qE '(sed -i|tee |>|rm )' <<<"$cmd"; then
+if grep -qE 'src/api/[^ ]*\.gen\.ts' <<<"$cmd" && grep -qE '(sed -i|tee |>|rm )' <<<"$(sed -E 's/[0-9]*>&[0-9]+//g; s/[0-9]*>>?[[:space:]]*\/dev\/null//g' <<<"$cmd")"; then   # fd 리다이렉트 제외(2026-08-21 `grep … client.gen.ts 2>&1` 오차단)
   deny "[protect] src/api/*.gen.ts 는 생성물 — api/openapi.yaml 을 고치고 pnpm api:gen."
 fi
 if grep -qE '(^|[;&| ])TDD_PHASE=' <<<"$cmd"; then

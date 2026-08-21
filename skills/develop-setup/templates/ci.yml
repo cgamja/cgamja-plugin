@@ -21,7 +21,10 @@ jobs:
       - name: api contract — breaking change vs base   # api/openapi.yaml 없으면 삭제
         if: github.event_name == 'pull_request'
         uses: oasdiff/oasdiff-action/breaking@v0
-        with: { base: "origin/${{ github.base_ref }}:api/openapi.yaml", revision: "HEAD:api/openapi.yaml", fail-on: WARN }
+        with:   # 플로우 맵 {…} 안의 ${{ }}는 knip YAML 파서가 못 읽는다(실측 2026-08-21) — 블록 스타일 유지
+          base: "origin/${{ github.base_ref }}:api/openapi.yaml"
+          revision: "HEAD:api/openapi.yaml"
+          fail-on: WARN
 
   browser-tests:   # 웹만. Expo는 삭제
     runs-on: ubuntu-latest
@@ -33,7 +36,9 @@ jobs:
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - uses: actions/cache@v4
-        with: { path: ~/.cache/ms-playwright, key: pw-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }} }
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm exec vitest run --project browser   # 50파일 넘으면 --shard=1/2, 2/2 매트릭스
 

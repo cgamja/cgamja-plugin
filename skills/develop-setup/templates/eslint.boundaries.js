@@ -19,9 +19,14 @@ export const boundariesConfig = {
     "import/resolver": { typescript: { project: "./tsconfig.app.json" } },
     "import-x/resolver-next": [createTypeScriptImportResolver({ project: "./tsconfig.app.json" })],
     "boundaries/elements": [
-      { type: "router", pattern: "{{ROUTER_DIR}}/**", mode: "full" },
-      { type: "domain", pattern: "src/domains/*", mode: "folder", capture: ["name"] },
-      { type: "shared", pattern: "src/shared/*", mode: "folder" },
+      // boundaries 7.2: `mode:`는 deprecated → `partialMatch: false`(=full). 요소 패턴에 **파일**(src/main.tsx)을 넣으면 경고+no-unknown-files 오탐 —
+      // Vite는 main.tsx·routeTree.gen.ts를 src/app/ 으로 옮긴다(generatedRouteTree: "src/app/routeTree.gen.ts"). 실측 2026-08-21
+      { type: "app", pattern: "src/app/**", partialMatch: false },
+      { type: "router", pattern: "{{ROUTER_DIR}}/**", partialMatch: false },
+      { type: "domain", pattern: "src/domains/*", capture: ["name"] },
+      { type: "shared", pattern: "src/shared/*" },
+      { type: "api", pattern: "src/api/**", partialMatch: false },      // orval 생성물 — 누구나 import, 아무도 수정 못 함(훅)
+      { type: "styles", pattern: "src/styles/**", partialMatch: false },
     ],
   },
   rules: {
@@ -35,7 +40,7 @@ export const boundariesConfig = {
         { from: { element: { type: "shared" } }, allow: { to: { element: { type: "shared" } } } },
         { from: { element: { type: "domain" } }, allow: { to: { element: { type: "shared" } } } },
         { from: { element: { type: "domain" } },
-          allow: { to: { element: { type: "domain", captured: { name: "${from.captured.name}" } } } } },
+          allow: { to: { element: { type: "domain", captured: { name: "{{from.captured.name}}" } } } } },
         ...ALLOWED_DOMAIN_EDGES.map(({ from, to }) => ({
           from: { element: { type: "domain", captured: { name: from } } },
           allow: { to: { element: { type: "domain", captured: { name: to }, fileInternalPath: "index.ts" } } },

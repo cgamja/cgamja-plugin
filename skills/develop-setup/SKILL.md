@@ -5,7 +5,7 @@ description: 새 프론트엔드 프로젝트(웹 React/Next/Vite 또는 RN Expo
 
 # develop-setup
 
-develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(규칙·구조·스펙)을 갖는다. 이 스킬은 그 사실 파일들을 `templates/`에서 복사·치환해 만들고, 실제로 강제되는지 확인한 뒤 끝난다. 한 프로젝트에 1회. 왜 이 배치인지는 develop-fe 스킬 `references/project-conventions.md`와 `adr/0004~0006`.
+develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(규칙·구조·스펙)을 갖는다. 이 스킬은 그 사실 파일들을 `templates/`에서 복사·치환해 만들고, 실제로 강제되는지 확인한 뒤 끝난다. 한 프로젝트에 1회. 왜 이 배치인지는 플러그인 루트 `references/project-conventions.md`와 `adr/0004~0006`, 플랫폼 프로필·a11y 층은 `adr/0010`.
 
 ## 0. 현재 상태 파악
 `bash scripts/preflight.sh`를 먼저 실행한다. 이미 있는 항목은 건드리지 않고 없는 것만 만든다(멱등). 기존 파일을 덮어써야 하면 diff를 보여주고 묻는다.
@@ -25,13 +25,13 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(규칙�
 ## 2. 생성 순서 (각 단계 끝에 무엇을 만들었는지 한 줄)
 | # | 만드는 것 | 출처 | 비고 |
 |---|---|---|---|
-| 1 | 앱 스캐폴드(없을 때만) | `create-next-app` / `create vite` / `create-expo-app` | TS strict. 질문 없이 기본 옵션 |
+| 1 | 앱 스캐폴드(없을 때만) | `create-next-app` / `create vite` / `create-expo-app` | TS strict. 질문 없이 기본 옵션. **실측(2026-08-21, Vite 8/TS 6/pnpm 11)**: Vite 템플릿의 oxlint는 제거하고 ESLint로, `tsconfig`는 `baseUrl` 없이 `paths`만, 네이티브 빌드 패키지는 `pnpm approve-builds`(비대화형) 또는 `pnpm-workspace.yaml` `allowBuilds`, 린트 플러그인은 `@vitest/eslint-plugin`, `@axe-core/playwright`는 `{ AxeBuilder }` named export, TanStack 라우트 파일은 `react-refresh/only-export-components` off |
 | 2 | `src/{app|routes,domains/<name>/{ui,model,api,index.ts},shared/{ui,lib,config}}` | — | Expo는 `app/`이 expo-router, Next는 `src/app`이 라우터 폴더 — "조립층"이 아니라 프레임워크 소유 |
 | 3 | `CLAUDE.md` | `templates/CLAUDE.md` | ≤60줄, **`@` import 없음**, 금지 5개 맨 위 |
-| 4 | `.claude/rules/{components,state,tests}.md` | `templates/rules/` | `paths:` frontmatter. Expo는 paths의 확장자·경로 치환 |
+| 4 | `.claude/rules/{components,state,tests,platform}.md` | `templates/rules/` | `paths:` frontmatter. Expo는 paths의 확장자·경로 치환. **`platform.md`는 `platform-web.md`(web-desktop/web-mobile 치환) 또는 `platform-expo.md`** — develop-fe UI 증거와 review-fe L5 렌즈가 읽는 프로필(`references/platform-fit-frontend.md`) |
 | 5 | `docs/adr/0001-domain-structure.md`, `docs/conventions.md` | `templates/adr-0001-domain-structure.md`, `templates/conventions.md` | 허용 엣지 목록은 비워 둔다(필요할 때 린트+ADR 동시 추가) |
-| 6 | ESLint flat config: boundaries(`dependencies`+`no-unknown-files`), `import-x/no-cycle`, `max-lines`, 스타일 플러그인, `eslint-plugin-vitest`(또는 jest) | `templates/eslint.boundaries.js` | 에러 메시지에 고치는 법 포함 |
-| 7 | 테스트: 웹 = Vitest projects(unit jsdom + browser chromium) + `vitest-browser-react` + MSW + Playwright(3~5 flows 자리) / Expo = `jest-expo` + RNTL + MSW + Maestro 폴더 | `templates/vitest.config.ts` / `templates/jest.expo.md` | develop-fe `tdd-frontend.md`와 일치 |
+| 6 | ESLint flat config: boundaries(`dependencies`+`no-unknown-files`), `import-x/no-cycle`, `max-lines`, 스타일 플러그인, `eslint-plugin-vitest`(또는 jest), **접근성 린트 — 웹 `eslint-plugin-jsx-a11y`(strict) / Expo `eslint-plugin-react-native-a11y`(all)** | `templates/eslint.boundaries.js` | 에러 메시지에 고치는 법 포함. a11y 세 층의 1층(`references/a11y-frontend.md` §1) |
+| 7 | 테스트: 웹 = Vitest projects(unit jsdom + browser chromium) + `vitest-browser-react` + **`vitest-axe`** + MSW + Playwright(3~5 flows 자리, **`@axe-core/playwright`**) / Expo = `jest-expo` + RNTL + MSW + Maestro 폴더 | `templates/vitest.config.ts` / `templates/jest.expo.md` | `references/tdd-frontend.md`와 일치. axe = a11y 2층 |
 | 7-1 | **API 계약 계층**: `api/openapi.yaml`(백엔드 스펙 있으면 `api:pull`로 받고, 없으면 `templates/openapi.draft.yaml`) + orval + `src/api/*.gen.ts` 커밋 + scripts `api:pull/api:gen/api:check` + ESLint `apiContractConfig` + `protect-files`에 `*.gen.ts` | `templates/orval.config.ts`, `templates/openapi.draft.yaml`, develop-fe `references/api-contract.md` | `pnpm api:gen` 후 `git diff --exit-code src/api`가 0인지(결정적 재생성) |
 | 8 | `package.json` scripts: `verify`(api:check+tsc+eslint+test+knip), `e2e`, `typecheck` · Knip · jscpd(CI) | — | **DoD는 `verify` 한 곳** |
 | 9 | commitlint + lefthook(`commit-msg`, `pre-commit` lint-staged, `pre-push` verify) | `templates/lefthook.yml` | 대화형 훅 금지 |
@@ -46,6 +46,7 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(규칙�
 3. 테스트 보호 훅: `*.test.*` Edit 시 **권한 프롬프트(ask)가 뜨는지**(대화형) — 스크립트 검증은 `printf '{"tool_input":{"file_path":"x.test.ts"}}' | bash .claude/hooks/protect-files.sh`에 `"permissionDecision": "ask"`. Bash 쪽: `TDD_PHASE=red perl -pi -e s/a/b/ x.test.ts` 거부, `echo x > y.test.ts` 거부, `cat x.test.ts 2>&1` 허용. Bash 쪽이 뚫리면 보호는 없는 것이다(2026-08-21 실측, adr/0009)
 4. `openspec new change probe-tmp --schema feature` → `status`에 specs·tasks 2개 → 삭제 (change 이름에 `_` 불가. CLI가 PATH에 없으면 `npx -y @fission-ai/openspec@latest`)
 5. `git commit -m "bad message"`가 commitlint에 막히는지 → `--no-verify`가 deny되는지
+5-2. **접근성 린트**: `src/shared/lib/_probe.tsx`에 `<img src="x" />`와 `<div onClick={() => {}} />` → eslint `jsx-a11y/alt-text`·`click-events-have-key-events` 에러(Expo: `<Pressable>` accessibilityRole 없음 → 에러) → 삭제. 통과해 버리면 플러그인이 꺼진 것
 5-1. **계약 강제**: `src/shared/lib/_probe.ts`에 `fetch("/x")`와 `import axios` → eslint 2 errors → 삭제. `src/api/client.gen.ts` 편집 시도가 훅에 막히는지
 6. 결과를 표로 보고한다(항목 / 확인 방법 / 결과). 하나라도 실패면 완료라고 하지 않는다
 
@@ -64,4 +65,4 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(규칙�
 |---|---|
 | `scripts/preflight.sh` | 무엇이 이미 있는지 표로 출력(종료코드 0=세팅 완료, 1=일부 없음) |
 | `templates/` | 복사·치환용 원본. `{{PROJECT}}`, `{{PLATFORM}}`, `{{PM}}`, `{{DOMAINS}}` 치환 |
-| develop-fe `references/project-conventions.md` | 왜 이렇게 배치하는가(이 스킬은 그 "어떻게") |
+| cgamja `references/project-conventions.md` | 왜 이렇게 배치하는가(이 스킬은 그 "어떻게"). `references/`는 플러그인 루트 |

@@ -15,3 +15,8 @@ check "review nudge on Agent review" "ce-code-review" "$(hook $R '{"session_id":
 check "no nudge on explore agent"   ""     "$(hook $R '{"session_id":"t","tool_input":{"description":"Explore codebase","prompt":"find usages"}}')"
 check "setup_check bypass warn"     "승인자" "$(hook $C '{"session_id":"t2","cwd":"'$E'","permission_mode":"bypassPermissions","tool_input":{}}')"
 check "setup_check default no warn" ""     "$(hook $C '{"session_id":"t3","cwd":"'$E'","permission_mode":"default","tool_input":{}}')"
+N=skills/develop-fe/hooks/test_nudge.sh
+check "test nudge without test-fe"  "test-fe" "$(hook $N '{"session_id":"tn1","tool_input":{"file_path":"src/a/B.browser.test.tsx"}}')"
+check "test nudge non-test silent"  ""        "$(hook $N '{"session_id":"tn1","tool_input":{"file_path":"src/a/B.tsx"}}')"
+hook $G '{"session_id":"tn2","tool_input":{"skill":"cgamja:test-fe"}}' >/dev/null
+check "test nudge silent after test-fe" "" "$(hook $N '{"session_id":"tn2","tool_input":{"file_path":"e2e/x.spec.ts"}}')"
