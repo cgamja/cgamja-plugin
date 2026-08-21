@@ -1,7 +1,7 @@
 # cgamja-plugin
 
 개인 Claude Code 플러그인. 스킬 2개. 네임스페이스 `cgamja` → `/cgamja:develop-fe`, `/cgamja:develop-setup`.
-(앱 화면 수집 스킬 `app-ref-to-figma`는 앱별 리포트가 쌓여 비공개 저장소 `cgamja-plugin-private`에 따로 있다.)
+(앱 화면 수집 스킬 `app-ref-to-figma`는 앱별 리포트가 쌓여 비공개 저장소 `cgamja-private`에 따로 있다.)
 
 ## 설치 (skills-directory plugin — 마켓플레이스·install 불필요)
 ```bash
