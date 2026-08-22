@@ -17,3 +17,4 @@
 | [0010](0010-orchestrator-and-specialists.md) | develop-fe는 오케스트레이터, `test-fe`/`review-fe` 분리, references·adr·agents는 루트, `-fe` 접미사 유지, a11y 세 층, 플랫폼 프로필 | 제안 | — |
 | [0011](0011-model-routing.md) | 모델 라우팅 — 본체는 판단, 서브에이전트는 `model:` 명시(haiku 탐색 / sonnet 구현 / opus 리뷰) | 제안 | — |
 | [0012](0012-review-lenses-by-tier.md) | 리뷰 렌즈 L1~L7 = persona, 티어가 렌즈 수를 정함, ce-code-review 병행, PR 모드 | 제안 | — |
+| [0013](0013-skill-verification-pyramid.md) | 스킬 검증 4층 피라미드 — 결정적/트리거/행동 eval/스크래치 런, 4층은 탐색 전용, 3층은 `plugin eval` 포맷, pass^k 80% | 제안 | — |

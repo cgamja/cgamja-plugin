@@ -19,7 +19,7 @@ skills/
   review-fe/       리뷰 — 티어별 렌즈 L1~L7을 persona 서브에이전트로(Tier-3/PR만 ce-code-review 병행), PR 모드
 references/        스킬 공유 지식(-frontend 접미사 = 스택 지식). 스킬은 "언제 읽나"만, 내용은 여기
 agents/            리뷰 렌즈 persona reviewer-{correctness,spec,tests,a11y,platform,architecture,performance}.md
-adr/               결정 기록(0001~0012). 절차를 바꾸려면 ADR 먼저
+adr/               결정 기록(0001~0013). 절차를 바꾸려면 ADR 먼저
 reports/           스킬을 실제로 돌린 기록(시나리오·비용·모델·통과표·결함)
 tests/             훅·preflight·문서 경로의 결정적 회귀 테스트
 bin/               openspec 래퍼
@@ -53,6 +53,6 @@ bin/               openspec 래퍼
 `bin/openspec` — 플러그인이 켜져 있으면 Bash PATH에 들어간다. 프로젝트 devDependency(`@fission-ai/openspec`) → `pnpm exec` → `npx` 순으로 실행. OpenSpec의 `/opsx:*` 명령이 bare `openspec`을 부르기 때문(실측: `which openspec` → 이 래퍼).
 
 ## 테스트·기록
-- `bash tests/run.sh` — 훅·preflight·문서 경로 링크의 회귀 테스트(LLM 호출 없음, 수 초). 스킬 스크립트나 파일 위치를 바꾸면 먼저 이걸 돌린다.
+- `bash tests/run.sh` — 훅·preflight·문서 경로 링크의 회귀 테스트(LLM 호출 없음, 수 초). 스킬 스크립트나 파일 위치를 바꾸면 먼저 이걸 돌린다. 이것이 검증 1층이고, 트리거·행동 eval·스크래치 런과의 역할 분담은 `references/skill-verification.md`(adr/0013).
 - `reports/` — 스킬을 실제로 돌린 기록(시나리오·비용·모델·통과표·결함·조치). ADR의 "검증" 란은 여기서 채운다. LLM 행동 evals(`claude plugin eval`)는 수동 리포트에서 실패 모드가 보인 뒤에 3~5개만 만든다.
 - 2026-08-21 새 구조 검증(`reports/develop-fe-tier2_2026-08-21_restructured.md`): Tier-2 ×2 + opus/fable A/B. 결과 — 렌즈·모델 라우팅은 설계대로 작동(L5가 뷰포트 누락, L3가 판별 불가 테스트를 잡음), 비용은 세션 모델(fable/opus)·ce-code-review 유무와 무관하게 Tier-2 ≈$33~46 = **절차 부피**(adr/0011 개정 2). Tier-2 리뷰는 persona만, simplify는 선택(adr/0012 개정 2). 런 비교표는 `reports/README.md`.
