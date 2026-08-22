@@ -40,6 +40,48 @@ echo "  · CI: $(ls .github/workflows/*.yml .gitlab-ci.yml 2>/dev/null | tr '\n'
 echo "  · 에이전트 설정: $(ls CLAUDE.md AGENTS.md .claude/settings.json .claude/cgamja.json 2>/dev/null | tr '\n' ' ')$( [ -d .claude/rules ] && echo '.claude/rules/ ' )$( [ -d openspec ] && echo 'openspec/ ' )"
 echo "  · 다른 도구의 채널: $(ls CONCEPTS.md STRATEGY.md .compound-engineering/config.local.yaml 2>/dev/null | tr '\n' ' ')$( [ -d docs/solutions ] && echo 'docs/solutions/ ' )$( [ -d docs/plans ] && echo 'docs/plans/(CE — 이 플러그인은 OpenSpec change를 쓴다) ' )  ← 있으면 그대로 쓴다, 중복 원천을 만들지 않는다"
 
+# ---- 선언 초안: 발견값으로 .claude/cgamja.json 후보를 만든다(없을 때만). 확정은 사용자·세팅 스킬.
+if [ ! -f .claude/cgamja.json ] && [ -n "$PKG" ]; then
+echo "— 선언 초안 (.claude/cgamja.json 후보 — 발견값, null은 대조표 ✗)"
+python3 - "$PKG" "$pm" <<'PY'
+import json,sys,glob,os,re
+pkg=json.loads(sys.argv[1]); pm=sys.argv[2]; sc=pkg['__scripts']; deps=set(k for k in pkg if k!='__scripts')
+run=lambda name: f"{pm} run {name}" if pm in('npm','bun') else f"{pm} {name}"
+def pick(*names):
+    for n in names:
+        if n in sc: return run(n)
+    return None
+verify=pick('verify','ci','check','validate')
+typecheck=pick('typecheck','type-check','tsc','check-types')
+lint=pick('lint','eslint')
+test=pick('test','test:unit','unit')
+e2e=pick('test:e2e','e2e')
+dev=pick('dev','start','serve')
+pats=[]
+for pat in ('**/*.test.*','**/*.spec.*','**/*_test.*'):
+    if glob.glob(pat,recursive=True): pats.append(pat)
+for d in ('e2e','cypress','playwright','tests/e2e','.maestro'):
+    if os.path.isdir(d): pats.append(d+'/**')
+layers={k:v for k,v in {'unit':test,'browser':pick('test:browser'),'e2e':e2e}.items() if v}
+gen=next((run(n) for n in sc if re.search(r'(gen|generate|codegen).*(api|client|types)|^api:gen$|openapi|orval',n)),None)
+src=next((f for f in ('api/openapi.yaml','api/openapi.json','openapi.yaml','openapi.json','swagger.json','schema.graphql') if os.path.exists(f)),None) or next(iter(sorted(f for f in glob.glob('src/**/openapi.*',recursive=True)+glob.glob('src/**/swagger.*',recursive=True))),None)
+mock=next((m for m,d in (('msw','msw'),('nock','nock'),('mirage','miragejs')) if d in deps),None)
+a11y=next((n for n,d in (('jsx-a11y','eslint-plugin-jsx-a11y'),('vuejs-accessibility','eslint-plugin-vuejs-accessibility'),('react-native-a11y','eslint-plugin-react-native-a11y'),('svelte(compiler)','svelte')) if d in deps),None)
+rt=next((n for n,d in (('axe','@axe-core/playwright'),('axe','vitest-axe'),('axe','axe-core'),('axe','cypress-axe')) if d in deps),None)
+root=next((d for d in ('src/domains','src/features','src/modules','src/pages','src/views') if os.path.isdir(d)),None)
+tokens=next((f for f in ('src/styles/tokens.css','src/tokens.css','design/tokens.json','tokens.json') if os.path.exists(f)),None)
+lock=next((f for f in ('pnpm-lock.yaml','package-lock.json','yarn.lock','bun.lockb') if os.path.exists(f)),None)
+prot=[f for f in ['package.json',lock,'eslint.config.*','.env','.env.*','lefthook.yml','.husky/*','commitlint.config.*','.claude/settings.json','.claude/hooks/*'] if f]
+d={"commands":{"verify":verify,"typecheck":typecheck,"test":test,"lint":lint,"dev":dev},
+   "tests":{"patterns":pats,"layers":layers},
+   "contract":({"source":src,"generate":gen,"generated":None} if (src or gen) else None),
+   "mock":{"boundary":mock},"design":{"source":None,"tokens":tokens},"platform":{"profile":None},
+   "domains":{"root":root,"allowed_edges":[]},"a11y":{"lint":a11y,"runtime":rt},"protected":prot,
+   "lint_file":{"extensions":["ts","tsx","vue","svelte","js"],"command":(f"{lint} {{file}}" if lint else None)}}
+print(json.dumps(d,ensure_ascii=False,indent=1))
+PY
+fi
+
 echo "— 대조표 (철학 원칙 ↔ 강제 수단)"
 row "선언 .claude/cgamja.json"     $(has .claude/cgamja.json && echo 0 || echo 1)   "templates/cgamja.json — 발견값으로 채운다"
 row "P3 commands.verify"           $( (cfgkey commands.verify || script verify) && echo 0 || echo 1) "타입·린트·테스트(·계약 드리프트·미사용) 한 명령"

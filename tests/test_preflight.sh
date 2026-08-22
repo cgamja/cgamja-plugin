@@ -7,6 +7,11 @@ mkdir -p $E/.claude; cp skills/develop-setup/templates/cgamja.json $E/.claude/; 
 check "declaration → P7 contract.source ✓" "✓ P7 contract.source" "$out"
 check "declaration → P6 platform ✗ without rules" "✗ P6 platform.profile" "$out"
 # 다른 스택 발견(Vue + Jest + husky)
-printf '{"dependencies":{"vue":"3"},"devDependencies":{"jest":"29","@vue/test-utils":"2","husky":"9","@commitlint/cli":"19"},"scripts":{"verify":"npm run ci"}}' > $E/package.json; touch $E/yarn.lock
+rm -f $E/.claude/cgamja.json
+printf '{"dependencies":{"vue":"3"},"devDependencies":{"jest":"29","@vue/test-utils":"2","husky":"9","@commitlint/cli":"19","msw":"2","eslint-plugin-vuejs-accessibility":"2","eslint":"9"},"scripts":{"verify":"npm run ci","lint":"eslint .","generate:api":"openapi-ts"}}' > $E/package.json; touch $E/yarn.lock
 out="$(bash $P $E)"; check "discovers vue/jest/yarn" "yarn" "$(grep '러너' <<<"$out")"; check "discovers framework vue" "vue" "$(grep '프레임워크' <<<"$out")"
 check "P3 verify ✓ from package.json script" "✓ P3 commands.verify" "$out"
+check "draft: mock.boundary msw discovered" '"boundary": "msw"' "$out"
+check "draft: a11y.lint vuejs discovered" 'vuejs-accessibility' "$out"
+check "draft: contract.generate from script" 'yarn generate:api' "$out"
+check "draft: lint_file from lint script" 'yarn lint {file}' "$out"
