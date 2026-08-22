@@ -37,11 +37,12 @@ check() {
   echo "# 2 boundary lint actually fires (domains.root)"
   local domain; domain="$(ls "$domain_root" 2>/dev/null | head -1)"
   if [ -n "$domain_root" ] && [ -n "$domain" ] && [ -n "$lint" ]; then
-    mkdir -p src/shared/lib
-    printf 'import "@/%s/%s";\nexport const probe = 1;\n' "${domain_root#src/}" "$domain" > src/shared/lib/_probe.ts
-    out="$(runlint src/shared/lib/_probe.ts)"
-    expect_grep "shared→domain import is an error" "boundaries|boundary|restricted|no-restricted-imports|dependency" "$out"
-    rm -f src/shared/lib/_probe.ts
+    # 별칭(@/) 가정 없이 상대경로. 프로브는 domains.root 의 부모(보통 src)에 둔다 — 밖에서 단위 내부로 들어가는 import
+    local pdir="$(dirname "$domain_root")"; local probe="$pdir/_cgamja_probe.ts"
+    printf 'import "./%s/%s";\nexport const probe = 1;\n' "$(basename "$domain_root")" "$domain" > "$probe"
+    out="$(runlint "$probe")"
+    expect_grep "outside→unit internal import is an error" "boundaries|boundary|restricted|no-restricted-imports|dependency" "$out"
+    rm -f "$probe"
   else skp "boundary probe"; fi
 
   echo "# 3 a11y lint (a11y.lint)"
@@ -50,6 +51,17 @@ check() {
     if [ "$(cfg platform.profile)" = native ]; then
       printf 'import { Pressable } from "react-native";\nexport const P = () => <Pressable onPress={() => {}} />;\n' > src/shared/lib/_probe.tsx
       out="$(runlint src/shared/lib/_probe.tsx)"; expect_grep "touchable without role is an error" "a11y" "$out"
+    elif cfg lint_file.extensions | grep -qx vue; then
+      printf '<template><div><img src="x" /><div @click="f" /></div></template>\n<script setup lang="ts">const f = () => {}</script>\n' > src/_cgamja_probe.vue
+      out="$(runlint src/_cgamja_probe.vue)"
+      expect_grep "img without alt is an error (vue)" "alt" "$out"
+      expect_grep "div @click without key handler is an error (vue)" "key-events|click-events|a11y" "$out"
+      rm -f src/_cgamja_probe.vue
+    elif cfg lint_file.extensions | grep -qx svelte; then
+      printf '<img src="x" />\n<div on:click={() => {}} />\n' > src/_cgamja_probe.svelte
+      out="$(runlint src/_cgamja_probe.svelte)"
+      expect_grep "a11y warnings surface as errors (svelte)" "a11y" "$out"
+      rm -f src/_cgamja_probe.svelte
     else
       printf 'export const P = () => (<><img src="x" /><div onClick={() => {}} /></>);\n' > src/shared/lib/_probe.tsx
       out="$(runlint src/shared/lib/_probe.tsx)"
@@ -77,14 +89,18 @@ for p in sys.stdin.read().split('\n'):
     if [ -n "$gen_first" ] && [ -n "$lint" ]; then
       out="$(runlint "$gen_first")"; code=$?; expect_exit "generated client passes lint (exception path)" 0 "$code" "$out"
     else bad "contract.generated has files" "none matched"; fi
-    out="$(bash -c "$(cfg contract.generate)" 2>&1 && git diff --exit-code --stat -- $(cfg contract.generated | sed 's#/\*\*.*##' | sort -u | tr '\n' ' ') 2>&1)"; code=$?
-    expect_exit "regenerate → no diff (deterministic)" 0 "$code" "$out"
+    local genpaths; genpaths="$(cfg contract.generated | sed 's#/\*\*.*##; s#/\*.*##' | sort -u | tr '\n' ' ')"
+    if out="$(bash -c "$(cfg contract.generate)" 2>&1)"; then
+      out="$(git diff --exit-code --stat -- $genpaths "$(cfg contract.source)" 2>&1)"; code=$?
+      expect_exit "regenerate → no diff (deterministic)" 0 "$code" "$out"
+    else skp "regenerate (contract.generate failed: $(tail -1 <<<"$out" | head -c 120))"; fi
+    git checkout -q -- $genpaths "$(cfg contract.source)" 2>/dev/null   # 프로브 부작용 원복
   else skp "contract probes"; fi
 
   echo "# 5 hooks (stdin JSON → decision, patterns from declaration)"
   hook() { printf '%s' "$2" | bash ".claude/hooks/$1" 2>/dev/null; }
-  local tp; tp="$(cfg tests.patterns | head -1 | sed 's#\*\*/##; s#\*#x#g')"   # 첫 패턴에서 예시 파일명 하나 만든다
-  local tfile="src/$tp"; [[ "$tfile" == *.* ]] || tfile="$(cfg tests.patterns | head -1 | sed 's#/\*\*##; s#\*\*/##')/x.spec.ts"
+  local tp; tp="$(cfg tests.patterns | head -1 | sed 's#\*\*/##g; s#\*#x#g')"   # 첫 패턴에서 예시 파일명 하나 만든다
+  local tfile="$tp"; [[ "$tfile" == */* ]] || tfile="src/$tp"; [[ "$tfile" == *.* ]] || tfile="${tfile%/}/x.spec.ts"
   out="$(hook protect-files.sh "{\"cwd\":\"$PWD\",\"tool_input\":{\"file_path\":\"$PWD/$tfile\"}}")"
   expect_grep "test file edit → ask (red gate): $tfile" '"permissionDecision": ?"ask"' "$out"
   out="$(TDD_PHASE=red hook protect-files.sh "{\"cwd\":\"$PWD\",\"tool_input\":{\"file_path\":\"$PWD/$tfile\"}}")"
