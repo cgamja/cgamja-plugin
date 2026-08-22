@@ -38,6 +38,23 @@
 
 없는 키는 null. null인 강제 수단은 세팅 스킬의 제안 목록이 되고, 절차는 null이면 그 단계를 "수동 증거"로 대체한다(예: a11y.runtime null → 리뷰 렌즈 L4가 더 넓게 본다).
 
+## 사용자 콘텐츠는 어느 파일에 — 섞여 있는 오픈소스의 채널을 그대로 쓴다 (중복 원천 금지)
+| 내용 | 파일 | 소유 도구 | 비고 |
+|---|---|---|---|
+| 행동 스펙(Requirement/Scenario) · 진행 중 change | `openspec/specs/`, `openspec/changes/` | OpenSpec | 계획 문서(`docs/plans/`)는 쓰지 않는다 — change가 계획(adr/0001) |
+| 스택·제약 산문 컨텍스트 | `openspec/config.yaml` `context:` / `rules:` | OpenSpec | **세팅 스킬이 `.claude/cgamja.json`에서 생성**(손으로 두 번 쓰지 않는다) |
+| 플러그인이 읽는 기계 사실 | `.claude/cgamja.json` | cgamja | 본 ADR §슬롯. `check-docs.sh`가 CLAUDE.md 명령과 일치 검사 |
+| 금지·명령·구조 한 단락 | `CLAUDE.md`(AGENTS.md를 쓰는 레포면 그 파일) | Claude Code | CE `project-standards` 리뷰어가 읽는 파일이기도 하다 |
+| 파일 타입별 규칙 | `.claude/rules/*.md` (`paths:`) | Claude Code | 플랫폼 프로필 포함 |
+| 아키텍처 결정·허용 엣지 | `docs/adr/` | cgamja | 린트 설정과 1:1 |
+| 긴 컨벤션·이유 | `docs/conventions.md` | cgamja | 백틱 포인터로만 |
+| 해결한 문제 | `docs/solutions/` | compound-engineering (`ce-compound`) | 세팅은 빈 폴더만 |
+| 도메인 용어 | `CONCEPTS.md` | compound-engineering | 있으면 리뷰어 입력 |
+| 제품 전략 | `STRATEGY.md` | compound-engineering | 선택 |
+| CE 설정 | `.compound-engineering/config.local.yaml` | compound-engineering | 선택 |
+| 디자인 스냅샷·토큰 | `design/` | cgamja (`figma-design-source.md`) | `design.source`/`design.tokens`가 가리킨다 |
+| 검증된 학습(플러그인 쪽) | cgamja `references/`·`reports/` | cgamja | 프로젝트에 복사하지 않는다 |
+
 ## 전제
 - 대상은 JS/TS 프론트엔드가 대부분이지만 절차는 그것도 가정하지 않는다. 네이티브(Flutter/SwiftUI)는 `platform.profile: native`로 들어올 수 있되 검증된 조각이 없다고 명시.
 - 선언 파일은 사람이 읽고 고칠 수 있을 만큼 작아야 한다(≤40줄).
