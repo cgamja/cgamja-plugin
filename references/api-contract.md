@@ -74,7 +74,7 @@ components:
 | 걸림돌 | `mock: true` 또는 `mock: { generators: [{type:"msw"}] }` (v7식 `mock.type`은 TypeError) | **TypeScript 6과 충돌**(`ts.SyntaxKind` undefined) — TS 5 고정 필요 |
 → **orval.** GraphQL이면 `graphql-codegen` + `typescript-msw`로 같은 구조(미실측). `openapi-fetch`/`openapi-react-query`는 유지보수 모드라 신규 금지. Optic은 2026-01 아카이브(`diff`는 oasdiff).
 
-`orval.config.ts` (검증본 — `develop-setup/templates/orval.config.ts`):
+`orval.config.ts` (검증본 — `develop-setup/templates/react/orval.config.ts`):
 ```ts
 import { defineConfig } from "orval";
 export default defineConfig({

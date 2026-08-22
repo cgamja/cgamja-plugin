@@ -69,7 +69,7 @@
 - 설정: `vitest.config.ts` `projects: [{name:"unit", environment:"jsdom", include:["**/*.test.ts?(x)"], exclude:["**/*.browser.test.tsx"]}, {name:"browser", browser:{enabled:true, provider:playwright(), instances:[{browser:"chromium"}]}, include:["**/*.browser.test.tsx"], optimizeDeps:{include:[...]}}]` (`optimizeDeps.include` 없으면 CI flaky) · `playwright.config.ts` chromium 1개, `storageState` 픽스처 · 린트 `@vitest/eslint-plugin` `expect-expect`·`no-disabled-tests`·`no-focused-tests` + `captain-obvious --check`.
 - 변이: Stryker는 Browser Mode 미지원 → jsdom 프로젝트의 `src/domains/**/model/**`만, `incremental: true`, `coverageAnalysis: perTest`.
 - Storybook이 이미 있으면 `@storybook/addon-vitest`로 스토리를 돌린다. 없으면 `vitest-browser-react` + `vitest-axe`로 동일 커버.
-- Expo(RN): 브라우저가 없으므로 `browser` 계층 없음 → `jest-expo` + `@testing-library/react-native` 한 층(`unit`)에 인터랙션까지, 레이아웃 픽셀은 시뮬레이터 스크린샷. MSW는 `setupServer`(Node). E2E는 Maestro. (`develop-setup/templates/jest.expo.md`)
+- Expo(RN): 브라우저가 없으므로 `browser` 계층 없음 → `jest-expo` + `@testing-library/react-native` 한 층(`unit`)에 인터랙션까지, 레이아웃 픽셀은 시뮬레이터 스크린샷. MSW는 `setupServer`(Node). E2E는 Maestro. (`develop-setup/templates/react/jest.expo.md`)
 - 예시(브라우저 계층, spec → 테스트):
 ```
 #### Scenario: 빈 이메일 제출

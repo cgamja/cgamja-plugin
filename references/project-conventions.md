@@ -9,7 +9,7 @@
 | 규칙 종류 | 위치 | 검사 주체 |
 |---|---|---|
 | 플러그인이 읽는 사실(명령·테스트 패턴·계약·디자인 원천·프로필·경계) | `.claude/cgamja.json` ≤40줄 | 훅·스모크·리뷰어 |
-| 명령어, 스택 특이점, 절대 금지 5개(맨 위), 포인터 | `CLAUDE.md` (≤60줄 soft, 폴더맵·의존성 목록처럼 코드에서 유추되는 건 제외) | 에이전트 |
+| 명령어, 스택 특이점, 절대 금지 5개(맨 위), 포인터 | `CLAUDE.md` — 레포가 `AGENTS.md`를 쓰면 그 파일(CE `project-standards` 리뷰어도 둘 다 읽는다) (≤60줄 soft, 폴더맵·의존성 목록처럼 코드에서 유추되는 건 제외) | 에이전트 |
 | **완료 정의(DoD)** | 프로젝트의 검증 스크립트 **한 곳**(`commands.verify`). CLAUDE.md 한 줄·Stop 훅·OpenSpec guidance·CI는 이름만 참조 | Stop 훅, CI |
 | 파일 타입별 판단 규칙(컴포넌트·상태·에러·테스트) | `.claude/rules/<topic>.md` + `paths:` frontmatter, 각 ≤30줄, 명령형, 정본 예시 파일 1개 포인터 | 해당 파일을 읽을 때 재주입 |
 | 긴 이유·예시 | `docs/conventions.md` — 백틱 포인터로만 참조, **`@` import 금지** | 사람, 필요시 에이전트 |
@@ -22,7 +22,8 @@
 | 아키텍처 결정과 허용 엣지 | `docs/adr/0001-domain-structure.md` (명령형 불릿) | 사람 |
 | 행동 스펙 | `openspec/specs/<capability>/spec.md` | `openspec validate --archived`(CI) |
 | OpenSpec 생성 시 주입 | `openspec/config.yaml` `context`/`rules` | propose/apply |
-| 해결한 문제 | `docs/solutions/` | `/ce-compound` |
+| 해결한 문제 · 용어 · 전략 | `docs/solutions/` · `CONCEPTS.md` · `STRATEGY.md` (compound-engineering 채널 — 있으면 그대로 쓴다) | `/ce-compound`, 리뷰어 입력 |
+| 스택 산문 컨텍스트 | `openspec/config.yaml` `context:` — **`cgamja.json`에서 생성**, 손으로 중복 작성 금지 | propose/apply |
 | 절차("새 도메인 추가하는 법") | 스킬 | 호출 시 |
 
 문서 rot 방지: CI에 20줄 스크립트 — CLAUDE.md/rules/conventions가 가리키는 경로가 존재하는지, `cgamja.json`의 명령이 실제 스크립트와 일치하는지. 주기적 트림.
@@ -73,7 +74,7 @@ src/
   shared/ui/button/index.ts   모듈별 entry. shared/ui/index.ts, shared/index.ts 없음
   shared/lib/ shared/config/
 ```
-- 린트: `eslint-plugin-boundaries` 7.x `dependencies`(`entry-point`는 deprecated) + `no-unknown-files` + `import-x/no-cycle`. 검증본 `develop-setup/templates/eslint.boundaries.js`. **실측 함정**: boundaries v7은 레거시 `import/resolver` 키만 읽는다 — `import-x/resolver-next`만 있으면 `@/…`가 external로 분류돼 경계 린트가 **조용히 통과**(2026-08-21). 두 키를 모두 둔다. 템플릿 변수는 `{{from.type}}`(v7; `${}` 구문은 deprecated). 요소 패턴에 파일(main.tsx)을 넣으면 `no-unknown-files` 오탐 → 엔트리는 `src/app/`으로.
+- 린트: `eslint-plugin-boundaries` 7.x `dependencies`(`entry-point`는 deprecated) + `no-unknown-files` + `import-x/no-cycle`. 검증본 `develop-setup/templates/react/eslint.boundaries.js`. **실측 함정**: boundaries v7은 레거시 `import/resolver` 키만 읽는다 — `import-x/resolver-next`만 있으면 `@/…`가 external로 분류돼 경계 린트가 **조용히 통과**(2026-08-21). 두 키를 모두 둔다. 템플릿 변수는 `{{from.type}}`(v7; `${}` 구문은 deprecated). 요소 패턴에 파일(main.tsx)을 넣으면 `no-unknown-files` 오탐 → 엔트리는 `src/app/`으로.
 - 세팅 자가검증: `src/shared/lib/_probe.ts`에서 도메인 import → `boundaries/dependencies` 에러가 **실제로 나는지**(`smoke.sh check` 2번 항목). 통과해 버리면 resolver 설정 문제.
 - 보조: dependency-cruiser는 CI 그래프용(선택). steiger·sheriff는 쓰지 않는다.
 - Next RSC 경계(`'use client'`)는 린트 불가 — `ui/`에서 명시, 리뷰 항목(L7).
