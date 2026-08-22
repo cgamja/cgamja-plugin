@@ -49,7 +49,7 @@ hooks:
 - Figma 읽기 전엔 `figma:figma-design-to-code` 스킬, 쓰기 전엔 `figma:figma-use`/`figma-generate-design`을 먼저 로드한다(플러그인 규칙).
 
 ## API 계약은 `api/openapi.yaml` 하나, 코드는 생성물만
-- 스펙이 있으면 받아오고(`api:pull`), 없으면 프론트가 **DRAFT 스텁**을 쓰고, 기존 코드엔 **별도 change로 뽑아 붙인다**(retrofit). 그 다음은 전부 같다: `api:gen` → `src/api/*.gen.ts`(타입·TanStack 훅·MSW·zod)만 import. 없는 필드·엔드포인트를 지어내면 tsc가 막는다 — 판정표는 `workflow.md` 1장, 절차·도구는 `references/api-contract.md`, 결정은 `adr/0008`.
+- 계약 원천(`contract.source`)이 있으면 받아오고, 없으면 프론트가 **DRAFT 스텁**을 쓰고, 기존 코드엔 **별도 change로 뽑아 붙인다**(retrofit). 그 다음은 전부 같다: 생성(`contract.generate`) → 생성물(`contract.generated`)만 import. 없는 필드·엔드포인트를 지어내면 타입 검사가 막는다 — 판정표는 `workflow.md` 1장, 절차·도구는 `references/api-contract.md`, 결정은 `adr/0008`.
 - 스펙에 없는 게 필요하면 **코드·목에 먼저 넣지 않는다**: 멈추고 스펙 diff를 제안해 확정받는다.
 
 ## 프로젝트 세팅이 없을 때
@@ -69,7 +69,7 @@ hooks:
 | `workflow.md` | 항상. 절차 본문 |
 | `references/openspec-setup.md` | 프로젝트에 OpenSpec 세팅할 때, `/opsx:*` 동작이 이상할 때 |
 | `references/figma-design-source.md` | 화면 task 시작 전(호출 규칙 §3), 스냅샷 만들 때(§2), 디자인 갭(§5), Figma 대조 검증(§6) |
-| `references/api-contract.md` | API가 걸린 task — 계약 상태 A/B/C/D 판정, orval 설정, DRAFT 스텁 템플릿, retrofit 절차, 백엔드와 화해 |
+| `references/api-contract.md` | API가 걸린 task — 계약 상태 A/B/C/D 판정, DRAFT 스텁 템플릿, 검증된 생성기 설정(조건부 절), retrofit 절차, 백엔드와 화해 |
 | `skills/test-fe/` → `references/tdd-frontend.md` | 테스트 task — Skill 도구로 `cgamja:test-fe`. 직접 읽지 않는다 |
 | `skills/review-fe/` → `references/review-lenses-frontend.md`, `agents/reviewer-*.md` | 리뷰 단계 — Skill 도구로 `cgamja:review-fe`. 직접 읽지 않는다 |
 | `references/a11y-frontend.md` | UI task 증거(§3)와 코드 규칙이 막지 못하는 접근성 체크(§2) |

@@ -17,7 +17,7 @@ description: 프론트엔드 코드 리뷰와 PR 리뷰를 티어별 렌즈(정�
 ## 절차
 1. **범위 확정**: diff 범위(`git diff <base>...HEAD` 또는 `gh pr diff`)와 커밋 목록. 티어를 인자로 받거나 추론한다(change 있음 → Tier-2, 없음 → Tier-1, PR 모드 → PR 행). 조건 판정은 기계적으로: diff에 `*.tsx`/스크린샷 경로 있음 → UI(L4 L5) · `src/api/**`·`api/openapi.yaml`·`fetch` 변경 → API(L6).
 2. **렌즈 선택**: `review-lenses-frontend.md` §2 표. 선택 결과를 한 줄로 보고하고 시작한다("Tier-2 · L1 L2 L3 L4 L5 · L6 제외(API 변경 없음)").
-3. **증거 수집(`haiku` Explore 1개)**: 스크린샷 경로 존재 확인, axe 결과, `pnpm verify` 마지막 실행 출력, 테스트 커밋/feat 커밋 분리 목록, 스펙 시나리오 목록. 이 묶음을 모든 persona에 같은 텍스트로 넘긴다.
+3. **증거 수집(`haiku` Explore 1개)**: 스크린샷 경로 존재 확인, 접근성 런타임(`a11y.runtime`) 결과, `commands.verify` 마지막 실행 출력, 테스트 커밋/feat 커밋 분리 목록, 스펙 시나리오 목록. 이 묶음을 모든 persona에 같은 텍스트로 넘긴다.
 4. **병렬 실행** — 렌즈마다 Agent 하나, **같은 메시지에서 동시에**:
    - 프롬프트 = `agents/reviewer-<lens>.md` 본문(플러그인이 agents를 서브에이전트 타입으로 등록했으면 `subagent_type`으로, 아니면 파일을 읽어 프롬프트 앞에 붙인다) + 3번 증거 + diff 범위 + 스펙 경로.
    - `model:`은 §3 표대로 **반드시 명시**(생략 = 세션 모델 = 가장 비쌈).
@@ -27,7 +27,7 @@ description: 프론트엔드 코드 리뷰와 PR 리뷰를 티어별 렌즈(정�
 7. PR 모드에서 결과를 PR에 쓰려면 **사용자 확인 후** `gh pr review --comment` 또는 `/code-review --comment`. 기본은 터미널 보고만.
 
 ## 단독 호출 모드
-- "머지해도 돼?": 위 절차 그대로 + 판정 한 줄이 답. `pnpm verify` 초록 증거가 없으면 먼저 돌린다.
+- "머지해도 돼?": 위 절차 그대로 + 판정 한 줄이 답. `commands.verify` 초록 증거가 없으면 먼저 돌린다.
 - "내 diff 점검"(커밋 전): Tier-1 렌즈(L1)만, 빠르게. 스펙이 있으면 L2 추가.
 - 렌즈 지정: `/review-fe code --lens a11y,platform` — 그 렌즈만.
 
