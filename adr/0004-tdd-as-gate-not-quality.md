@@ -1,5 +1,6 @@
 # 0004. TDD는 품질 기법이 아니라 리뷰 게이트 + 변조 방지; 인터랙션 테스트 기본은 Vitest Browser Mode
 - 상태: 제안
+- 개정(2026-08-22, adr/0014): Vitest Browser Mode는 React+Vite 검증 구현(`references/tdd-frontend.md` §6). 원칙은 계층 `unit/browser/e2e`(선언 `tests.layers`)로 일반화.
 - 날짜: 2026-08-21
 - 검증: (없음)
 

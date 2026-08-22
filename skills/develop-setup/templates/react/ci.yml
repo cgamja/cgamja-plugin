@@ -12,7 +12,7 @@ jobs:
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
-      - run: pnpm exec commitlint --from origin/main --to HEAD
+      - run: pnpm exec commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}"   # origin/main 가정 X(기본 브랜치 이름 무관)
         if: github.event_name == 'pull_request'
       - run: npx -y @fission-ai/openspec@latest validate --archived --strict
         env: { OPENSPEC_TELEMETRY: "0" }

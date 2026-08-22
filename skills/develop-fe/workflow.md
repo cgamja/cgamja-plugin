@@ -13,10 +13,10 @@
 ## 0. 세션 시작 (매번, 30초)
 0. 세팅 확인: `package.json`에 `verify` 스크립트, `openspec/config.yaml`, `.claude/rules/`가 없으면 **멈추고 `/develop-setup`을 먼저 하라고 안내**한다(여기서 세팅을 즉흥으로 만들지 않는다). Tier-1 한 줄 수정은 예외로 진행 가능
 1. `git status` / `git log --oneline -10`
-2. `pnpm exec openspec list` — 열린 change 있으면 그 `tasks.md`부터 읽는다(CLI는 프로젝트 devDependency. 없으면 세팅 누락 → `/develop-setup`)
+2. `openspec list`(프로젝트의 패키지 러너로) — 열린 change 있으면 그 `tasks.md`부터 읽는다(CLI는 프로젝트 의존성. 없으면 세팅 누락 → `/develop-setup`)
 3. `docs/solutions/` 를 task 키워드로 grep — 이미 푼 문제인가
-4. `[TODO: pnpm typecheck]` 한 번 — 깨져 있으면 **새 작업 전에 고친다**
-4-1. API가 걸린 작업이면 `api/openapi.yaml` 있나 + `pnpm api:check` — 없거나 빨강이면 1장 "계약 상태 판정"으로
+4. `commands.typecheck`(프로젝트 선언) 한 번 — 깨져 있으면 **새 작업 전에 고친다**
+4-1. API가 걸린 작업이면 계약 원천(`contract.source`) 있나 + 생성물 드리프트 검사 — 없거나 빨강이면 1장 "계약 상태 판정"으로
 5. 화면 작업이면 `design/screens/<slug>/summary.md` 있나 확인. 없으면 Figma 호출 규칙(`figma-design-source.md` §3)대로 스냅샷부터. `design/` 자체가 없으면(프로젝트 첫 화면) §2 초기 스냅샷(토큰·map·components)을 먼저 한다 — 이건 Tier와 무관하게 1회
 
 ## 1. Task 분석 → 티어 판정
@@ -44,7 +44,7 @@
 | 상태 | 판정 | 처리 |
 |---|---|---|
 | A 스펙 있음 | `api/openapi.yaml`이 백엔드 원천과 일치 | `api:gen` → **생성물(`src/api/*.gen.ts`)만 import**. 손으로 타입·fetch 금지(린트·훅) |
-| B 스펙 없음 | 파일 없음 / 새 엔드포인트 | 프론트가 **DRAFT 스텁**(최소: path 1·schema·Problem) → Tier-2 질문 ⑥에 포함 → 생성 → 생성된 MSW 핸들러가 실행 가능한 계약 |
+| B 스펙 없음 | 파일 없음 / 새 엔드포인트 | 프론트가 **DRAFT 스텁**(최소: path 1·schema·Problem) → Tier-2 질문 ⑥에 포함 → 생성 → 경계 mock(`mock.boundary`) 핸들러가 실행 가능한 계약(생성물이 핸들러를 제공하면 그것을 기본으로, 아니면 계약 타입으로 손 핸들러) |
 | C 기존 코드, 스펙 없음 | 호출은 있는데 스펙 없음 | **별도 Tier-2 change `api-contract`**(retrofit: 인벤토리 → 스펙 → 생성 → 엔드포인트 단위 strangler). 기능 change와 섞지 않는다 |
 | D 스펙에 없는 게 필요 | 구현 중 발견 | 코드·목에 먼저 넣지 않는다. 멈춤 → 스펙 diff 제안 → 확정 → `api:gen` (디자인 갭 루프의 API판) |
 
@@ -89,15 +89,15 @@ Tier-2 3단계(propose) **전에** 돈다. 디자인이 확정돼야 시나리�
 ## 3. 공통 규칙
 
 ### 3-1. 검증 스택 — 싸게 → 비싸게, 위가 깨지면 아래로 안 내려간다
-1. **결정적** = **`pnpm verify`** 한 스크립트(`api:check && tsc --noEmit && eslint . && vitest run && knip` — `api:check` = 재생성 후 `git diff --exit-code src/api`). 완료 정의는 이 이름 한 곳에만 있고 Stop 훅·CLAUDE.md·OpenSpec guidance·CI는 이름만 참조한다(adr/0005). ESLint엔 boundaries·better-tailwindcss·vitest 규칙 포함
+1. **결정적** = **`commands.verify`**(프로젝트 선언) 한 명령 — 계약 드리프트 + 타입 + 린트 + 테스트 + 미사용 검사를 한 줄로. 완료 정의는 이 이름 한 곳에만 있고 Stop 훅·CLAUDE.md·OpenSpec guidance·CI는 이름만 참조한다(adr/0005). 린트에 경계·토큰·테스트 무결성 규칙이 있는지는 세팅 대조표가 본다
 2. **행동**: Playwright 스모크 2~3개 + `@axe-core/playwright`(violations 블로킹) · 다이얼로그는 `toMatchAriaSnapshot`
 3. **시각**: 뷰포트 3개 스크린샷을 **사람이 본다**. `toMatchScreenshot`은 디자인시스템 프리미티브에만. Ready 화면은 추가로 Figma 대조(토큰 린트 → computed style → 2x SSIM 97%+, `figma-design-source.md` §6)
 4. **LLM judge**: 안 쓴다. 취향은 사람
 
-훅(`[TODO: settings.json]`, 표는 `project-conventions.md` §5): `PostToolUse(Write|Edit)` → 그 파일 format+lint(1초 이내, tsc 금지) / `Stop` → `pnpm verify`(코드 편집 턴만) / `PreToolUse` Write|Edit **+ Bash** → `package.json`·lockfile·린터 설정·`*.test.*`(구현 턴) 보호, `--no-verify` 거부 — 같은 패턴을 `permissions.deny`에도(훅 `if`는 fail-open).
+훅(`[TODO: settings.json]`, 표는 `project-conventions.md` §5): `PostToolUse(Write|Edit)` → 그 파일 format+lint(1초 이내, tsc 금지) / `Stop` → `commands.verify`(코드 편집 턴만) / `PreToolUse` Write|Edit **+ Bash** → 매니페스트·lockfile·린터 설정·`tests.patterns`(구현 턴)·`contract.generated` 보호, `--no-verify` 거부 — 같은 패턴을 `permissions.deny`에도(훅 `if`는 fail-open).
 
 ### 3-2. 테스트 규칙 → `/test-fe` 스킬
-- 테스트 task는 **Skill 도구로 `cgamja:test-fe`를 부른다**(시나리오·change slug를 넘긴다). 계층 선택(jsdom / Browser Mode / E2E), 쿼리·mock 규칙, red 게이트(adr/0009)는 거기에 있다. 여기서는 결과만 받는다: 실패 출력 원문 + 이유 + `test(scope):` 커밋
+- 테스트 task는 **Skill 도구로 `cgamja:test-fe`를 부른다**(시나리오·change slug를 넘긴다). 계층 선택(단위 / 브라우저 / E2E), 쿼리·mock 규칙, red 게이트(adr/0009)는 거기에 있다. 여기서는 결과만 받는다: 실패 출력 원문 + 이유 + `test(scope):` 커밋
 - TDD의 목적은 품질이 아니라 **리뷰 게이트 + 변조 방지**(adr/0004). 구현 턴은 테스트 파일을 건드리지 않고(Edit ask, Bash 쓰기 deny), 기존 초록은 초록 유지(PASS_TO_PASS), `feat` diff에 `*.test.*` 금지
 - 못 만들면 **실패한 assertion 원문**과 함께 멈춘다. assertion 완화·skip·snapshot 재생성 금지
 
@@ -109,7 +109,7 @@ Tier-2 3단계(propose) **전에** 돈다. 디자인이 확정돼야 시나리�
 - 색·간격·폰트는 **토큰만**(`tokens.css` = Figma Variables export, 리뷰되는 원천). Figma의 `leading-[22.126px]` 류는 토큰으로 치환, 없으면 질문. 토큰 동기화는 `get_variable_defs` diff **보고만**, 자동 덮어쓰기 금지
 - Figma 호출은 `figma-design-source.md` §3 표로만 판단. "이 값이 뭐지"로 Figma를 열지 않는다 — 스냅샷 갭이면 한 번 채운다
 - 새 의존성은 승인 없이 추가 안 함
-- 접근성은 세 층(린트 `jsx-a11y`/`react-native-a11y` → axe → 역할 쿼리)이 막고, 못 잡는 것은 `references/a11y-frontend.md` §2 체크. `role`/`aria-*` 수동 추가 전에 네이티브 요소로, 아이콘 버튼 이름은 동작("닫기")
+- 접근성은 세 층(린트 `a11y.lint` → 런타임 `a11y.runtime` → 역할 쿼리)이 막고, 못 잡는 것은 `references/a11y-frontend.md` §2 체크. `role`/`aria-*` 수동 추가 전에 네이티브 요소로, 아이콘 버튼 이름은 동작("닫기")
 - 빈·로딩·에러 상태는 spec에 없어도 기본 포함
 
 ### 3-4. 컨텍스트 규칙
@@ -161,7 +161,7 @@ Tier-2 3단계(propose) **전에** 돈다. 디자인이 확정돼야 시나리�
 - Tier-2 스펙 작성이 구현보다 오래 걸린 게 2번 → `feature` 스키마 instruction을 더 줄인다
 - **스펙이 테스트된 동작과 모순된 채 출하된 change 2개** → 살아있는 스펙 유지 실패, CE-only로 (adr/0001). 에이전트는 스펙을 읽으므로 "안 읽음"이 아니라 "오래된 걸 믿음"이 위험. CI `openspec validate --archived` 필수
 - 실험 B(`ce-work` 브리지, adr/0001) 2개 change 후 채택/폐기 기록
-- 브라우저 테스트가 CI에서 주 2회 flaky → jsdom 기본으로 복귀(adr/0004)
+- 브라우저 계층 테스트가 CI에서 주 2회 flaky → 단위 계층 기본으로 복귀(adr/0004)
 - 도메인 간 허용 엣지 3개째 → `widgets/` 층 ADR(adr/0006)
 - 리뷰 지적 3회 연속 스타일뿐 → persona 지시문 수정(`agents/`) · 렌즈별 "없음" 3연속 → 그 렌즈 Tier-3 전용(`review-lenses-frontend.md` §5)
 - sonnet 구현이 같은 스펙에서 2회 실패 → 그 task 유형 opus로(`model-routing.md` §4)

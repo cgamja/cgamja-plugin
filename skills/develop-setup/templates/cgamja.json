@@ -1,0 +1,16 @@
+{
+  "$schema": "cgamja project declaration v1 — adr/0014 §슬롯. 플러그인의 훅·스모크·리뷰어가 읽는 사실. 없는 강제 수단은 null(세팅 스킬의 제안 목록이 된다). ≤40줄.",
+  "commands": { "verify": "pnpm verify", "typecheck": "pnpm typecheck", "test": "pnpm test", "lint": "pnpm lint", "dev": "pnpm dev" },
+  "tests": {
+    "patterns": ["**/*.test.*", "**/*.browser.test.*", "**/*.spec.*", "e2e/**", "**/*.stories.*"],
+    "layers": { "unit": "pnpm test:unit", "browser": "pnpm test:browser", "e2e": "pnpm e2e" }
+  },
+  "contract": { "source": "api/openapi.yaml", "generate": "pnpm api:gen", "generated": ["src/api/**/*.gen.ts", "src/api/model/**"] },
+  "mock": { "boundary": "msw" },
+  "design": { "source": "none", "tokens": "src/styles/tokens.css" },
+  "platform": { "profile": "web-desktop" },
+  "domains": { "root": "src/domains", "allowed_edges": [] },
+  "a11y": { "lint": "jsx-a11y", "runtime": "axe" },
+  "protected": ["package.json", "pnpm-lock.yaml", "package-lock.json", "yarn.lock", "eslint.config.*", ".env", ".env.*", "lefthook.yml", "commitlint.config.*", ".claude/settings.json", ".claude/hooks/*"],
+  "lint_file": { "extensions": ["ts", "tsx"], "command": "pnpm exec prettier --log-level warn --write {file} && pnpm exec eslint --fix {file}" }
+}
