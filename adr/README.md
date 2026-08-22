@@ -18,3 +18,4 @@
 | [0011](0011-model-routing.md) | 모델 라우팅 — 본체는 판단, 서브에이전트는 `model:` 명시(haiku 탐색 / sonnet 구현 / opus 리뷰) | 제안 | — |
 | [0012](0012-review-lenses-by-tier.md) | 리뷰 렌즈 L1~L7 = persona, 티어가 렌즈 수를 정함, ce-code-review 병행, PR 모드 | 제안 | — |
 | [0013](0013-skill-verification-pyramid.md) | 스킬 검증 4층 피라미드 — 결정적/트리거/행동 eval/스크래치 런, 4층은 탐색 전용, 3층은 `plugin eval` 포맷, pass^k 80% | 제안 | — |
+| [0014](0014-stack-agnostic-three-layers.md) | 절차/프로젝트 선언(`.claude/cgamja.json`)/관심사별 references 세 층 — 스택은 정하지 않고 읽는다, develop-setup은 발견·대조·최소 제안, 스캐폴드 없음 | 제안 | — |

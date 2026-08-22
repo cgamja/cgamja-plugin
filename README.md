@@ -21,7 +21,7 @@ skills/
   review-fe/       리뷰 — 티어별 렌즈 L1~L7을 persona 서브에이전트로(Tier-3/PR만 ce-code-review 병행), PR 모드
 references/        스킬 공유 지식(-frontend 접미사 = 스택 지식). 스킬은 "언제 읽나"만, 내용은 여기
 agents/            리뷰 렌즈 persona reviewer-{correctness,spec,tests,a11y,platform,architecture,performance}.md
-adr/               결정 기록(0001~0013). 절차를 바꾸려면 ADR 먼저
+adr/               결정 기록(0001~0014). 절차를 바꾸려면 ADR 먼저
 reports/           스킬을 실제로 돌린 기록(시나리오·비용·모델·통과표·결함)
 tests/             훅·preflight·문서 경로의 결정적 회귀 테스트
 bin/               openspec 래퍼
