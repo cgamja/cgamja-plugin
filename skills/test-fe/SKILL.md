@@ -12,7 +12,7 @@ description: 프론트엔드 테스트 코드를 쓰는 기준과 루프 — 시
 - 프로젝트 설정: `vitest.config.ts` projects(unit/browser) 또는 `jest.config`, `test/msw/handlers.ts`, `test/factories/`. 없으면 `/develop-setup` 7번 항목이 빠진 것 — 즉흥으로 만들지 않고 안내 후 멈춘다(Tier-1 단일 파일 테스트는 예외).
 
 ## 절차
-1. **계층 하나 고르기** — `tdd-frontend.md` §1 표. 인터랙션·포커스·레이아웃이면 **브라우저 계층**, 로직·훅·텍스트만이면 **단위 계층**, 화면을 건너면 E2E(계층별 러너·파일 규약은 프로젝트 선언 `tests.layers`)(3~5개 고정 목록에 있을 때만). 고른 이유를 한 줄로.
+1. **계층 하나 고르기** — `tdd-frontend.md` §1 표. 인터랙션·포커스·레이아웃이면 **브라우저 계층**(선언 `tests.layers.browser`가 null이면 단위 계층 + DOM 시뮬레이션으로 내리고, 레이아웃·포커스 시나리오는 E2E 또는 스크린샷 증거로 — `tdd-frontend.md` §1), 로직·훅·텍스트만이면 **단위 계층**, 화면을 건너면 E2E(계층별 러너·파일 규약은 프로젝트 선언 `tests.layers`)(3~5개 고정 목록에 있을 때만). 고른 이유를 한 줄로.
 2. **같은 걸 검증하는 테스트가 이미 있나** grep(시나리오 키워드, 컴포넌트명). 있으면 그 파일에 추가하고 중복 테스트를 만들지 않는다.
 3. **테스트 작성** — §3 규칙: `getByRole` > `getByLabelText` > … > `getByTestId`(최후, 이유 주석 필수). mock은 네트워크 경계(`mock.boundary`)에서만, 핸들러는 계약 생성물이 제공하면 그것을 기본으로 시나리오별 override. 자식 컴포넌트·훅·store mock 금지. 비동기는 자동 재시도 expect. 테스트 이름은 `WHEN … THEN …` 원문.
 4. **red** — 껍데기(빈 export)로 import만 통과시키고 실행. **실패 출력 원문 + 이유 한 줄**("요소 없음 — 기능 미구현"). import 에러·오타는 red가 아니다 → 3으로.

@@ -44,7 +44,7 @@
 | 상태 | 판정 | 처리 |
 |---|---|---|
 | A 스펙 있음 | `api/openapi.yaml`이 백엔드 원천과 일치 | `api:gen` → **생성물(`src/api/*.gen.ts`)만 import**. 손으로 타입·fetch 금지(린트·훅) |
-| B 스펙 없음 | 파일 없음 / 새 엔드포인트 | 프론트가 **DRAFT 스텁**(최소: path 1·schema·Problem) → Tier-2 질문 ⑥에 포함 → 생성 → 생성된 경계 mock 핸들러가 실행 가능한 계약 |
+| B 스펙 없음 | 파일 없음 / 새 엔드포인트 | 프론트가 **DRAFT 스텁**(최소: path 1·schema·Problem) → Tier-2 질문 ⑥에 포함 → 생성 → 경계 mock(`mock.boundary`) 핸들러가 실행 가능한 계약(생성물이 핸들러를 제공하면 그것을 기본으로, 아니면 계약 타입으로 손 핸들러) |
 | C 기존 코드, 스펙 없음 | 호출은 있는데 스펙 없음 | **별도 Tier-2 change `api-contract`**(retrofit: 인벤토리 → 스펙 → 생성 → 엔드포인트 단위 strangler). 기능 change와 섞지 않는다 |
 | D 스펙에 없는 게 필요 | 구현 중 발견 | 코드·목에 먼저 넣지 않는다. 멈춤 → 스펙 diff 제안 → 확정 → `api:gen` (디자인 갭 루프의 API판) |
 

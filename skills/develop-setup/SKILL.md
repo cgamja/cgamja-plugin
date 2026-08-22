@@ -32,7 +32,7 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 | 1 | `.claude/cgamja.json` | `templates/cgamja.json`을 **발견한 값으로** 채움 | ≤40줄. 없는 강제 수단은 `null` |
 | 2 | `CLAUDE.md` (없을 때만; 있으면 "하지 않는 것"·명령·구조 단락만 병합 제안) | `templates/CLAUDE.md` | **≤60줄**(넘으면 줄이고 보고 — 2026-08-22 Vue 런 92줄), `@` import 없음, 값은 선언과 1:1 |
 | 3 | `.claude/rules/{components,state,tests,platform}.md` | `templates/rules/` | `paths:`는 `tests.patterns`·`domains.root`와 일치. 기존 rules가 있으면 추가만 |
-| 4 | `.claude/settings.json` + `.claude/hooks/*.sh` | `templates/settings.json`, `templates/hooks/` **그대로 복사** | 훅은 선언을 읽는다 — 수정 금지. 기존 settings가 있으면 hooks·deny 병합 |
+| 4 | `.claude/settings.json` + `.claude/hooks/*.sh` | `templates/settings.json`, `templates/hooks/` **그대로 복사** | 훅은 선언을 읽는다 — 수정 금지. 기존 settings가 있으면 hooks·deny 병합. `.claude/state/`(Stop 훅의 verify 로그)를 `.gitignore`에 |
 | 5 | `docs/adr/0001-domain-structure.md`, `docs/conventions.md` | `templates/adr-0001-domain-structure.md`, `templates/conventions.md` | 구조 이름은 발견한 것(`domains.root`) |
 | 6 | 커밋 규약: commitlint + 훅 매니저 `commit-msg`/`pre-commit` | `templates/lefthook.yml`(기존 husky 등이 있으면 그 안에 규칙만) | 대화형 훅 금지 |
 | 7 | `verify` 한 줄 + 대조표 ✗ 중 사용자가 승인한 강제 수단 | `references/*` 의 "검증된 구현" 절 조각(`templates/react/`는 그 절에서 검증된 스택용 — 각 파일 머리에 스택·날짜) | **새 의존성은 승인 후에만.** 검증된 조각이 없는 스택이면: 조사 → 설치 → 프로브 → 되면 references에 날짜와 함께 추가(`feedback-install-and-verify`) |

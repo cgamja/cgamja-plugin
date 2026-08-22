@@ -45,7 +45,7 @@ components:
 - **린트**: 생성물 밖(`contract.generated` 제외, 테스트 제외)에서 직접 HTTP 호출·HTTP 클라이언트 import 금지 — 메시지에 "생성 클라이언트를 써라, 계약은 `contract.source`".
 - **훅**: `PreToolUse` 보호 훅이 `contract.generated`를 막는다 — "원천을 고치고 `contract.generate`" 안내 + exit 2(Edit/Write·Bash 모두).
 - **경계 mock**: 계약 밖 호출은 테스트에서 **에러**(조용히 통과 금지).
-- **드리프트 검사**: `commands.verify`에 "재생성 후 생성물 diff 0"이 포함된다. CI는 base 브랜치 원천 vs HEAD의 **breaking 변경 검사**를 추가.
+- **드리프트 검사**: `commands.verify`에 "재생성 후 생성물 diff 0"이 포함된다. 재생성은 드리프트가 **있을 때만** 트리를 바꾼다(그 diff가 곧 수정 목록) — 읽기전용이어야 하는 곳(리뷰어, Stop 훅 증거 수집)은 생성 없이 `git diff --exit-code -- <contract.generated>`만 본다. CI는 base 브랜치 원천 vs HEAD의 **breaking 변경 검사**를 추가.
 
 ## 5. Retrofit (상태 C) — 기존 코드에 계약 붙이기, change 1개
 1. **인벤토리**: 직접 호출·쿼리 훅·손 타입을 grep → `docs/api-inventory.md` 표 `{method, path, file, 손 타입}`. 엔드포인트별 그룹.
@@ -62,8 +62,12 @@ components:
 3. (선택) 스펙 vs 라이브 퍼징(schemathesis류).
 4. 백엔드 원천으로 **교체**하고 DRAFT 표기 제거 → 생성 → 타입 검사가 깨지는 곳이 수정 목록.
 
-## 7. `contract: null` — 계약 생성이 없는 프로젝트
-원칙 P7을 바로 강제할 수 없으니 **대체 증거**로 간다: ① 손 타입은 한 디렉터리에 모으고 리뷰어 L6이 "생성물 밖 손 타입"이 아니라 "그 디렉터리 밖 손 타입"을 본다 ② 경계 mock은 여전히 계약 밖 요청을 에러로 ③ 세팅 대조표에 "계약 생성 없음"이 남아 다음 세팅 때 §5 retrofit을 제안한다. 계약 생성 도입은 기능 change와 섞지 않는다.
+## 7. `contract: null` — 계약 생성이 없는 프로젝트 (수동 모드)
+원칙 P7을 바로 강제할 수 없으니 **경계를 선언으로 대체**한다: `contract: { "source": null, "generate": null, "generated": null, "client": "<손으로 쓴 HTTP 클라이언트·타입 디렉터리>" }`.
+① 직접 HTTP 호출 금지 린트(§4)는 `contract.client` **밖**에만 적용 — 그 디렉터리가 유일한 HTTP 경계다. 리뷰어 L6도 "생성물 밖"이 아니라 "`contract.client` 밖 손 타입·호출"을 본다.
+② 경계 mock(`mock.boundary`) 핸들러 목록이 허용 요청의 **allowlist**다 — 핸들러 없는 요청은 여전히 에러. 새 엔드포인트는 코드보다 핸들러(+`contract.client` 타입)를 먼저 추가한다(상태 D의 수동판).
+③ 세팅 대조표에 "계약 생성 없음"이 남아 다음 세팅 때 §5 retrofit을 제안한다. 계약 생성 도입은 기능 change와 섞지 않는다.
+`client`도 없으면(손 타입이 흩어져 있음) 수동 모드가 아니라 **상태 C** — retrofit change가 먼저다.
 
 ## 8. 검증된 구현 — React + OpenAPI (orval 8.24.0 · msw 2.15 · zod 4.4 · @tanstack/react-query 5.101, 2026-08-21 스크래치 Vite)
 | | orval 8 | @hey-api/openapi-ts 0.99 |

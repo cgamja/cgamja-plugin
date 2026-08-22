@@ -28,7 +28,7 @@
 | `commands.typecheck` / `test` / `lint` / `dev` | 개별 명령(없으면 null) | `pnpm typecheck` | `./gradlew test` |
 | `tests.patterns` | 테스트 파일 glob(훅이 보호) | `["**/*.test.*","e2e/**"]` | `["**/*.spec.ts","cypress/**"]` |
 | `tests.layers` | 계층 이름 → 실행 명령·파일 규약 | `{unit:…, browser:…, e2e:…}` | `{unit:…, e2e:…}` |
-| `contract.source` / `generate` / `generated` | 계약 원천 파일 · 생성 명령 · 생성물 glob(훅이 보호) | `api/openapi.yaml` / `pnpm api:gen` / `src/api/**/*.gen.ts` | `schema.graphql` / `npm run codegen` / `src/gql/**` 또는 null |
+| `contract.source` / `generate` / `generated` / `client` | 계약 원천 파일 · 생성 명령 · 생성물 glob(훅이 보호) · 생성이 없을 때 손 클라이언트 디렉터리(수동 모드, `api-contract.md` §7) | `api/openapi.yaml` / `pnpm api:gen` / `src/api/**/*.gen.ts` | `schema.graphql` / `npm run codegen` / `src/gql/**` 또는 null |
 | `mock.boundary` | 네트워크 경계 mock 방식(원칙 P7 확인용) | `msw` | `nock`, `playwright route`, `mirage` |
 | `design.source` | 디자인 원천 | `figma:<fileKey>` / `none` | 동일 |
 | `design.tokens` | 토큰 파일 | `src/styles/tokens.css` | `tokens.json` |

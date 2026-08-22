@@ -44,6 +44,7 @@ task: "유닛테스트 5개가 `localStorage` undefined로 실패 — 원인 확
 | 수정: `src/setup-tests.ts` 가드 조건 1줄 + 중복 `defineProperty` 제거. 테스트 파일 편집 0(red 게이트 준수) | ✓ |
 | 증거: `pnpm verify` exit 0 — vue-tsc·eslint·vitest 25 files/63 tests 통과 | ✓ |
 | 커밋 `fix(test): …` 1개, 푸시 안 함 | ✓ |
+
 선언(`commands.verify`, `tests.patterns`)이 실제 개발 루프에서 읽혔다: Stop 훅이 verify를 돌렸고 테스트 파일은 보호됐다.
 
 ## 판정

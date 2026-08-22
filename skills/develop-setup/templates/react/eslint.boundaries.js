@@ -64,6 +64,8 @@ export const apiContractConfig = {
   ignores: ["src/api/**", "src/test/**", "**/*.test.*", "**/*.browser.test.*", "e2e/**"],
   rules: {
     "no-restricted-globals": [2, { name: "fetch", message: "직접 fetch 금지 — src/api 생성 클라이언트를 쓴다. 없는 엔드포인트면 api/openapi.yaml부터(스펙 diff 제안)." }],
+    "no-restricted-properties": [2,
+      ...["window", "globalThis", "self"].map((object) => ({ object, property: "fetch", message: "직접 fetch 금지(window/globalThis/self 경유 포함) — src/api 생성 클라이언트." }))],
     "no-restricted-imports": [2, { paths: [
       { name: "axios", message: "직접 axios 금지 — src/api 생성 클라이언트." },
       { name: "ky", message: "직접 ky 금지 — src/api 생성 클라이언트." },
