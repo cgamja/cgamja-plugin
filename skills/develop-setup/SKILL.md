@@ -17,7 +17,7 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 | P2 테스트는 게이트 | `tests.patterns`, `tests.layers` | 테스트 파일 glob이 정확하고 훅이 그 파일 Edit를 `ask`로 막는다 | 훅 설치(§2-4) — 러너는 그대로 |
 | P7 계약 한 곳 | `contract.*` | 원천 파일 + 생성 명령 + 생성물 glob, 재생성 diff 0 | 원천이 있으면 생성기 제안(`references/api-contract.md` §2·§8), 없으면 `null` + retrofit change 안내(§5). 기능 change와 섞지 않는다 |
 | P7 경계 mock | `mock.boundary` | 계약 밖 요청이 테스트에서 에러 | 러너에 맞는 경계 mock 도구(JS면 `references/tdd-frontend.md` §6) |
-| P8 경계는 기계가 | `domains.root`, `domains.allowed_edges` | 기존 구조 이름으로 경계 린트가 **실제로** 에러를 낸다(프로브) | 기존 린터에 경계 규칙 추가(ESLint면 `templates/react/eslint.boundaries.js` 조각). 구조를 바꾸자고 하지 않는다 |
+| P8 경계는 기계가 | `domains.root`, `domains.allowed_edges` | 기존 구조 이름으로 경계 린트가 **실제로** 에러를 낸다 — 별칭 경로뿐 아니라 **상대경로 import도**(smoke 프로브 기준; 2026-08-22 Vue 런에서 `patterns: ['src/pages/*']`가 `./pages/x`를 못 막음) | 기존 린터에 경계 규칙 추가(ESLint면 `templates/react/eslint.boundaries.js` 조각). 구조를 바꾸자고 하지 않는다 |
 | P5 접근성 기본값 | `a11y.lint`, `a11y.runtime` | 린트 1층 + 런타임 2층 | 프레임워크별 a11y 린트 + axe(`references/a11y-frontend.md` §5). 없으면 `null`로 두고 리뷰 렌즈가 넓게 본다 |
 | P4 디자인 원천 | `design.source`, `design.tokens` | 원천 선언 + 토큰 파일 + 토큰 외 값 린트 | Figma면 `design/` 스냅샷(`references/figma-design-source.md` §2), 없으면 `none` + 토큰 파일 위치 |
 | P6 플랫폼 | `platform.profile` | `.claude/rules/platform.md` 프로필 | 사용자에게 프로필 1개 확인 |
@@ -30,13 +30,13 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 | # | 만드는 것 | 출처 | 비고 |
 |---|---|---|---|
 | 1 | `.claude/cgamja.json` | `templates/cgamja.json`을 **발견한 값으로** 채움 | ≤40줄. 없는 강제 수단은 `null` |
-| 2 | `CLAUDE.md` (없을 때만; 있으면 "하지 않는 것"·명령·구조 단락만 병합 제안) | `templates/CLAUDE.md` | ≤60줄, `@` import 없음, 값은 선언과 1:1 |
+| 2 | `CLAUDE.md` (없을 때만; 있으면 "하지 않는 것"·명령·구조 단락만 병합 제안) | `templates/CLAUDE.md` | **≤60줄**(넘으면 줄이고 보고 — 2026-08-22 Vue 런 92줄), `@` import 없음, 값은 선언과 1:1 |
 | 3 | `.claude/rules/{components,state,tests,platform}.md` | `templates/rules/` | `paths:`는 `tests.patterns`·`domains.root`와 일치. 기존 rules가 있으면 추가만 |
 | 4 | `.claude/settings.json` + `.claude/hooks/*.sh` | `templates/settings.json`, `templates/hooks/` **그대로 복사** | 훅은 선언을 읽는다 — 수정 금지. 기존 settings가 있으면 hooks·deny 병합 |
 | 5 | `docs/adr/0001-domain-structure.md`, `docs/conventions.md` | `templates/adr-0001-domain-structure.md`, `templates/conventions.md` | 구조 이름은 발견한 것(`domains.root`) |
 | 6 | 커밋 규약: commitlint + 훅 매니저 `commit-msg`/`pre-commit` | `templates/lefthook.yml`(기존 husky 등이 있으면 그 안에 규칙만) | 대화형 훅 금지 |
 | 7 | `verify` 한 줄 + 대조표 ✗ 중 사용자가 승인한 강제 수단 | `references/*` 의 "검증된 구현" 절 조각(`templates/react/`는 그 절에서 검증된 스택용 — 각 파일 머리에 스택·날짜) | **새 의존성은 승인 후에만.** 검증된 조각이 없는 스택이면: 조사 → 설치 → 프로브 → 되면 references에 날짜와 함께 추가(`feedback-install-and-verify`) |
-| 8 | OpenSpec: `openspec init --tools claude --profile core .` → `schema fork spec-driven feature` → 템플릿 교체 → `config.yaml` `context:`를 **`.claude/cgamja.json`에서 생성**(같은 사실을 두 번 손으로 쓰지 않는다) | `references/openspec-setup.md` | 이미 있으면 `feature` 스키마만 확인 |
+| 8 | OpenSpec(**척추 — null 불가**. 설치가 필요하면 "새 의존성" 일반 규칙과 별개로 승인을 묻는다; 비대화형이면 설치하고 보고): `openspec init --tools claude --profile core .` → `schema fork spec-driven feature` → 템플릿 교체 → `config.yaml` `context:`를 **`.claude/cgamja.json`에서 생성**(같은 사실을 두 번 손으로 쓰지 않는다) | `references/openspec-setup.md` | 이미 있으면 `feature` 스키마만 확인 |
 | 9 | `design/`: `design.source`가 Figma면 초기 스냅샷(map·tokens·components), 아니면 `design/NO_FIGMA` | `references/figma-design-source.md` §2 | 화면 스냅샷은 여기서 안 함 |
 | 10 | CI: 기존 워크플로우에 `verify`·commitlint·`openspec validate`·문서 경로 검사 단계 추가 | `templates/check-docs.sh`, 예시 `templates/react/ci.yml` | 기존 CI를 대체하지 않는다 |
 

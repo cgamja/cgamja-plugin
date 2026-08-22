@@ -13,6 +13,7 @@
 | 2026-08-21 | A/B L1·L2 | review-fe persona 단독 | opus vs fable | — | $6.55 | — | fable이 opus 놓친 blocker 0 → opus 유지 | [restructured](develop-fe-tier2_2026-08-21_restructured.md) |
 | 2026-08-21 | Tier-2 #2 토글+필터 | develop-fe + test-fe + review-fe | fable | persona만 | $45.65 | 52분/269msg | 버그 2·판별 불가 테스트 2 잡음; ce-code-review 없이 품질 유지 | [restructured](develop-fe-tier2_2026-08-21_restructured.md) |
 | 2026-08-21 | Tier-2 #3 삭제+되돌리기 | develop-fe + test-fe + review-fe | **opus** | persona만 | $44.88 | ~50분/357msg | "세션 opus=절반" 기각; 비용 = 절차 부피 | [restructured](develop-fe-tier2_2026-08-21_restructured.md) |
+| 2026-08-22 | setup (brownfield **Vue 3**, 타사 레포) | develop-setup(adr/0014) | sonnet | 발견·대조·최소 제안 | $2.42 | 11.4분/89턴 | 스택 변경 0, a11y 린트 무력화 발견, smoke 오탐 3건→수정 | [brownfield-vue](brownfield-vue_2026-08-22.md) |
 
 ## 스크래치 프로젝트
 `~/cgamja-scratch/todos-app` — 2026-08-21 런 4개가 쌓인 Vite+TanStack 프로젝트(51커밋, 브랜치 `feat/todos-list-create`, change 3개 archive). 다음 Tier-2/Tier-3 실험의 베이스. 런 원본 JSON·프롬프트·A/B 스크립트는 `~/cgamja-scratch/logs/`.
