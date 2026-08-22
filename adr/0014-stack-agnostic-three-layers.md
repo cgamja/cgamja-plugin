@@ -8,7 +8,7 @@
 ## 맥락
 플러그인 목표는 "어떤 프론트엔드 프로젝트(greenfield/brownfield, 스택 불문)에서든 스펙·테스트 게이트·증거·디자인 원천·접근성·계약·경계·리뷰 렌즈를 적용하는 절차 스킬"이다(`docs/philosophy.md`). 그런데 레포는 React/Next/Expo를 전제로 지어졌다: `develop-setup`이 스택을 묻고 스캐폴드하며(12곳), `references/*-frontend.md`에 Vitest·MSW·orval·jsx-a11y가 원칙과 섞여 있고(tdd 18·api-contract 21곳), persona에 Next/Expo 항목이 박혀 있다. 2026-08-22 "스택 프로필" 제안은 거부됐다 — 프로필을 늘리는 건 greenfield 보일러플레이트의 다른 이름이다.
 
-리서치(2026-08-22, compound-engineering·superpowers·addyosmani/agent-skills·anthropics/skills·OpenSpec·vercel): 절차 플러그인이 스택 무관을 유지하는 방식은 수렴돼 있다 — ① 절차는 "프로젝트의 테스트 명령을 써라"처럼 **슬롯 이름**으로만 말하고, ② 규약은 **프로젝트가 선언**(CLAUDE.md/AGENTS.md, OpenSpec `config.yaml` `context:`, CE `.compound-engineering/config.yaml`)하며, ③ 스택 지식은 관심사별 문서 안의 조건부 절이나 "diff가 그 런타임을 건드릴 때만" 붙는 리뷰어로 둔다. 세팅 스킬은 전부 brownfield 점검(CE `ce-setup`, claude-automation-recommender)이고 스캐폴드는 0. MSW·OpenAPI를 공통으로 두는 곳은 없다. `references/react.md` vs `references/vue.md` 분기도 없다.
+리서치(2026-08-22, compound-engineering·superpowers·addyosmani/agent-skills·anthropics/skills·OpenSpec·vercel): 절차 플러그인이 스택 무관을 유지하는 방식은 수렴돼 있다 — ① 절차는 "프로젝트의 테스트 명령을 써라"처럼 **슬롯 이름**으로만 말하고, ② 규약은 **프로젝트가 선언**(CLAUDE.md/AGENTS.md, OpenSpec `config.yaml` `context:`, CE `.compound-engineering/config.yaml`)하며, ③ 스택 지식은 관심사별 문서 안의 조건부 절이나 "diff가 그 런타임을 건드릴 때만" 붙는 리뷰어로 둔다. 세팅 스킬은 전부 brownfield 점검(CE `ce-setup`, claude-automation-recommender)이고 스캐폴드는 0. MSW·OpenAPI를 공통으로 두는 곳은 없다. 스택별 reference 파일(react용·vue용)을 분기·선택하는 로직도 없다.
 
 ## 결정
 1. **세 층**으로 나눈다.
