@@ -1,6 +1,6 @@
 # Figma를 디자인 원천으로 쓰는 법 (리서치 2026-08-21)
 
-Figma 파일에 디자인이 있고, 일부는 미완성(와이어프레임 상태)으로 표시돼 있다. 에이전트는 ① 완성된 화면은 Figma대로 구현하고 ② 미완성 부분은 Artifact로 후보를 뽑아 사용자와 확정한 뒤 코드로 만들고 Figma에 거울로 남기며 ③ **단순 기능 개발에선 Figma를 부르지 않는다**. 결정은 `adr/0002`, `adr/0003`.
+디자인 원천은 프로젝트가 `.claude/cgamja.json` `design.source`로 선언한다(`figma:<fileKey>` 또는 `none`; 다른 원천이면 같은 원칙 — 원천은 진실, 저장소 스냅샷은 캐시). 아래는 Figma일 때. Figma 파일에 디자인이 있고, 일부는 미완성(와이어프레임 상태)으로 표시돼 있다. 에이전트는 ① 완성된 화면은 Figma대로 구현하고 ② 미완성 부분은 Artifact로 후보를 뽑아 사용자와 확정한 뒤 코드로 만들고 Figma에 거울로 남기며 ③ **단순 기능 개발에선 Figma를 부르지 않는다**. 결정은 `adr/0002`, `adr/0003`.
 
 ## 0. 먼저 알아야 할 플랜 게이트 ([rate limits](https://developers.figma.com/docs/figma-mcp-server/rate-limits-access/))
 | 기능 | 조건 |
@@ -23,7 +23,7 @@ Figma 파일에 디자인이 있고, 일부는 미완성(와이어프레임 상�
 ```
 design/
   map.md                 get_metadata 트리(페이지/섹션/프레임 이름 + nodeId). 노드 찾기용 인덱스 — Figma 안 열고 ID를 안다
-  tokens.json            Figma Variables → DTCG export. 리뷰되는 원천. Style Dictionary → src/styles/tokens.css
+  tokens.json            Figma Variables → DTCG export. 리뷰되는 원천. Style Dictionary 등으로 → 프로젝트의 토큰 파일(`design.tokens`, 예: src/styles/tokens.css)
   components.md          Figma 컴포넌트 이름 → 코드 import 경로 (가난한 Code Connect)
   screens/<slug>/
     summary.md           섹션 구성, 사용 컴포넌트, 상태(빈/로딩/에러/hover), 브레이크포인트, 미완성 표시 목록, 출처 nodeId + 캡처 날짜
@@ -37,7 +37,7 @@ design/
 ## 3. Figma 호출 규칙 (task마다 이 표로 판단)
 | 상황 | Figma 호출 | 읽는 것 |
 |---|---|---|
-| 버그 수정, 리팩토링, 데이터/상태 연결, 이미 구현된 화면에 동작 추가 | **안 함** | `design/screens/<slug>/summary.md`, `tokens.css` |
+| 버그 수정, 리팩토링, 데이터/상태 연결, 이미 구현된 화면에 동작 추가 | **안 함** | `design/screens/<slug>/summary.md`, 토큰 파일(`design.tokens`) |
 | "이 색/간격이 뭐지?" | **안 함** | `tokens.css`. 없으면 스냅샷 갭 → 한 번 채우고 끝, 매번 묻지 않는다 |
 | 새 화면/새 컴포넌트 (`design/map.md`에 없음) | 함 — `get_metadata`(1) + 섹션별 `get_design_context`(n) + `get_screenshot`(1) | 스냅샷 생성 후 그걸로 작업 |
 | 디자인이 바뀜(사용자가 말함 / summary가 오래됨) | 함 — 해당 섹션만 재스냅샷 | `git diff`로 바뀐 부분만 수정 |
