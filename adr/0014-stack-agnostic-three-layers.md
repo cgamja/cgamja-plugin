@@ -3,7 +3,7 @@
 - 상태: 제안
 - 날짜: 2026-08-22
 - 관련: `docs/philosophy.md`(근거), 0010(개정 — "-fe 접미사" 논리), 0008(개정 — orval은 조건부 절로), 0004·0006(예시 스택으로 강등), 0013(검증)
-- 검증: brownfield Vue 3 앱에 `/develop-setup` 1회(2026-08-22, sonnet, 89턴·$2.42, `reports/brownfield-vue_2026-08-22.md`) — 스택 변경 0, 기존 도구 위에 강제 수단 부착, 실제 결함(a11y 린트 warn 강등) 발견. 남은 증거: 같은 프로젝트에서 `/develop-fe` Tier-1
+- 검증: brownfield Vue 3 앱에 `/develop-setup` 1회(2026-08-22, sonnet, 89턴·$2.42, `reports/brownfield-vue_2026-08-22.md`) — 스택 변경 0, 기존 도구 위에 강제 수단 부착, 실제 결함(a11y 린트 warn 강등) 발견. 이어서 같은 프로젝트에서 `/develop-fe` Tier-1 1회(25턴·$0.74) — 선언이 개발 루프에서 읽힘(Stop 훅 verify, 테스트 파일 보호), 근본 원인 수정·verify 63/63. 다음 검증: Tier-2(스펙·red 게이트·리뷰 렌즈)를 비React에서
 
 ## 맥락
 플러그인 목표는 "어떤 프론트엔드 프로젝트(greenfield/brownfield, 스택 불문)에서든 스펙·테스트 게이트·증거·디자인 원천·접근성·계약·경계·리뷰 렌즈를 적용하는 절차 스킬"이다(`docs/philosophy.md`). 그런데 레포는 React/Next/Expo를 전제로 지어졌다: `develop-setup`이 스택을 묻고 스캐폴드하며(12곳), `references/*-frontend.md`에 Vitest·MSW·orval·jsx-a11y가 원칙과 섞여 있고(tdd 18·api-contract 21곳), persona에 Next/Expo 항목이 박혀 있다. 2026-08-22 "스택 프로필" 제안은 거부됐다 — 프로필을 늘리는 건 greenfield 보일러플레이트의 다른 이름이다.

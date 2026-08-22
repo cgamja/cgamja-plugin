@@ -35,5 +35,16 @@ adr/0014의 첫 검증: "React가 아닌 기존 프로젝트에서 절차가 도
 | 7 | CLAUDE.md 92줄 | 절차 | 2장 2번에 "60줄 넘으면 줄인 뒤 보고" |
 | 8 | preflight 초안과 에이전트 선언이 거의 같음(`lint_file.command`만 에이전트가 `pnpm eslint --fix {file}`로 개선) | — | 초안을 그대로 쓰고 사람이 고치는 흐름이 맞다 |
 
+## 2차: 같은 프로젝트에서 `/develop-fe` Tier-1 (sonnet, 25턴 · $0.74 · 3.5분)
+task: "유닛테스트 5개가 `localStorage` undefined로 실패 — 원인 확인·수정, verify 초록". 사전에 OpenSpec을 설치(세팅이 null로 남긴 것을 승인한 셈)하고 bootstrap 커밋.
+| 관찰 | 판정 |
+|---|---|
+| 티어 판정 Tier-1("원인 명확한 버그", 파일 1개) — 아티팩트 없이 진입 | ✓ |
+| 근본 원인: Node 22+의 `globalThis.localStorage` 접근자(파일 미설정 시 undefined) + happy-dom `populateGlobal`이 이미 있는 전역 키를 덮지 않음 → 기존 폴리필 가드 조건이 발동 안 함 | ✓ 진짜 원인(환경 의존) |
+| 수정: `src/setup-tests.ts` 가드 조건 1줄 + 중복 `defineProperty` 제거. 테스트 파일 편집 0(red 게이트 준수) | ✓ |
+| 증거: `pnpm verify` exit 0 — vue-tsc·eslint·vitest 25 files/63 tests 통과 | ✓ |
+| 커밋 `fix(test): …` 1개, 푸시 안 함 | ✓ |
+선언(`commands.verify`, `tests.patterns`)이 실제 개발 루프에서 읽혔다: Stop 훅이 verify를 돌렸고 테스트 파일은 보호됐다.
+
 ## 판정
-**범용 첫 증거 성립**: 절차·훅·프로브가 React 없는 프로젝트에서 돌았고, 기존 도구 위에서만 강제 수단을 붙였으며, 프로젝트의 실제 결함(a11y 린트 무력화)을 찾았다. 비용 $2.42는 Tier-2 React 런($33~46)의 1/15 — 세팅은 저렴하다. 남은 것: 같은 프로젝트에서 `/develop-fe` Tier-1 1회(선언이 실제 개발 루프에서 읽히는지).
+**범용 증거 성립(세팅 + Tier-1)**: 절차·훅·프로브가 React 없는 프로젝트에서 돌았고, 기존 도구 위에서만 강제 수단을 붙였으며, 프로젝트의 실제 결함(a11y 린트 무력화)을 찾았다. 비용 $2.42는 Tier-2 React 런($33~46)의 1/15 — 세팅은 저렴하다. Tier-1 런이 선언 기반 루프까지 확인했다. 다음 검증은 비React Tier-2(스펙·red 게이트·리뷰 렌즈).
