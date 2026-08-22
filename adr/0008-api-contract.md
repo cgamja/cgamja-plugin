@@ -1,5 +1,6 @@
 # 0008. API 계약 — 원천은 OpenAPI 파일 하나, 스펙 유무는 "누가 쓰나"의 차이일 뿐; 생성물만 import
 - 상태: 제안
+- 개정(2026-08-22, adr/0014): orval·OpenAPI는 조건부 "검증된 구현"으로 강등. 원칙(원천 한 파일·생성물만 import·상태 A/B/C/D)은 계약 형식 무관으로 유지, 선언은 `.claude/cgamja.json` `contract.*`. `contract: null` 수동 모드 추가(`references/api-contract.md` §7).
 - 날짜: 2026-08-21
 - 검증: 스크래치 Tier-2(B)·상태 D·retrofit C 각 1회(2026-08-21, `reports/develop-fe-tier2_2026-08-21.md`). 실제 백엔드와의 화해(§6)는 미검증
 

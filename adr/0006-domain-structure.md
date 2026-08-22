@@ -1,5 +1,6 @@
 # 0006. 아키텍처 = bulletproof-react features + FSD 세그먼트; 도메인 간 import 기본 금지; ADR+린트에 둔다
 - 상태: 제안
+- 개정(2026-08-22, adr/0014): bulletproof-react+FSD 구조는 greenfield 기본값(`references/project-conventions.md` §6). brownfield는 기존 구조를 `domains.root`로 선언하고 경계 원칙만 린트로 건다.
 - 날짜: 2026-08-21
 - 검증: (없음)
 
