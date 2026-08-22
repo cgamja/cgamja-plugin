@@ -86,10 +86,16 @@ echo "— 대조표 (철학 원칙 ↔ 강제 수단)"
 row "선언 .claude/cgamja.json"     $(has .claude/cgamja.json && echo 0 || echo 1)   "templates/cgamja.json — 발견값으로 채운다"
 row "P3 commands.verify"           $( (cfgkey commands.verify || script verify) && echo 0 || echo 1) "타입·린트·테스트(·계약 드리프트·미사용) 한 명령"
 row "P2 tests.patterns + 훅"       $( (cfgkey tests.patterns && has .claude/hooks/protect-files.sh) && echo 0 || echo 1) "templates/hooks/ + 선언 tests.patterns"
-row "P7 contract.source"           $(cfgkey contract.source && echo 0 || echo 1)   "원천 파일 선언 또는 null(retrofit change 안내)"
-row "P7 contract.generated + 드리프트" $( (cfgkey contract.generated && script api:check) && echo 0 || echo 1) "생성물 glob + 재생성 diff 0 검사가 verify에"
+cfgnull() { [ -f .claude/cgamja.json ] && python3 -c "
+import json,sys;d=json.load(open('.claude/cgamja.json'));sys.exit(0 if sys.argv[1] in d and d[sys.argv[1]] is None else 1)" "$1" 2>/dev/null; }
+if cfgnull contract; then
+  row "P7 contract (수동 모드 null)"  0 "" "계약 생성 없음 — contract.client 경계 + mock allowlist(api-contract.md §7). retrofit은 별도 change"
+else
+row "P7 contract.source"           $(cfgkey contract.source && echo 0 || echo 1)   "원천 파일 선언, 또는 contract: null(수동 모드) + client 디렉터리"
+row "P7 contract.generated + 드리프트" $( (cfgkey contract.generated && (script api:check || cfgkey commands.verify)) && echo 0 || echo 1) "생성물 glob + 재생성 diff 0 검사가 verify에"
+fi
 row "P7 mock.boundary"             $(cfgkey mock.boundary && echo 0 || echo 1)     "경계 mock(계약 밖 요청 = 에러)"
-row "P8 domains.root + 경계 린트"  $( (cfgkey domains.root && ls eslint.config.* biome.json* .oxlintrc* >/dev/null 2>&1) && echo 0 || echo 1) "기존 린터에 경계 규칙(React: templates/react/eslint.boundaries.js)"
+row "P8 domains.root + 경계 린트"  $( (cfgkey domains.root && ls eslint.config.* biome.json* .oxlintrc* >/dev/null 2>&1) && echo 0 || echo 1) "기존 린터에 경계 규칙(검증된 조각: references/project-conventions.md §6)"
 row "P5 a11y.lint"                 $(cfgkey a11y.lint && echo 0 || echo 1)         "프레임워크별 a11y 린트 또는 null"
 row "P5 a11y.runtime"              $(cfgkey a11y.runtime && echo 0 || echo 1)      "axe 등 또는 null"
 row "P4 design.source"             $(cfgkey design.source && echo 0 || echo 1)     "figma:<fileKey> 또는 none"

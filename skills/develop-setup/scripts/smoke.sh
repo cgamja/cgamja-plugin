@@ -23,8 +23,9 @@ PY
 check() {
   local dir="$1"; cd "$dir" || { echo "no dir $dir"; exit 1; }
   [ -f .claude/cgamja.json ] || { echo "✗ .claude/cgamja.json 없음 — /develop-setup 먼저"; exit 1; }
-  local verify lint domain_root gen_first
+  local verify lint domain_root gen_first pdir
   verify="$(cfg commands.verify)"; lint="$(cfg commands.lint)"; domain_root="$(cfg domains.root)"
+  pdir="$( [ -n "$domain_root" ] && dirname "$domain_root" || { [ -d src ] && echo src; } )"   # 프로브 위치 = 선언된 루트의 부모(없으면 src, 그것도 없으면 skip)
   echo "## smoke check: $dir (verify=\`$verify\`)"
   local lintfile; lintfile="$(cfg lint_file.command)"   # 파일 단위 린트(선언 lint_file.command, {file} 치환). 없으면 commands.lint
   [ -z "$lintfile" ] && lintfile="${lint} {file}"
@@ -46,40 +47,37 @@ check() {
   else skp "boundary probe"; fi
 
   echo "# 3 a11y lint (a11y.lint)"
-  if [ -n "$(cfg a11y.lint)" ] && [ -n "$lint" ]; then
-    mkdir -p src/shared/lib
+  if [ -n "$(cfg a11y.lint)" ] && [ -n "$lint" ] && [ -n "$pdir" ]; then
+    local ap="$pdir/_cgamja_probe"
     if [ "$(cfg platform.profile)" = native ]; then
-      printf 'import { Pressable } from "react-native";\nexport const P = () => <Pressable onPress={() => {}} />;\n' > src/shared/lib/_probe.tsx
-      out="$(runlint src/shared/lib/_probe.tsx)"; expect_grep "touchable without role is an error" "a11y" "$out"
+      printf 'import { Pressable } from "react-native";\nexport const P = () => <Pressable onPress={() => {}} />;\n' > "$ap.tsx"
+      out="$(runlint "$ap.tsx")"; expect_grep "touchable without role is an error" "a11y" "$out"
     elif cfg lint_file.extensions | grep -qx vue; then
-      printf '<template><div><img src="x" /><div @click="f" /></div></template>\n<script setup lang="ts">const f = () => {}</script>\n' > src/_cgamja_probe.vue
-      out="$(runlint src/_cgamja_probe.vue)"
+      printf '<template><div><img src="x" /><div @click="f" /></div></template>\n<script setup lang="ts">const f = () => {}</script>\n' > "$ap.vue"
+      out="$(runlint "$ap.vue")"
       expect_grep "img without alt is an error (vue)" "alt" "$out"
       expect_grep "div @click without key handler is an error (vue)" "key-events|click-events|a11y" "$out"
-      rm -f src/_cgamja_probe.vue
     elif cfg lint_file.extensions | grep -qx svelte; then
-      printf '<img src="x" />\n<div on:click={() => {}} />\n' > src/_cgamja_probe.svelte
-      out="$(runlint src/_cgamja_probe.svelte)"
+      printf '<img src="x" />\n<div on:click={() => {}} />\n' > "$ap.svelte"
+      out="$(runlint "$ap.svelte")"
       expect_grep "a11y warnings surface as errors (svelte)" "a11y" "$out"
-      rm -f src/_cgamja_probe.svelte
     else
-      printf 'export const P = () => (<><img src="x" /><div onClick={() => {}} /></>);\n' > src/shared/lib/_probe.tsx
-      out="$(runlint src/shared/lib/_probe.tsx)"
+      printf 'export const P = () => (<><img src="x" /><div onClick={() => {}} /></>);\n' > "$ap.tsx"
+      out="$(runlint "$ap.tsx")"
       expect_grep "img without alt is an error" "alt" "$out"
       expect_grep "div onClick without key handler is an error" "key-events|click-events|a11y" "$out"
     fi
-    rm -f src/shared/lib/_probe.tsx
+    rm -f "$ap".*
   else skp "a11y lint probe"; fi
 
   echo "# 4 contract (contract.*)"
   if [ -n "$(cfg contract.source)" ]; then
     [ -f "$(cfg contract.source)" ] && ok "contract.source exists" || bad "contract.source exists" "$(cfg contract.source)"
-    if [ -n "$lint" ]; then
-      mkdir -p src/shared/lib
-      printf 'import axios from "axios";\nexport const p = () => { void axios; return fetch("/x"); };\n' > src/shared/lib/_probe.ts
-      out="$(runlint src/shared/lib/_probe.ts)"
+    if [ -n "$lint" ] && [ -n "$pdir" ]; then
+      printf 'import axios from "axios";\nexport const p = () => { void axios; return fetch("/x"); };\n' > "$pdir/_cgamja_probe_http.ts"
+      out="$(runlint "$pdir/_cgamja_probe_http.ts")"
       expect_grep "raw HTTP call is an error" "no-restricted-globals|restricted|fetch" "$out"
-      rm -f src/shared/lib/_probe.ts
+      rm -f "$pdir/_cgamja_probe_http.ts"
     fi
     gen_first="$(python3 -c "
 import glob,sys
@@ -90,11 +88,13 @@ for p in sys.stdin.read().split('\n'):
       out="$(runlint "$gen_first")"; code=$?; expect_exit "generated client passes lint (exception path)" 0 "$code" "$out"
     else bad "contract.generated has files" "none matched"; fi
     local genpaths; genpaths="$(cfg contract.generated | sed 's#/\*\*.*##; s#/\*.*##' | sort -u | tr '\n' ' ')"
-    if out="$(bash -c "$(cfg contract.generate)" 2>&1)"; then
+    # 사용자 작업을 지우지 않는다: 생성물·원천에 미커밋 변경이 있으면 재생성 프로브를 건너뛴다
+    if ! git diff --quiet -- $genpaths "$(cfg contract.source)" 2>/dev/null; then skp "regenerate (생성물/원천에 미커밋 변경 있음 — 커밋 후 다시)"
+    elif out="$(bash -c "$(cfg contract.generate)" 2>&1)"; then
       out="$(git diff --exit-code --stat -- $genpaths "$(cfg contract.source)" 2>&1)"; code=$?
       expect_exit "regenerate → no diff (deterministic)" 0 "$code" "$out"
-    else skp "regenerate (contract.generate failed: $(tail -1 <<<"$out" | head -c 120))"; fi
-    git checkout -q -- $genpaths "$(cfg contract.source)" 2>/dev/null   # 프로브 부작용 원복
+      git checkout -q -- $genpaths "$(cfg contract.source)" 2>/dev/null   # 프로브가 만든 diff만 원복(위에서 깨끗함을 확인했다)
+    else skp "regenerate (contract.generate failed: $(tail -1 <<<"$out" | head -c 120))"; git checkout -q -- $genpaths "$(cfg contract.source)" 2>/dev/null; fi
   else skp "contract probes"; fi
 
   echo "# 5 hooks (stdin JSON → decision, patterns from declaration)"
