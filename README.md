@@ -10,6 +10,8 @@ ln -s ~/cgamja-plugin ~/.claude/skills/cgamja   # 다음 세션부터 cgamja@ski
 심링크라 제자리에서 로드된다 — 스킬이 쓰는 `adr/`·`reports/`가 이 저장소에 바로 쌓이고, 훅의 `${CLAUDE_PLUGIN_ROOT}`도 이 경로로 풀린다. 개발 중 특정 세션만 다른 체크아웃을 쓰려면 `claude --plugin-dir <path>`(같은 이름이면 그 세션에서 우선). 변경 후 세션 중 반영은 `/reload-plugins`.
 `agents/`의 persona는 마켓플레이스 설치면 서브에이전트 타입으로 등록되고, skills-dir 설치면 `review-fe`가 파일을 읽어 Agent 프롬프트로 넘긴다 — 두 경로 모두 같은 파일(adr/0010).
 
+철학(고정점, 사용자만 수정): `docs/philosophy.md` — 스택을 정하지 않고 프로젝트를 읽어 맞추되 스펙·테스트 게이트·증거·디자인 원천·접근성·계약·경계·리뷰 렌즈는 항상.
+
 ## 구조 (adr/0010)
 ```
 skills/
