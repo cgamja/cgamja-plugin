@@ -1,5 +1,5 @@
 {
-  "$comment": ".claude/settings.json — develop-fe 워크플로우 훅. 경로·명령은 프로젝트에 맞게 치환. 훅의 if 필터는 fail-open이라 hard deny는 permissions.deny에도 넣는다.",
+  "$comment": ".claude/settings.json — develop-fe 워크플로우 훅. 훅의 if 필터는 fail-open이라 hard deny는 permissions.deny에도 넣는다(JS 매니페스트·lockfile 4종·선언 파일). 다른 스택의 의존성 파일(Gemfile·pyproject 등)은 선언 protected로 훅이 막는다 — deny 목록에 직접 추가해도 된다.",
   "env": {
     "GIT_PAGER": "cat"
   },
@@ -16,7 +16,15 @@
       "Bash(*sed -i*package.json*)",
       "Bash(*> package.json*)",
       "Bash(*tee *pnpm-lock.yaml*)",
-      "Bash(*> pnpm-lock.yaml*)"
+      "Bash(*> pnpm-lock.yaml*)",
+      "Bash(*tee *package-lock.json*)",
+      "Bash(*> package-lock.json*)",
+      "Bash(*tee *yarn.lock*)",
+      "Bash(*> yarn.lock*)",
+      "Bash(*tee *bun.lockb*)",
+      "Bash(*> bun.lockb*)",
+      "Bash(*tee *.claude/cgamja.json*)",
+      "Bash(*> .claude/cgamja.json*)"
     ]
   },
   "hooks": {

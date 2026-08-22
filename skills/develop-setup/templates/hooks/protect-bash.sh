@@ -7,8 +7,15 @@ stripped="$(sed -E 's/[0-9]*>&[0-9]+//g; s/[0-9]*>>?[[:space:]]*\/dev\/null//g' 
 WRITE='(sed -i|perl -p?i|tee |>|>>|rm |cp |mv |cat <<|open\([^)]*["'"'"']w)'
 if grep -qE -- '--no-verify|git commit[^|]* -n |HUSKY=0|LEFTHOOK=0|core\.hooksPath|push[^|]*(--force|-f )' <<<"$cmd"; then
   deny "[protect] 훅 우회 금지(--no-verify, LEFTHOOK=0, hooksPath, push --force). 막힌 이유를 고치거나 사용자에게 물어라."; fi
-if grep -qE '(pnpm|yarn|bun) (add|remove) |npm (i|install|uninstall) [^-]|pip install|cargo add|go get ' <<<"$cmd"; then
+# 패키지 추가/삭제: 옵션(-D, --save 등)을 걷어낸 뒤 하위명령 뒤에 인자가 남으면 deny(`npm install`/`npm ci`/`pnpm install` 단독은 lockfile 설치라 허용)
+noopt="$(sed -E 's/ --?[A-Za-z][A-Za-z0-9=-]*//g' <<<"$cmd")"
+if grep -qE '(pnpm|yarn|bun|npm) (add|remove|rm|uninstall|un|i|install) [^ |;&]+' <<<"$noopt" || grep -qE 'pip install|cargo add|go get ' <<<"$cmd"; then
   deny "[protect] 의존성은 쉘로 바꾸지 않는다 — 새 의존성은 사용자에게 먼저 물어라(CLAUDE.md)."; fi
+# 인터프리터 일회성 실행(node -e / python -c / ruby -e / perl -e)에 보호·생성물·테스트 경로가 들어 있으면 쓰기로 간주
+if grep -qE '(node|python3?|ruby|perl) +-[ec] ' <<<"$cmd"; then
+  allp="$( { cfg protected; cfg contract.generated; cfg tests.patterns; echo '.claude/cgamja.json'; } | globs_to_regex)"
+  if grep -qE "$allp" <<<"$cmd"; then deny "[protect] 인터프리터 일회성 실행으로 보호 파일·생성물·테스트 파일을 건드리지 않는다 — Edit 도구를 쓰거나 사용자에게 물어라."; fi
+fi
 prot="$(cfg protected | globs_to_regex)"
 if grep -qE "$prot" <<<"$cmd" && grep -qE "$WRITE" <<<"$stripped"; then
   deny "[protect] 보호 파일(cgamja.json protected)을 쉘로 바꾸지 않는다 — 사용자에게 먼저 물어라."; fi

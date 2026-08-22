@@ -8,5 +8,5 @@ matches "$(cfg contract.generated)" "$rel" && exit 0
 case "$rel" in openspec/*|node_modules/*) exit 0;; esac
 cmdt="$(cfg lint_file.command)"; [ -z "$cmdt" ] && exit 0
 cd "$ROOT" 2>/dev/null || exit 0
-out="$(bash -c "${cmdt//\{file\}/\"$f\"}" 2>&1)" || { echo "$out" | tail -30 >&2; exit 2; }
+out="$(bash -c "${cmdt//\{file\}/\"\$1\"}" _ "$f" 2>&1)" || { echo "$out" | tail -30 >&2; exit 2; }   # {file}→"$1": 경로는 인수로, 셸 코드로 재해석하지 않는다
 exit 0

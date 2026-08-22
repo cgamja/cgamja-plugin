@@ -8,5 +8,7 @@ changed="$( { git diff --name-only; git diff --cached --name-only; git ls-files 
 [ -z "$changed" ] && exit 0
 if git diff --name-only 2>/dev/null | grep -qE "$(cfg protected | globs_to_regex)"; then
   echo "[stop] 보호 파일(의존성·설정)이 바뀌었습니다 — 사용자 확인이 필요합니다." >&2; fi
-out="$(bash -c "$verify" 2>&1)" || { echo "[stop] \`$verify\` 실패 — 고치기 전엔 끝난 게 아닙니다:" >&2; echo "$out" | tail -50 >&2; exit 2; }
+out="$(bash -c "$verify" 2>&1)"; code=$?
+mkdir -p .claude/state; { echo "# $(date -u +%FT%TZ) \`$verify\` exit $code"; echo "$out" | tail -200; } > .claude/state/verify.last.log   # 증거 보존(review-fe가 읽는다). 커밋하지 않는다(.gitignore)
+[ $code -eq 0 ] || { echo "[stop] \`$verify\` 실패 — 고치기 전엔 끝난 게 아닙니다:" >&2; echo "$out" | tail -50 >&2; exit 2; }
 exit 0

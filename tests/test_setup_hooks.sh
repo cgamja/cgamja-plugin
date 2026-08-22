@@ -33,3 +33,12 @@ check "alt: .test.ts not protected" ""       "$(hook $F '{"cwd":"'"$Q"'","tool_i
 check "alt: Gemfile deny"          "deny"    "$(hook $F '{"cwd":"'"$Q"'","tool_input":{"file_path":"'"$Q"'/Gemfile"}}')"
 check "alt: gen.ts allowed (no contract)" "" "$(hook $F '{"cwd":"'"$Q"'","tool_input":{"file_path":"'"$Q"'/src/api/client.gen.ts"}}')"
 check "alt: bash sed cypress deny" "읽기전용" "$(hook $B '{"cwd":"'"$Q"'","tool_input":{"command":"sed -i s/a/b/ cypress/e2e/x.cy.ts"}}')"
+# CodeRabbit PR#1: npm 옵션 우회, 인터프리터 일회성 실행, lockfile 설치는 허용
+check "bash: npm install --save pkg deny" "deny" "$(hook $B "$(bashcmd 'npm install --save lodash')")"
+check "bash: npm i -D pkg deny"          "deny" "$(hook $B "$(bashcmd 'npm i -D lodash')")"
+check "bash: pnpm add -D pkg deny"       "deny" "$(hook $B "$(bashcmd 'pnpm add -D vitest')")"
+check "bash: pnpm install (lockfile) allow" "" "$(hook $B "$(bashcmd 'pnpm install --frozen-lockfile')")"
+check "bash: npm ci allow"               ""     "$(hook $B "$(bashcmd 'npm ci')")"
+check "bash: python -c writes cgamja.json deny" "deny" "$(hook $B "$(bashcmd "python3 -c 'from pathlib import Path; Path(\".claude/cgamja.json\").write_text(\"{}\")'")")"
+check "bash: node -e writes test file deny"     "deny" "$(hook $B "$(bashcmd "node -e \"require('fs').writeFileSync('src/a.test.ts','')\"")")"
+check "bash: node -e harmless allow"            ""     "$(hook $B "$(bashcmd "node -e \"console.log(1)\"")")"
