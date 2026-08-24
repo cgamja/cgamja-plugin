@@ -82,4 +82,4 @@ hooks:
 | `hooks/` | 스킬 frontmatter 훅 스크립트(Skill 가드, 세팅 점검, test-fe 상기, 리뷰 Agent 상기). 규칙을 추가·완화할 때 — adr/0007 |
 
 ## 이 스킬 자체의 개선
-`workflow.md` 7장의 재검토 조건(10개 task마다)을 만나면 **workflow.md를 바로 고치지 말고** `adr/`에 새 번호로 기록한 뒤 반영한다. `[TODO]`는 프로젝트 스택이 정해지는 순간 채운다 — 훅·린트가 없으면 이 워크플로우는 절반만 작동한다.
+`workflow.md` 7장의 재검토 조건(10개 task마다)을 만나면 **workflow.md를 바로 고치지 말고** `adr/`에 새 번호로 기록한 뒤 반영한다. 프로젝트 확정값은 선언(`.claude/cgamja.json`)이 갖는다 — 선언·훅·린트가 없으면 이 워크플로우는 절반만 작동한다(`/develop-setup`).

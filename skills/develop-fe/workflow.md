@@ -6,7 +6,7 @@
 **원칙**: 체크를 먼저 정하고, 빨간 불을 보고, 구현하고, 증거를 낸다. 문서는 결정(WHAT)만, 코드(HOW)는 안 쓴다. 규칙은 프롬프트가 아니라 훅·린트로 강제한다.
 **디자인**: 원천은 Figma, 작업 입력은 저장소의 `design/` 스냅샷. Figma MCP는 새 화면·디자인 변경·최종 검증 때만 부른다(`references/figma-design-source.md`, `adr/0002`). 미완성 표시(`📝 TODO:`/`🚧 WIP`/`⬜ PLACEHOLDER`)된 부분은 구현하지 않고 디자인 갭 루프(2-D)로 보낸다(`adr/0003`).
 
-> `[TODO]` = 프로젝트 시작 시 확정할 것(스택, 테스트 러너, 린터, 훅). 확정하면 이 파일과 `openspec/config.yaml`에서 `[TODO]`를 없앤다.
+> 프로젝트 확정값(명령·패턴·수단)은 본문에 쓰지 않는다 — `.claude/cgamja.json` **선언 키**로 참조한다(adr/0014 §슬롯). 키가 null이면 그 단계는 명시된 대체 경로(수동 증거, 또는 멈추고 `/develop-setup` 안내)로 간다.
 
 ---
 
@@ -53,7 +53,7 @@
 ### Tier-1 패치
 1. 관련 코드 읽기. **같은 걸 하는 컴포넌트/유틸 먼저 검색**(중복 생성이 에이전트 1위 실패)
 2. 체크 정하기: 기존 테스트 수정/추가(`/test-fe`) **또는** 스크린샷 1장(프로필 뷰포트 중 1개). 순수 스타일이면 스크린샷만
-3. 고친다 → `[TODO: typecheck + lint + 관련 test]` + 증거
+3. 고친다 → `commands.typecheck`·`commands.lint`·관련 테스트(`commands.test`) 중 선언된 것 실행 + 증거
 4. `/review-fe code`(Tier-1 = L1 정확성·중복만) → 커밋 1개 → 5장
 
 ### Tier-2 기능
@@ -63,7 +63,7 @@
 4. **`/opsx:apply`** — task 하나씩:
    - 테스트 task: **`/test-fe`**(Skill 도구)로 — 계층 선택·쿼리·mock 규칙은 거기. Edit 시 권한 프롬프트가 뜬다 — **사람이 diff를 승인하는 것이 red 게이트**(adr/0009). 승인되면 실행 → **실패 출력과 이유("기능 미구현", import 오류 아님)를 보여주고** `test(scope):` 커밋. 거부되거나 비대화형이라 승인자가 없으면 **구현 task로 넘어가지 말고 멈춰서** 사람에게 알린다(테스트 없는 구현 금지)
    - 구현 task: 테스트 파일은 건드리지 않는다(Edit는 ask, Bash 쓰기는 deny). 초록 + PASS_TO_PASS → `[x]` → `feat(scope):` 커밋. diff에 `*.test.*`가 섞이면 안 됨
-   - UI task: 뷰포트·다크모드·키보드 증거는 **`.claude/rules/platform.md` 프로필**대로(`references/platform-fit-frontend.md`; 없으면 웹 375/768/1280) `agent-browser`(`[TODO]`)로 찍고, 콘솔 에러 0. 접근성 증거: axe `serious+` 0건 + Tab 시퀀스 목록(`references/a11y-frontend.md` §3). 스냅샷이 있으면 `reference@2x.png`와 나란히 비교해 차이 나열 — 값은 스크린샷이 아니라 `getComputedStyle`로 확인(`figma-design-source.md` §6)
+   - UI task: 뷰포트·다크모드·키보드 증거는 **`.claude/rules/platform.md` 프로필**대로(`references/platform-fit-frontend.md`; 없으면 웹 375/768/1280) 선언된 스크린샷 수단(`evidence.screenshot`; null이면 사용자에게 요청하고 경로를 받는다)으로 찍고, 콘솔 에러 0. 접근성 증거: axe `serious+` 0건 + Tab 시퀀스 목록(`references/a11y-frontend.md` §3). 스냅샷이 있으면 `reference@2x.png`와 나란히 비교해 차이 나열 — 값은 스크린샷이 아니라 `getComputedStyle`로 확인(`figma-design-source.md` §6)
    - Figma 출력(`context.tsx`)은 참고지 복사 대상이 아니다: `leading-[22.126px]`류는 토큰으로, 토큰이 없으면 사용자에게 올린다. 아이콘·이미지는 export된 에셋을 받아 커밋(URL은 7일 만료)
    - 마지막 "Converge" 그룹: spec의 모든 시나리오 ↔ 코드 대조, 빠진 건 task로 append하고 마저 한다
 5. **`/review-fe code`** (Skill 도구로 `cgamja:review-fe`, change slug·티어를 넘긴다) — 렌즈(L1 정확성·중복 / L2 스펙 완전성 / L3 테스트 무결성 + UI면 L4 접근성·L5 플랫폼 + API면 L6 경계·계약)를 persona 서브에이전트로 병렬 실행해 한 표로 합친다(adr/0012 개정 1 — Tier-2는 `ce-code-review` 없이). **Agent 도구로 리뷰어를 즉석 제작하지 않는다**(2026-08-21 두 번 연속 이탈). blocker 있으면 반영 후 해당 렌즈만 재실행 1회. `/ce-simplify-code`는 **선택**(사용자 요청 또는 jscpd 임계 초과 시 — sonnet 3에이전트 ≈200k에 적용 0~2건, adr/0012 개정 2)
@@ -83,7 +83,7 @@ Tier-2 3단계(propose) **전에** 돈다. 디자인이 확정돼야 시나리�
 2. **change 분해** (graph-engineering 휴리스틱): 후보 단계 나열 → 쌍마다 "B가 A의 출력(타입·컴포넌트·API)을 읽나?" → 읽으면 순차, 아니면 독립. **숨은 엣지** 확인: 같은 파일 쓰기, 시그니처/스키마 변경은 반드시 선행. 없으면 "없음"이라고 명시
 3. 첫 change를 `/opsx:propose --schema spec-driven`(proposal + specs + design + tasks). 나머지 change는 이름만 예약
 4. **change마다 새 세션에서 Tier-2 4~6단계.** 세션 간 상태는 `tasks.md`·git log·`docs/solutions/`뿐이라고 가정
-5. 독립 change 2개 이상이 **둘 다 오래 걸릴 때만** worktree 병렬(`[TODO: 포트 규칙]` 정하기 전엔 금지)
+5. 독립 change 2개 이상이 **둘 다 오래 걸릴 때만** worktree 병렬(포트·디렉터리 규칙이 프로젝트 `.claude/rules/`에 정의되기 전엔 금지)
 6. 전부 archive 후 통합: e2e 스모크 + 주요 플로우 스크린샷 + `/review-fe tier-3`(렌즈 L1~L7 전부)
 
 ## 3. 공통 규칙
@@ -94,7 +94,7 @@ Tier-2 3단계(propose) **전에** 돈다. 디자인이 확정돼야 시나리�
 3. **시각**: 뷰포트 3개 스크린샷을 **사람이 본다**. `toMatchScreenshot`은 디자인시스템 프리미티브에만. Ready 화면은 추가로 Figma 대조(토큰 린트 → computed style → 2x SSIM 97%+, `figma-design-source.md` §6)
 4. **LLM judge**: 안 쓴다. 취향은 사람
 
-훅(`[TODO: settings.json]`, 표는 `project-conventions.md` §5): `PostToolUse(Write|Edit)` → 그 파일 format+lint(1초 이내, tsc 금지) / `Stop` → `commands.verify`(코드 편집 턴만) / `PreToolUse` Write|Edit **+ Bash** → 매니페스트·lockfile·린터 설정·`tests.patterns`(구현 턴)·`contract.generated` 보호, `--no-verify` 거부 — 같은 패턴을 `permissions.deny`에도(훅 `if`는 fail-open).
+훅(프로젝트 `.claude/settings.json` — 세팅이 설치, 표는 `project-conventions.md` §5): `PostToolUse(Write|Edit)` → 그 파일 format+lint(1초 이내, tsc 금지) / `Stop` → `commands.verify`(코드 편집 턴만) / `PreToolUse` Write|Edit **+ Bash** → 매니페스트·lockfile·린터 설정·`tests.patterns`(구현 턴)·`contract.generated` 보호, `--no-verify` 거부 — 같은 패턴을 `permissions.deny`에도(훅 `if`는 fail-open).
 
 ### 3-2. 테스트 규칙 → `/test-fe` 스킬
 - 테스트 task는 **Skill 도구로 `cgamja:test-fe`를 부른다**(시나리오·change slug를 넘긴다). 계층 선택(단위 / 브라우저 / E2E), 쿼리·mock 규칙, red 게이트(adr/0009)는 거기에 있다. 여기서는 결과만 받는다: 실패 출력 원문 + 이유 + `test(scope):` 커밋
@@ -105,7 +105,7 @@ Tier-2 3단계(propose) **전에** 돈다. 디자인이 확정돼야 시나리�
 - 아키텍처는 spec이 아니라 `docs/adr/0001-domain-structure.md` + ESLint 경계 규칙에. 기본값은 bulletproof-react features + FSD 세그먼트(`app/domains/<name>/{ui,model,api,index.ts}/shared`). **도메인 간 import는 기본 금지**, 허용 엣지는 린트 설정+ADR에 명시(adr/0006). 경계에 막히면 우회하지 말고 묻는다
 - 만들기 전에 `src/shared`와 대상 도메인 `index.ts`를 grep, 재사용한 걸 PR에 적는다(에이전트 코드베이스 1위 실패 = 의미적 중복)
 - 만들기 전에 검색. 비슷한 게 있으면 확장/합성, `V2` 금지
-- 상태 위치: 로컬 `useState` / 공유 UI context / 서버 `[TODO]` / URL `[TODO]`. 같은 진실을 두 곳에 두지 않는다
+- 상태 위치: 로컬 / 공유 UI / 서버 / URL 네 곳 — 각 위치에 쓰는 수단은 프로젝트 `.claude/rules/state.md`가 정한다(없으면 세팅 제안 목록). 같은 진실을 두 곳에 두지 않는다
 - 색·간격·폰트는 **토큰만**(`tokens.css` = Figma Variables export, 리뷰되는 원천). Figma의 `leading-[22.126px]` 류는 토큰으로 치환, 없으면 질문. 토큰 동기화는 `get_variable_defs` diff **보고만**, 자동 덮어쓰기 금지
 - Figma 호출은 `figma-design-source.md` §3 표로만 판단. "이 값이 뭐지"로 Figma를 열지 않는다 — 스냅샷 갭이면 한 번 채운다
 - 새 의존성은 승인 없이 추가 안 함
