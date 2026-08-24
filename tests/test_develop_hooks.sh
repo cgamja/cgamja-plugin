@@ -9,6 +9,8 @@ check "other skill allow"   ""     "$(hook $G '{"session_id":"t","tool_input":{"
 check "guard off env"       ""     "$(DEVELOP_SKILL_GUARD=off hook $G '{"session_id":"t","tool_input":{"skill":"lfg"}}')"
 E=$(mktemp -d); check "setup_check warns on empty dir" "세팅 누락" "$(hook $C '{"session_id":"t","cwd":"'$E'","tool_input":{}}')"
 mkdir -p $E/.claude/rules $E/openspec; echo '{"scripts":{"verify":"x"}}' > $E/package.json; touch $E/openspec/config.yaml $E/.claude/rules/a.md; echo '{"hooks":{"Stop":[]}}' > $E/.claude/settings.json
+check "setup_check warns without declaration" "cgamja.json" "$(hook $C '{"session_id":"t","cwd":"'$E'","tool_input":{}}')"
+echo '{"commands":{"verify":"x"}}' > $E/.claude/cgamja.json
 check "setup_check silent when complete" "" "$(hook $C '{"session_id":"t","cwd":"'$E'","tool_input":{}}')"
 R=skills/develop-fe/hooks/review_nudge.sh
 check "review nudge on Agent review" "ce-code-review" "$(hook $R '{"session_id":"t","tool_input":{"description":"Code review of todos","prompt":"review the diff"}}')"

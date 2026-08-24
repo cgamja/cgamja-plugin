@@ -7,6 +7,7 @@ warn=""; case "$pm" in bypassPermissions|dontAsk) warn="[develop-fe] permission_
 m=""
 { [ -f package.json ] && grep -q '"verify"[[:space:]]*:' package.json; } || m="$m package.json#verify"
 [ -f openspec/config.yaml ] || m="$m openspec/config.yaml"
+[ -f .claude/cgamja.json ] || m="$m .claude/cgamja.json"
 ls .claude/rules/*.md >/dev/null 2>&1 || m="$m .claude/rules/"
 [ -f .claude/settings.json ] && grep -q '"Stop"' .claude/settings.json || m="$m settings.json#Stop훅"
 [ -z "$m" ] && { [ -n "$warn" ] && context "$warn"; exit 0; }

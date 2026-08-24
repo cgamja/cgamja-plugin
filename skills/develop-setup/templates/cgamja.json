@@ -11,6 +11,7 @@
   "platform": { "profile": "web-desktop" },
   "domains": { "root": "src/domains", "allowed_edges": [] },
   "a11y": { "lint": "jsx-a11y", "runtime": "axe" },
+  "evidence": { "screenshot": null },
   "protected": ["package.json", "pnpm-lock.yaml", "package-lock.json", "yarn.lock", "eslint.config.*", ".env", ".env.*", "lefthook.yml", "commitlint.config.*", ".claude/settings.json", ".claude/hooks/*"],
   "lint_file": { "extensions": ["ts", "tsx"], "command": "pnpm exec prettier --log-level warn --write {file} && pnpm exec eslint --fix {file}" }
 }

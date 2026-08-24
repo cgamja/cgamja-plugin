@@ -20,6 +20,7 @@
 4. **훅·템플릿**: 스택 무관 강제 조각(테스트 파일 보호, 생성물 보호, `--no-verify` 거부, commit-msg 테스트 분리)은 유지하되 패턴·명령을 ②에서 읽는다. `vitest.config.ts`·`eslint.boundaries.js`·`orval.config.ts`·`jest.expo.md`는 ③의 React 검증 조각으로 이동. 버전 고정 deps 목록·스캐폴드 스크립트는 만들지 않는다.
 5. **보존**: React/Vite 실측(orval 8 동작, hey-api TS6 충돌, Browser Mode Chromium 전용, `.prettierignore` 누락이 `api:check`를 깨뜨림 등)은 삭제하지 않고 ③의 구현 절로 라벨을 붙여 옮긴다. 범용의 증거는 삭제가 아니라 두 번째 스택에서 절차가 도는 것이다.
 6. **이름**: `-fe` 접미사는 유지한다(프론트엔드 관심사 — 디자인 원천·접근성·플랫폼·스크린샷 증거 — 가 절차에 있다는 뜻이지 React라는 뜻이 아니다). 0010 §3의 "React 고유한 것이 절차에 박혀 있어서"는 이 ADR로 대체.
+7. **개정(2026-08-24) — `[TODO]` 문법 폐지.** 절차 문서에 "프로젝트 시작 시 채울 것"이라는 자리 표시를 남기지 않는다 — 그 자리는 전부 ②의 선언 키 참조로 쓰고, 키가 null이면 **명시된 대체 경로**(수동 증거 또는 멈추고 세팅 안내)로 간다. 근거: `[TODO]`는 선언이 없던 시절의 장치인데 ② 도입 후에도 6곳이 남아 "기계 강제가 부분 구현"이라는 올바른 비판을 받았다. 스크린샷 수단 슬롯 `evidence.screenshot`을 §슬롯에 추가(뷰포트 증거를 찍는 명령/도구 — 이전 문서의 `agent-browser [TODO]` 자리). worktree 병렬의 포트 규칙, 상태 위치별 수단은 슬롯이 아니라 프로젝트 `.claude/rules/`의 소관으로 명시.
 
 ## ② 슬롯 (`.claude/cgamja.json`)
 | 키 | 뜻 | 예(React+Vite) | 예(다른 스택) |
@@ -35,6 +36,7 @@
 | `platform.profile` | `web-desktop` / `web-mobile` / `native` | | |
 | `domains.root` / `allowed_edges` | 경계 린트와 1:1 | `src/domains` / `[]` | `src/features` |
 | `a11y.lint` / `a11y.runtime` | 1·2층 도구(없으면 null → 세팅이 제안) | `jsx-a11y` / `axe` | `vue-a11y` / `axe` |
+| `evidence.screenshot` | 뷰포트 스크린샷을 찍는 수단(명령 또는 도구 이름; null이면 사용자에게 요청) | `agent-browser` | `playwright screenshot` 스크립트, 시뮬레이터 캡처 |
 
 없는 키는 null. null인 강제 수단은 세팅 스킬의 제안 목록이 되고, 절차는 null이면 그 단계를 "수동 증거"로 대체한다(예: a11y.runtime null → 리뷰 렌즈 L4가 더 넓게 본다).
 
