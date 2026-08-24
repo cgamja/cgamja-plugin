@@ -53,7 +53,7 @@ hooks:
 - 스펙에 없는 게 필요하면 **코드·목에 먼저 넣지 않는다**: 멈추고 스펙 diff를 제안해 확정받는다.
 
 ## 프로젝트 세팅이 없을 때
-`package.json`의 `verify` 스크립트 · `openspec/config.yaml` · `.claude/rules/` 중 하나라도 없으면 이 스킬은 절반만 작동한다(훅·린트·스펙이 없으면 규칙이 산문으로만 남는다). **`/develop-setup`을 먼저 하라고 안내하고 멈춘다.** (첫 Edit/Write 직전에 훅 `hooks/setup_check.sh`가 누락 항목을 컨텍스트로 알려 준다 — 차단은 아니다) 여기서 즉흥으로 세팅을 만들지 않는다 — 세팅은 1회성이고 질문·설치·자가 검증이 필요해 별도 스킬이다. 예외: Tier-1 한 줄 수정은 세팅 없이도 진행한다.
+`package.json`의 `verify` 스크립트 · `openspec/config.yaml` · `.claude/rules/` · `.claude/cgamja.json`(선언) 중 하나라도 없으면 이 스킬은 절반만 작동한다(훅·린트·스펙이 없으면 규칙이 산문으로만 남는다). **`/develop-setup`을 먼저 하라고 안내하고 멈춘다.** (첫 Edit/Write 직전에 훅 `hooks/setup_check.sh`가 누락 항목을 컨텍스트로 알려 준다 — 차단은 아니다) 여기서 즉흥으로 세팅을 만들지 않는다 — 세팅은 1회성이고 질문·설치·자가 검증이 필요해 별도 스킬이다. 예외: Tier-1 한 줄 수정은 세팅 없이도 진행한다.
 
 ## 절대 하지 않는 것 (앞 세 항목은 훅 `hooks/skill_guard.sh`가 Skill 호출 시점에 거부한다 — adr/0007)
 - `ce-plan` / `lfg` 호출 — OpenSpec change와 아티팩트가 겹쳐 플랜이 두 군데 생긴다. `ce-work`는 실험 B(`adr/0001`)로만, 기본은 `opsx:apply`.

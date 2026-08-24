@@ -11,11 +11,11 @@
 ---
 
 ## 0. 세션 시작 (매번, 30초)
-0. 세팅 확인: `package.json`에 `verify` 스크립트, `openspec/config.yaml`, `.claude/rules/`가 없으면 **멈추고 `/develop-setup`을 먼저 하라고 안내**한다(여기서 세팅을 즉흥으로 만들지 않는다). Tier-1 한 줄 수정은 예외로 진행 가능
+0. 세팅 확인: `package.json`에 `verify` 스크립트, `openspec/config.yaml`, `.claude/rules/`, **`.claude/cgamja.json`(선언 — 이후 단계가 읽는 키의 원천)** 중 하나라도 없으면 **멈추고 `/develop-setup`을 먼저 하라고 안내**한다(여기서 세팅을 즉흥으로 만들지 않는다). Tier-1 한 줄 수정은 예외로 진행 가능
 1. `git status` / `git log --oneline -10`
 2. `openspec list`(프로젝트의 패키지 러너로) — 열린 change 있으면 그 `tasks.md`부터 읽는다(CLI는 프로젝트 의존성. 없으면 세팅 누락 → `/develop-setup`)
 3. `docs/solutions/` 를 task 키워드로 grep — 이미 푼 문제인가
-4. `commands.typecheck`(프로젝트 선언) 한 번 — 깨져 있으면 **새 작업 전에 고친다**
+4. `commands.typecheck`(프로젝트 선언; null이면 `commands.verify`로 대체, 둘 다 null이면 실행 없이 세팅 누락으로 기록) 한 번 — 깨져 있으면 **새 작업 전에 고친다**
 4-1. API가 걸린 작업이면 계약 원천(`contract.source`) 있나 + 생성물 드리프트 검사 — 없거나 빨강이면 1장 "계약 상태 판정"으로
 5. 화면 작업이면 `design/screens/<slug>/summary.md` 있나 확인. 없으면 Figma 호출 규칙(`figma-design-source.md` §3)대로 스냅샷부터. `design/` 자체가 없으면(프로젝트 첫 화면) §2 초기 스냅샷(토큰·map·components)을 먼저 한다 — 이건 Tier와 무관하게 1회
 
