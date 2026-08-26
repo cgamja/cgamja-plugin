@@ -15,6 +15,7 @@
 | 2026-08-21 | Tier-2 #3 삭제+되돌리기 | develop-fe + test-fe + review-fe | **opus** | persona만 | $44.88 | ~50분/357msg | "세션 opus=절반" 기각; 비용 = 절차 부피 | [restructured](develop-fe-tier2_2026-08-21_restructured.md) |
 | 2026-08-22 | setup (brownfield **Vue 3**, 타사 레포) | develop-setup(adr/0014) | sonnet | 발견·대조·최소 제안 | $2.42 | 11.4분/89턴 | 스택 변경 0, a11y 린트 무력화 발견, smoke 오탐 3건→수정 | [brownfield-vue](brownfield-vue_2026-08-22.md) |
 | 2026-08-22 | Tier-1 (brownfield Vue 3, 테스트 환경 버그) | develop-fe(adr/0014) | sonnet | 선언 기반 훅 | $0.74 | 3.5분/25턴 | 근본 원인·1파일 수정·verify 63/63·테스트 파일 무편집 | [brownfield-vue](brownfield-vue_2026-08-22.md) |
+| 2026-08-26 | retro (~/app SIM-141·SIM-139 세션 3개, 0017~0022 이전 수행분) | retro-fe(adr/0022) | fable + sonnet×3 | 세션당 분석 병렬 | $? | 감사 대상 7.7h | ask 87회→0018 사후 검증, CI 5라운드 미수렴 원인 규명, 훅 오탐 12회 중 2계열 잔존, ADR 후보 3 | [retro](retro-2026-08-26.md) |
 
 ## 스크래치 프로젝트
 `~/cgamja-scratch/todos-app` — 2026-08-21 런 4개가 쌓인 Vite+TanStack 프로젝트(51커밋, 브랜치 `feat/todos-list-create`, change 3개 archive). 다음 Tier-2/Tier-3 실험의 베이스. 런 원본 JSON·프롬프트·A/B 스크립트는 `~/cgamja-scratch/logs/`.
