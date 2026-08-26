@@ -23,3 +23,4 @@
 | [0016](0016-lens-ledger-review-budget.md) | 렌즈 원장 — 렌즈별 반영률·토큰을 `reports/lens-ledger.md`에 누적, 0012 §5 판정을 데이터로, Tier-2 예산(기본/라이트)은 사용자 선택 | 제안 | — |
 | [0017](0017-hook-precision-and-handoff.md) | 훅 정밀화 — 읽기/쓰기 구분, 보호 파일 Edit는 deny→ask, 의존성 패턴 대칭, 스크래치 테스트 rm 허용, Stop 훅 handoff | 제안 | — |
 | [0018](0018-red-gate-batch-approval.md) | red 게이트 = 세션당 1회 승인 + 실패 원문 배치 확인 — 편집마다 ask 폐지, 변조 방지는 커밋 분리+L3 | 제안 | — |
+| [0019](0019-lean-workflow.md) | 워크플로우 다이어트 — 시작 fast-path, 단계 단위 커밋(change당 4~8), 리뷰 반영 배치+잔여 diff 0, 계획 컨텍스트 예산, propose planning boundary, 폰트 대조 | 제안 | — |
