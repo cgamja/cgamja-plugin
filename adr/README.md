@@ -13,7 +13,7 @@
 | [0006](0006-domain-structure.md) | bulletproof-react features + FSD 세그먼트, 도메인 간 import 기본 금지, ADR+린트 | 제안 | — |
 | [0007](0007-skill-hooks.md) | 스킬 frontmatter 훅 — 금지 스킬 호출 차단(Skill 매처), 세팅 누락 경고(once) | 제안 | — |
 | [0008](0008-api-contract.md) | API 계약 — 원천은 `api/openapi.yaml` 하나, 상태 A/B/C/D 판정, orval 생성물만 import, retrofit은 별도 change | 제안 | — |
-| [0009](0009-red-gate-is-permission-ask.md) | red 게이트 = Edit 권한 `ask`(사람이 diff 승인), `TDD_PHASE`는 사람이 띄운 세션의 우회 키, Bash 테스트 쓰기는 항상 deny | 제안 | — |
+| [0009](0009-red-gate-is-permission-ask.md) | red 게이트 = Edit 권한 `ask`(사람이 diff 승인), `TDD_PHASE`는 사람이 띄운 세션의 우회 키, Bash 테스트 쓰기는 항상 deny | 대체됨(→0018) | 2세션 |
 | [0010](0010-orchestrator-and-specialists.md) | develop-fe는 오케스트레이터, `test-fe`/`review-fe` 분리, references·adr·agents는 루트, `-fe` 접미사 유지, a11y 세 층, 플랫폼 프로필 | 제안 | — |
 | [0011](0011-model-routing.md) | 모델 라우팅 — 본체는 판단, 서브에이전트는 `model:` 명시(haiku 탐색 / sonnet 구현 / opus 리뷰) | 제안 | — |
 | [0012](0012-review-lenses-by-tier.md) | 리뷰 렌즈 L1~L7 = persona, 티어가 렌즈 수를 정함, ce-code-review 병행, PR 모드 | 제안 | — |
@@ -21,4 +21,7 @@
 | [0014](0014-stack-agnostic-three-layers.md) | 절차/프로젝트 선언(`.claude/cgamja.json`)/관심사별 references 세 층 — 스택은 정하지 않고 읽는다, develop-setup은 발견·대조·최소 제안, 스캐폴드 없음 | 제안 | — |
 | [0015](0015-positioning-differentiators.md) | 차별점 재정의 — 기계 강제·자기 테스트는 전제, 고유 가치는 증거 스택·선언 brownfield·비용 투명성. 지형표 `docs/positioning.md` | 제안 | — |
 | [0016](0016-lens-ledger-review-budget.md) | 렌즈 원장 — 렌즈별 반영률·토큰을 `reports/lens-ledger.md`에 누적, 0012 §5 판정을 데이터로, Tier-2 예산(기본/라이트)은 사용자 선택 | 제안 | — |
+| [0017](0017-hook-precision-and-handoff.md) | 훅 정밀화 — 읽기/쓰기 구분, 보호 파일 Edit는 deny→ask, 의존성 패턴 대칭, 스크래치 테스트 rm 허용, Stop 훅 handoff | 제안 | — |
+| [0018](0018-red-gate-batch-approval.md) | red 게이트 = 세션당 1회 승인 + 실패 원문 배치 확인 — 편집마다 ask 폐지, 변조 방지는 커밋 분리+L3 | 제안 | — |
+| [0019](0019-lean-workflow.md) | 워크플로우 다이어트 — 시작 fast-path, 단계 단위 커밋(change당 4~8), 리뷰 반영 배치+잔여 diff 0, 계획 컨텍스트 예산, propose planning boundary, 폰트 대조 | 제안 | — |
 | [0020](0020-develop-baby-fe.md) | develop-baby-fe — MVP 경량 경로: 별도 진입점, 절차 오프(스펙·red 게이트·렌즈 다중), L1 1회(sonnet), 에스컬레이션은 안내, 목표 <$5 | 제안 | — |

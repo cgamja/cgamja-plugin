@@ -10,7 +10,8 @@
 
 ---
 
-## 0. 세션 시작 (매번, 30초)
+## 0. 세션 시작 (매번 — fast-path 먼저, 점검은 뒤이어)
+**Fast-path (adr/0019)**: 사용자 지시에 즉시 실행 가능한 첫 행동(브랜치 생성, 특정 파일 열기, "바로 X부터")이 있으면 **그것이 첫 도구 호출**이다 — 점검을 이유로 미루지 않는다. **첫 가시 보고(티어+예상 비용 한 줄)는 30초 안에** 내고, 아래 점검은 그 뒤에(가능한 것은 병렬로) 한다. 외부 트래커가 있는 레포면 시작 시점 조회는 **한 경로만**: 스코프는 레포 사본, 실시간 상태는 트래커 — 같은 내용을 두 번 읽지 않는다.
 0. 세팅 확인: `package.json`에 `verify` 스크립트, `openspec/config.yaml`, `.claude/rules/`, **`.claude/cgamja.json`(선언 — 이후 단계가 읽는 키의 원천)** 중 하나라도 없으면 **멈추고 `/develop-setup`을 먼저 하라고 안내**한다(여기서 세팅을 즉흥으로 만들지 않는다). Tier-1 한 줄 수정은 예외로 진행 가능
 1. `git status` / `git log --oneline -10`
 2. `openspec list`(프로젝트의 패키지 러너로) — 열린 change 있으면 그 `tasks.md`부터 읽는다(CLI는 프로젝트 의존성. 없으면 세팅 누락 → `/develop-setup`)
@@ -27,7 +28,7 @@
 | 판정 | **diff를 한 문장으로 설명할 수 있나?** | 파일 여러 개 / 새 컴포넌트·라우트 / 상태 추가 / 접근법 둘 이상 | 여러 기능이 엮임, 모르는 영역, 새 의존성·아키텍처 결정 |
 | 예 | 스타일, 오타, 조건 하나, 원인 명확한 버그 | 폼 하나, 리스트+상세, API 연동 하나 | 인증 전체, 디자인시스템 도입, 결제 |
 | OpenSpec | 안 씀 | change 1개, 스키마 `feature`(specs+tasks) | brainstorm → change N개, 스키마 `spec-driven`(full) |
-| 사람 게이트 | 없음 | 구현 전 질문 1회(묶어서, 최대 5개) | 결정 지도 합의 + change마다 시작 확인 |
+| 사람 게이트 | 없음 | 질문 1회(묶어서, 최대 5개) + red 게이트 1회(세션당, adr/0018) | 결정 지도 합의 + change마다 시작 확인 |
 | 컨텍스트 | 한 세션 | change 1개 = 세션 1개 | **change마다 새 세션** |
 
 버그는 티어와 별개로 **`/ce-debug`** 로 진입(원인 명확하면 Tier-1).
@@ -59,15 +60,15 @@
 ### Tier-2 기능
 1. **탐색**: 관련 코드, 기존 컴포넌트, `openspec/specs/`(해당 capability 있나), `docs/solutions/`, **`design/screens/<slug>/summary.md` + `reference@2x.png`**(있으면 Figma를 열지 않는다). 코드·스냅샷이 이미 답하는 건 묻지 않는다
 2. **질문 1회** (AskUserQuestion, 최대 5개 묶어서). 항상 포함: ① 참고할 비슷한 기존 코드 있나 ② Figma 노드 URL(스냅샷 없을 때만) ③ 빈·로딩·에러 상태 — summary.md에 "Figma에 없음"이면 여기서 확정 ④ 반응형 범위 ⑤ 내가 가정한 기본값 목록 — 반박만 받는다 ⑥ **계약**: 스펙 URL/파일 있나? 없으면 "내가 DRAFT 스텁을 쓴다 — 이 shape(요청·응답·에러)가 맞나"를 스텁 요약과 함께
-3. **`/opsx:propose`** → `openspec/changes/<slug>/` 에 `specs/<capability>/spec.md`(delta, 시나리오 = 테스트 원천) + `tasks.md`(task마다 `→ verify:`). `[NEEDS CLARIFICATION]`이 남아 있으면 tasks 전에 해소. `openspec validate <slug> --strict`
+3. **`/opsx:propose`** → `openspec/changes/<slug>/` 에 `specs/<capability>/spec.md`(delta, 시나리오 = 테스트 원천) + `tasks.md`(task마다 `→ verify:`). `[NEEDS CLARIFICATION]`이 남아 있으면 tasks 전에 해소. `openspec validate <slug> --strict`. **propose 중엔 프로젝트 코드·계약 파일을 편집하지 않는다**(planning boundary, adr/0019) — DRAFT 스텁 작성·`contract.generate` 실행은 apply의 첫 task로(스펙에는 스텁 요약만). 계획(1~3단계) 종료 시 컨텍스트 사용량을 한 줄로 보고한다(15% 초과면 서브에이전트로 내렸어야 할 것을 기록)
 4. **`/opsx:apply`** — task 하나씩:
-   - 테스트 task: **`/test-fe`**(Skill 도구)로 — 계층 선택·쿼리·mock 규칙은 거기. Edit 시 권한 프롬프트가 뜬다 — **사람이 diff를 승인하는 것이 red 게이트**(adr/0009). 승인되면 실행 → **실패 출력과 이유("기능 미구현", import 오류 아님)를 보여주고** `test(scope):` 커밋. 거부되거나 비대화형이라 승인자가 없으면 **구현 task로 넘어가지 말고 멈춰서** 사람에게 알린다(테스트 없는 구현 금지)
+   - 테스트 task: **`/test-fe`**(Skill 도구)로 — 계층 선택·쿼리·mock 규칙은 거기. red 게이트는 **세션당 1회**(adr/0018): 이 세션의 첫 테스트 파일 Edit에만 권한 프롬프트가 뜨고, 이후 테스트 편집은 묻지 않는다. 대신 각 red는 **실패 출력 원문(assertion별 핵심 줄)과 이유("기능 미구현", import 오류 아님)를 사용자에게 보이는 본문에 붙인 뒤** `test(scope):` 커밋 — thinking·요약만으로는 게이트가 성립하지 않는다. 첫 ask가 거부되거나 비대화형이라 승인자가 없으면 **구현 task로 넘어가지 말고 멈춰서** 사람에게 알린다(테스트 없는 구현 금지)
    - 구현 task: 테스트 파일은 건드리지 않는다(Edit는 ask, Bash 쓰기는 deny). 초록 + PASS_TO_PASS → `[x]` → `feat(scope):` 커밋. diff에 `*.test.*`가 섞이면 안 됨
-   - UI task: 뷰포트·다크모드·키보드 증거는 **`.claude/rules/platform.md` 프로필**대로(`references/platform-fit-frontend.md`; 없으면 웹 375/768/1280) 선언된 스크린샷 수단(`evidence.screenshot`; null이면 사용자에게 요청하고 경로를 받는다)으로 찍고, 콘솔 에러 0. 접근성 증거: axe `serious+` 0건 + Tab 시퀀스 목록(`references/a11y-frontend.md` §3). 스냅샷이 있으면 `reference@2x.png`와 나란히 비교해 차이 나열 — 값은 스크린샷이 아니라 `getComputedStyle`로 확인(`figma-design-source.md` §6)
+   - UI task: 뷰포트·다크모드·키보드 증거는 **`.claude/rules/platform.md` 프로필**대로(`references/platform-fit-frontend.md`; 없으면 웹 375/768/1280) 선언된 스크린샷 수단(`evidence.screenshot`; null이면 촬영 수단을 탐색해 **직접 촬영을 먼저 시도**하고, 안 되면 사용자에게 요청 — 탐색 순서는 증거 캡처 reference가 정한다)으로 찍고, 콘솔 에러 0. 접근성 증거: axe `serious+` 0건 + Tab 시퀀스 목록(`references/a11y-frontend.md` §3). 스냅샷이 있으면 `reference@2x.png`와 나란히 비교해 차이 나열 — 값은 스크린샷이 아니라 `getComputedStyle`로 확인(`figma-design-source.md` §6)
    - Figma 출력(`context.tsx`)은 참고지 복사 대상이 아니다: `leading-[22.126px]`류는 토큰으로, 토큰이 없으면 사용자에게 올린다. 아이콘·이미지는 export된 에셋을 받아 커밋(URL은 7일 만료)
    - 마지막 "Converge" 그룹: spec의 모든 시나리오 ↔ 코드 대조, 빠진 건 task로 append하고 마저 한다
-5. **`/review-fe code`** (Skill 도구로 `cgamja:review-fe`, change slug·티어를 넘긴다) — 렌즈(L1 정확성·중복 / L2 스펙 완전성 / L3 테스트 무결성 + UI면 L4 접근성·L5 플랫폼 + API면 L6 경계·계약)를 persona 서브에이전트로 병렬 실행해 한 표로 합친다(adr/0012 개정 1 — Tier-2는 `ce-code-review` 없이). **Agent 도구로 리뷰어를 즉석 제작하지 않는다**(2026-08-21 두 번 연속 이탈). blocker 있으면 반영 후 해당 렌즈만 재실행 1회. `/ce-simplify-code`는 **선택**(사용자 요청 또는 jscpd 임계 초과 시 — sonnet 3에이전트 ≈200k에 적용 0~2건, adr/0012 개정 2)
-6. **Figma 대조** (Ready 화면일 때): 토큰 린트 0건 → computed style 5~10개 → 2x 픽셀/SSIM 97% 이상, EXPECTED/ACTUAL/DIFF 3장 저장. `get_screenshot` 1회로 기준 PNG 갱신 가능(`figma-design-source.md` §6)
+5. **`/review-fe code`** (Skill 도구로 `cgamja:review-fe`, change slug·티어를 넘긴다) — 렌즈(L1 정확성·중복 / L2 스펙 완전성 / L3 테스트 무결성 + UI면 L4 접근성·L5 플랫폼 + API면 L6 경계·계약)를 persona 서브에이전트로 병렬 실행해 한 표로 합친다(adr/0012 개정 1 — Tier-2는 `ce-code-review` 없이). **Agent 도구로 리뷰어를 즉석 제작하지 않는다**(2026-08-21 두 번 연속 이탈). blocker는 **전 렌즈 것을 모아 수정 패스 1번 → `fix(review)` 커밋 1개 → 해당 렌즈만 재실행 1회**(adr/0019). 재실행 이후 새 수정 커밋이 생기면 그 diff는 기계 리뷰 미통과 — 판정 줄에 명시하고 잔여 diff 0을 기본으로 한다. `/ce-simplify-code`는 **선택**(사용자 요청 또는 jscpd 임계 초과 시 — sonnet 3에이전트 ≈200k에 적용 0~2건, adr/0012 개정 2)
+6. **Figma 대조** (Ready 화면일 때): 토큰 린트 0건 → computed style 5~10개(**font-family 포함** — 디자인 폰트가 프로젝트에 없으면 대체 사실을 첫 UI task 보고에 명시, adr/0019) → 2x 픽셀/SSIM 97% 이상, EXPECTED/ACTUAL/DIFF 3장 저장. `get_screenshot` 1회로 기준 PNG 갱신 가능(`figma-design-source.md` §6)
 7. **`/opsx:archive`** → delta가 `openspec/specs/`에 병합 → 5장, 6장
 
 ### 2-D. 디자인 갭 루프 (미완성·미디자인 부분) — `adr/0003`
@@ -97,7 +98,7 @@ Tier-2 3단계(propose) **전에** 돈다. 디자인이 확정돼야 시나리�
 훅(프로젝트 `.claude/settings.json` — 세팅이 설치, 표는 `project-conventions.md` §5): `PostToolUse(Write|Edit)` → 그 파일 format+lint(1초 이내, tsc 금지) / `Stop` → `commands.verify`(코드 편집 턴만) / `PreToolUse` Write|Edit **+ Bash** → 매니페스트·lockfile·린터 설정·`tests.patterns`(구현 턴)·`contract.generated` 보호, `--no-verify` 거부 — 같은 패턴을 `permissions.deny`에도(훅 `if`는 fail-open).
 
 ### 3-2. 테스트 규칙 → `/test-fe` 스킬
-- 테스트 task는 **Skill 도구로 `cgamja:test-fe`를 부른다**(시나리오·change slug를 넘긴다). 계층 선택(단위 / 브라우저 / E2E), 쿼리·mock 규칙, red 게이트(adr/0009)는 거기에 있다. 여기서는 결과만 받는다: 실패 출력 원문 + 이유 + `test(scope):` 커밋
+- 테스트 task는 **Skill 도구로 `cgamja:test-fe`를 부른다**(시나리오·change slug를 넘긴다). 계층 선택(단위 / 브라우저 / E2E), 쿼리·mock 규칙, red 게이트(세션당 1회, adr/0018)는 거기에 있다. 여기서는 결과만 받는다: 실패 출력 원문 + 이유 + `test(scope):` 커밋
 - TDD의 목적은 품질이 아니라 **리뷰 게이트 + 변조 방지**(adr/0004). 구현 턴은 테스트 파일을 건드리지 않고(Edit ask, Bash 쓰기 deny), 기존 초록은 초록 유지(PASS_TO_PASS), `feat` diff에 `*.test.*` 금지
 - 못 만들면 **실패한 assertion 원문**과 함께 멈춘다. assertion 완화·skip·snapshot 재생성 금지
 
@@ -114,7 +115,7 @@ Tier-2 3단계(propose) **전에** 돈다. 디자인이 확정돼야 시나리�
 
 ### 3-4. 컨텍스트 규칙
 - 같은 수정 2번 실패 → `/clear`, `docs/solutions/` 확인, 접근 변경. "더 열심히"가 아니라 **빠진 도구/규칙**을 찾는다
-- 탐색은 Explore 서브에이전트로 — 본 컨텍스트에 파일 덤프 금지. **서브에이전트는 `model:`을 항상 명시**(`references/model-routing.md`, adr/0011): 탐색·수집 `haiku`, 구현·테스트 작성 `sonnet`, 리뷰 렌즈 `opus`. 티어 판정·질문 설계·갭 판단·계약 판정은 본체가 직접
+- 탐색은 Explore 서브에이전트로 — 본 컨텍스트에 파일 덤프 금지. **계획 단계도 같다**(adr/0019): 티켓 본문·스냅샷·긴 문서는 서브에이전트가 읽고 요약만 받는다 — 본체가 직접 읽는 건 작업 원천(스펙 delta, summary.md)뿐. **서브에이전트는 `model:`을 항상 명시**(`references/model-routing.md`, adr/0011): 탐색·수집 `haiku`, 구현·테스트 작성 `sonnet`, 리뷰 렌즈 `opus`. 티어 판정·질문 설계·갭 판단·계약 판정은 본체가 직접
 - 에이전트가 규칙을 어기면 CLAUDE.md에 줄을 늘리지 말고 **린트·훅·`openspec/config.yaml` rules**로 내린다
 
 ## 4. 기록 (Compound)
@@ -125,8 +126,9 @@ Tier-2 3단계(propose) **전에** 돈다. 디자인이 확정돼야 시나리�
 - **일회용** = `docs/plans/`(brainstorm 산출물), `openspec/changes/archive/`, Artifact 후보 캔버스. 끝나면 갱신 안 함
 
 ## 5. 커밋
-- `feat|fix|refactor|test|chore|docs(scope): 요약`. task 1개 = 커밋 1개 기본
-- 테스트 변경은 **별도 커밋**(테스트 약화가 리뷰에 바로 보이게). 스펙은 `docs(spec): ...`
+- `feat|fix|refactor|test|chore|docs(scope): 요약`. **단계 1개 = 커밋 1개**(adr/0019): change당 기본 4~8개 — `docs(spec)` 1 · `test(scope)` 1~3(red는 시나리오를 묶어 배치로) · `feat(scope)` 1~3(연속 task를 묶어서) · `fix(review)` 1 · 필요시 `chore` 1. **task마다 커밋하지 않는다.** 10개 초과는 7장 재검토 신호
+- 시행착오·세팅 수리·중간 재작업은 독립 커밋으로 남기지 않는다 — 다음 단계 커밋에 합친다
+- 테스트 변경은 **별도 커밋**(테스트 약화가 리뷰에 바로 보이게 — adr/0018 변조 방지의 주 담당). 스펙은 `docs(spec): ...`
 - `/ce-commit` 사용. 푸시는 change 단위
 
 ## 6. PR
@@ -159,6 +161,7 @@ Tier-2 3단계(propose) **전에** 돈다. 디자인이 확정돼야 시나리�
 
 ## 7. 재검토 조건 (10개 task마다 점검)
 - Tier-2 스펙 작성이 구현보다 오래 걸린 게 2번 → `feature` 스키마 instruction을 더 줄인다
+- change당 커밋 10개 초과 2번 → 단계 커밋 규칙(adr/0019) 위반 지점 점검 · fast-path로 시작한 작업이 세팅 누락으로 되돌아간 사례 2번 → 필수 점검을 fast-path 앞으로 복귀
 - **스펙이 테스트된 동작과 모순된 채 출하된 change 2개** → 살아있는 스펙 유지 실패, CE-only로 (adr/0001). 에이전트는 스펙을 읽으므로 "안 읽음"이 아니라 "오래된 걸 믿음"이 위험. CI `openspec validate --archived` 필수
 - 실험 B(`ce-work` 브리지, adr/0001) 2개 change 후 채택/폐기 기록
 - 브라우저 계층 테스트가 CI에서 주 2회 flaky → 단위 계층 기본으로 복귀(adr/0004)

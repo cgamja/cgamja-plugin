@@ -109,8 +109,8 @@ for p in sys.stdin.read().split('\n'):
     hook protect-files.sh "{\"cwd\":\"$PWD\",\"tool_input\":{\"file_path\":\"$PWD/$gen_first\"}}" >/dev/null; code=$?
     expect_exit "generated file edit → deny" 2 "$code" ""; fi
   local pf; pf="$(cfg protected | head -1)"
-  hook protect-files.sh "{\"cwd\":\"$PWD\",\"tool_input\":{\"file_path\":\"$PWD/$pf\"}}" >/dev/null; code=$?
-  expect_exit "protected file edit → deny: $pf" 2 "$code" ""
+  out="$(hook protect-files.sh "{\"cwd\":\"$PWD\",\"tool_input\":{\"file_path\":\"$PWD/$pf\"}}")"
+  expect_grep "protected file edit → ask (adr/0017): $pf" '"permissionDecision": ?"ask"' "$out"
   for c in "TDD_PHASE=red perl -pi -e s/a/b/ $tfile" "echo x > $tfile" "sed -i '' s/a/b/ $tfile" 'git commit --no-verify -m x' 'pnpm add lodash' 'npm install lodash'; do
     hook protect-bash.sh "{\"cwd\":\"$PWD\",\"tool_input\":{\"command\":\"$c\"}}" >/dev/null; code=$?
     expect_exit "bash deny: $c" 2 "$code" ""
