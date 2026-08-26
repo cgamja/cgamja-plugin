@@ -23,7 +23,7 @@ description: 프론트엔드 코드 리뷰와 PR 리뷰를 티어별 렌즈(정�
    - `model:`은 §3 표대로 **반드시 명시**(생략 = 세션 모델 = 가장 비쌈).
    - **Tier-3·PR 모드에서만**(adr/0012 개정 1) 동시에 Skill 도구로 `compound-engineering:ce-code-review`를 부른다 — args에 `plan:<스펙 경로>` + "각 `### Requirement:`/`#### Scenario:`를 요구사항으로 취급해 Requirements Completeness를 작성하라" + "스타일 말고 spec 대비 빠진 것·정확성만". 경로 없이 부르면 develop-fe 훅이 거부한다(adr/0001). PR 모드로 스펙이 없으면 PR 본문을 임시 파일로 저장해 `plan:`으로 넘긴다. Tier-1/2는 persona만(2026-08-21 실측: 없이도 blocker·버그 누락 0, 비용 ≈300k 절감).
 5. **합치기**: §4 형식 표를 렌즈 순으로 이어 붙이고 같은 `파일:줄`은 하나로(출처 렌즈 병기). ce-code-review 결과는 별도 절로. 맨 위에 **판정 한 줄**: `blocker n → 반영 후 재실행` / `blocker 0, should n → 머지 가능(should는 PR 본문에)`.
-6. **반영 루프**: blocker가 있으면 develop-fe(또는 사용자)가 고친 뒤 **해당 렌즈만** 재실행 1회. 두 번째에도 blocker면 멈추고 사람에게. 예외: 2차 blocker가 **1차 반영 때 스펙에 새로 넣은 문장**의 테스트 누락뿐이면 persona 없이 assertion 보강 + 변이 확인 1건(구현 한 줄 제거 → 실패)으로 닫고 그 사실을 판정 줄에 적는다(2026-08-21 실측 경로).
+6. **반영 루프**(adr/0019): blocker는 **전 렌즈 것을 모아 수정 패스 1번 → `fix(review)` 커밋 1개**로 반영한 뒤 **해당 렌즈만** 재실행 1회. 두 번째에도 blocker면 멈추고 사람에게. 재실행 **이후** 새 수정 커밋이 생기면 그 diff는 기계 리뷰 미통과 — 판정 줄에 명시하고, 잔여 diff 0(수정을 재실행 이전 커밋으로 몰기)을 기본으로 한다. 예외: 2차 blocker가 **1차 반영 때 스펙에 새로 넣은 문장**의 테스트 누락뿐이면 persona 없이 assertion 보강 + 변이 확인 1건(구현 한 줄 제거 → 실패)으로 닫고 그 사실을 판정 줄에 적는다(2026-08-21 실측 경로).
 7. PR 모드에서 결과를 PR에 쓰려면 **사용자 확인 후** `gh pr review --comment` 또는 `/code-review --comment`. 기본은 터미널 보고만.
 
 ## 단독 호출 모드
