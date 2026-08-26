@@ -32,7 +32,7 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 | 1 | `.claude/cgamja.json` | `templates/cgamja.json`을 **발견한 값으로** 채움 | ≤40줄. 없는 강제 수단은 `null` |
 | 2 | `CLAUDE.md` (없을 때만; 있으면 "하지 않는 것"·명령·구조 단락만 병합 제안) | `templates/CLAUDE.md` | **≤60줄**(넘으면 줄이고 보고 — 2026-08-22 Vue 런 92줄), `@` import 없음, 값은 선언과 1:1 |
 | 3 | `.claude/rules/{components,state,tests,platform}.md` | `templates/rules/` | `paths:`는 `tests.patterns`·`domains.root`와 일치. 기존 rules가 있으면 추가만 |
-| 4 | `.claude/settings.json` + `.claude/hooks/*.sh` | `templates/settings.json`, `templates/hooks/` **그대로 복사** | 훅은 선언을 읽는다 — 수정 금지. 기존 settings가 있으면 hooks·deny 병합. `.claude/state/`(Stop 훅의 verify 로그)를 `.gitignore`에 |
+| 4 | `.claude/settings.json` + `.claude/hooks/*.sh` | `templates/settings.json`, `templates/hooks/` **그대로 복사** | 훅은 선언을 읽는다 — 수정 금지. 기존 settings가 있으면 hooks·deny 병합. `.claude/state/` 디렉터리를 만들고(Stop 훅 verify 로그·handoff 마커, adr/0017) `.gitignore`에 |
 | 5 | `docs/adr/0001-domain-structure.md`, `docs/conventions.md` | `templates/adr-0001-domain-structure.md`, `templates/conventions.md` | 구조 이름은 발견한 것(`domains.root`) |
 | 6 | 커밋 규약: commitlint + 훅 매니저 `commit-msg`/`pre-commit` | `templates/lefthook.yml`(기존 husky 등이 있으면 그 안에 규칙만) | 대화형 훅 금지 |
 | 7 | `verify` 한 줄 + 대조표 ✗ 중 사용자가 승인한 강제 수단 | `references/*` 의 "검증된 구현" 절 조각(`templates/react/`는 그 절에서 검증된 스택용 — 각 파일 머리에 스택·날짜) | **새 의존성은 승인 후에만.** 검증된 조각이 없는 스택이면: 조사 → 설치 → 프로브 → 되면 references에 날짜와 함께 추가(`feedback-install-and-verify`) |
@@ -41,7 +41,7 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 | 10 | CI: 기존 워크플로우에 `verify`·commitlint·`openspec validate`·문서 경로 검사 단계 추가 | `templates/check-docs.sh`, 예시 `templates/react/ci.yml` | 기존 CI를 대체하지 않는다 |
 
 ## 3. 자가 검증 — 만들었다가 아니라 작동한다를 보인다
-`bash scripts/smoke.sh check <dir>` — 선언을 읽어 프로브를 돌린다: `commands.verify` 초록 / 경계 린트가 **실제로** 에러를 내는가(`domains.root` 밖에서 import 주입) / a11y 린트가 대체 텍스트 없는 이미지·클릭만 있는 컨테이너를 잡는가 / 계약 린트가 직접 HTTP 호출을 잡는가(`contract` 선언 시) / 훅 9종(테스트 Edit `ask`, 생성물 deny, 보호 파일 deny, 쉘 우회 deny, 읽기 허용) / commitlint / 재생성 diff 0 / openspec `new change` / 선언·규칙 파일 존재·미치환 변수 0. **하나라도 ✗면 완료라고 하지 않는다.** 통과해 버리는 프로브(예: 경계 린트가 조용히 통과)는 설정 문제다 — `references/project-conventions.md` §6 함정 참고.
+`bash scripts/smoke.sh check <dir>` — 선언을 읽어 프로브를 돌린다: `commands.verify` 초록 / 경계 린트가 **실제로** 에러를 내는가(`domains.root` 밖에서 import 주입) / a11y 린트가 대체 텍스트 없는 이미지·클릭만 있는 컨테이너를 잡는가 / 계약 린트가 직접 HTTP 호출을 잡는가(`contract` 선언 시) / 훅 9종(테스트 Edit `ask`, 생성물 deny, 보호 파일 `ask`(adr/0017), 쉘 우회 deny, 읽기 허용) / commitlint / 재생성 diff 0 / openspec `new change` / 선언·규칙 파일 존재·미치환 변수 0. **하나라도 ✗면 완료라고 하지 않는다.** 통과해 버리는 프로브(예: 경계 린트가 조용히 통과)는 설정 문제다 — `references/project-conventions.md` §6 함정 참고.
 
 ## 4. 끝맺음
 - 결과를 표로 보고한다: 발견한 것 / 붙인 것 / `null`로 남긴 것(이유) / 프로브 결과.
