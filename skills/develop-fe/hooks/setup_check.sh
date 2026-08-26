@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # PreToolUse (Edit|Write|MultiEdit) once:true — 프로젝트 세팅이 없으면 경고 컨텍스트(차단 아님: Tier-1 예외).
 source "$(dirname "$0")/_lib.sh"
-cwd="$(j cwd)"; cd "${cwd:-.}" 2>/dev/null || exit 0
+# 프로젝트 루트 고정(adr/0017): 직전 Bash의 cd로 cwd가 하위 디렉터리여도 오경보가 나지 않게 — 위로 올라가며 선언/매니페스트를 찾고, 없으면 git 루트, 그것도 없으면 cwd
+cwd="$(j cwd)"; d="${cwd:-$PWD}"
+while [ "$d" != "/" ] && [ ! -f "$d/.claude/cgamja.json" ] && [ ! -f "$d/package.json" ]; do d="$(dirname "$d")"; done
+[ "$d" = "/" ] && d="$(git -C "${cwd:-.}" rev-parse --show-toplevel 2>/dev/null || echo "${cwd:-.}")"
+cd "$d" 2>/dev/null || exit 0
 pm="$(j permission_mode)"
 warn=""; case "$pm" in bypassPermissions|dontAsk) warn="[develop-fe] permission_mode=$pm — 승인자가 없는 세션일 수 있다. 테스트 파일 Edit는 사람 승인(ask)이 필요해 Tier-2 테스트 task에서 멈추게 된다(adr/0009). Tier-2 이상이면 사용자에게 대화형 세션을 권하고, 진행하더라도 테스트 없이 구현으로 넘어가지 마라. ";; esac
 m=""
