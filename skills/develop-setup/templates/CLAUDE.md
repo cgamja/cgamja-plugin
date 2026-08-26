@@ -1,7 +1,7 @@
 # {{PROJECT}}
 
 ## 하지 않는 것 (훅·린트가 막는다 — 이유를 알고 우회하지 않는다)
-- 새 의존성 추가 — 먼저 물어라. lockfile diff를 Stop 훅이 본다
+- 새 의존성·보호 파일(매니페스트·린트 설정·훅) 변경을 쉘로 — Edit로 제안하면 **사람이 diff를 보고 승인**한다(ask). 쉘 쓰기·패키지 추가/삭제 명령은 거부된다. 승인 후 인자 없는 install로 lockfile 동기화. lockfile diff는 Stop 훅이 본다
 - 색·간격·폰트 하드코딩 — `{{TOKENS_PATH}}`만 (린트)
 - 기존 컴포넌트 검색 없이 새 컴포넌트 — `src/shared/ui`, 대상 도메인 `index.ts`, `design/components.md`를 먼저 grep하고 재사용한 걸 PR에 적어라
 - 테스트를 초록으로 만들기 위한 테스트 수정 — 테스트 파일 Edit는 **사람 승인**(권한 프롬프트 = red 게이트), 쉘로 쓰기(`sed -i`/`perl -pi`/리다이렉트)와 인라인 `TDD_PHASE=`는 거부된다. 승인이 없으면 구현으로 넘어가지 말고 멈춰라. 못 고치면 실패한 assertion 원문과 함께 멈춰라
