@@ -7,7 +7,7 @@ while [ "$d" != "/" ] && [ ! -f "$d/.claude/cgamja.json" ] && [ ! -f "$d/package
 [ "$d" = "/" ] && d="$(git -C "${cwd:-.}" rev-parse --show-toplevel 2>/dev/null || echo "${cwd:-.}")"
 cd "$d" 2>/dev/null || exit 0
 pm="$(j permission_mode)"
-warn=""; case "$pm" in bypassPermissions|dontAsk) warn="[develop-fe] permission_mode=$pm — 승인자가 없는 세션일 수 있다. 테스트 파일 Edit는 사람 승인(ask)이 필요해 Tier-2 테스트 task에서 멈추게 된다(adr/0009). Tier-2 이상이면 사용자에게 대화형 세션을 권하고, 진행하더라도 테스트 없이 구현으로 넘어가지 마라. ";; esac
+warn=""; case "$pm" in bypassPermissions|dontAsk) warn="[develop-fe] permission_mode=$pm — 승인자가 없는 세션일 수 있다. 첫 테스트 파일 Edit는 사람 승인(ask, 세션당 1회)이 필요해 Tier-2 테스트 task에서 멈추게 된다(adr/0018). Tier-2 이상이면 사용자에게 대화형 세션을 권하고, 진행하더라도 테스트 없이 구현으로 넘어가지 마라. ";; esac
 m=""
 { [ -f package.json ] && grep -q '"verify"[[:space:]]*:' package.json; } || m="$m package.json#verify"
 [ -f openspec/config.yaml ] || m="$m openspec/config.yaml"

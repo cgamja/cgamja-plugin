@@ -66,3 +66,13 @@ check "stop: handoff consumed"            ""     "$(ls "$P/.claude/state/handoff
 out="$(printf '{"session_id":"h","cwd":"%s"}' "$P" | bash $S 2>&1)"; code=$?
 check "stop: verify fail blocks (exit 2)" "2"    "$code"
 cp skills/develop-setup/templates/cgamja.json "$P/.claude/cgamja.json"
+# adr/0018: red 게이트 세션당 1회 — 첫 편집 ask → 승인(편집 성공 = red-mark) → 같은 세션은 묻지 않음
+M=skills/develop-setup/templates/hooks/red-mark.sh
+rm -f "$P/.claude/state/red-approved-h"
+check "files: first test edit ask (adr/0018)" "\"ask\"" "$(hook $F "$(filecmd src/a.test.ts)")"
+hook $M "$(filecmd src/a.test.ts)" >/dev/null
+check "red-mark: marker written"          "red-approved-h" "$(ls "$P/.claude/state/" 2>/dev/null)"
+check "files: same session test edit allow" ""   "$(hook $F "$(filecmd src/b.test.ts)")"
+check "files: other session still ask"    "\"ask\"" "$(hook $F '{"session_id":"h2","cwd":"'"$P"'","tool_input":{"file_path":"'"$P"'/src/c.test.ts"}}')"
+hook $M '{"session_id":"h3","cwd":"'"$P"'","tool_input":{"file_path":"'"$P"'/src/n.ts"}}' >/dev/null
+check "red-mark: non-test file no marker" ""     "$(ls "$P/.claude/state/" 2>/dev/null | grep h3)"
