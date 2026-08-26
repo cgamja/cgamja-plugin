@@ -25,3 +25,4 @@
 | [0018](0018-red-gate-batch-approval.md) | red 게이트 = 세션당 1회 승인 + 실패 원문 배치 확인 — 편집마다 ask 폐지, 변조 방지는 커밋 분리+L3 | 제안 | — |
 | [0019](0019-lean-workflow.md) | 워크플로우 다이어트 — 시작 fast-path, 단계 단위 커밋(change당 4~8), 리뷰 반영 배치+잔여 diff 0, 계획 컨텍스트 예산, propose planning boundary, 폰트 대조 | 제안 | — |
 | [0020](0020-develop-baby-fe.md) | develop-baby-fe — MVP 경량 경로: 별도 진입점, 절차 오프(스펙·red 게이트·렌즈 다중), L1 1회(sonnet), 에스컬레이션은 안내, 목표 <$5 | 제안 | — |
+| [0021](0021-evidence-declaration.md) | 증거 선언 — 촬영 기본 동선 반전(에이전트 직접 시도 → 최후에 사용자), `evidence.dark`/`platforms` 슬롯 확장, 렌즈는 선언 밖 부재를 blocker가 아니라 "선언된 한계"로 | 제안 | — |
