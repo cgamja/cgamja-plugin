@@ -21,3 +21,4 @@
 | [0014](0014-stack-agnostic-three-layers.md) | 절차/프로젝트 선언(`.claude/cgamja.json`)/관심사별 references 세 층 — 스택은 정하지 않고 읽는다, develop-setup은 발견·대조·최소 제안, 스캐폴드 없음 | 제안 | — |
 | [0015](0015-positioning-differentiators.md) | 차별점 재정의 — 기계 강제·자기 테스트는 전제, 고유 가치는 증거 스택·선언 brownfield·비용 투명성. 지형표 `docs/positioning.md` | 제안 | — |
 | [0016](0016-lens-ledger-review-budget.md) | 렌즈 원장 — 렌즈별 반영률·토큰을 `reports/lens-ledger.md`에 누적, 0012 §5 판정을 데이터로, Tier-2 예산(기본/라이트)은 사용자 선택 | 제안 | — |
+| [0017](0017-hook-precision-and-handoff.md) | 훅 정밀화 — 읽기/쓰기 구분, 보호 파일 Edit는 deny→ask, 의존성 패턴 대칭, 스크래치 테스트 rm 허용, Stop 훅 handoff | 제안 | — |

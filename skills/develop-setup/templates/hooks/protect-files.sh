@@ -4,7 +4,8 @@ source "$(dirname "$0")/_lib.sh"
 f="$(j tool_input.file_path)"; [ -z "$f" ] && exit 0
 rel="${f#"$ROOT"/}"
 if matches "$(cfg protected)" "$rel"; then
-  deny "[protect] $rel 은 보호 파일(cgamja.json protected) — 의존성·린트·훅 설정은 사용자에게 먼저 물어라(CLAUDE.md '하지 않는 것')."; fi
+  # 보호 파일 = ask(adr/0017): 사람이 diff를 보고 승인하는 것이 escape hatch. 쉘 쓰기는 protect-bash가 여전히 deny(diff가 안 보이면 승인이 성립하지 않는다).
+  ask "[protect] $rel 은 보호 파일(cgamja.json protected) — 왜 바꾸는지와 diff를 보고 승인하세요. 거부되면 쉘로 우회하지 말고 멈춰서 사용자에게 알릴 것. 의존성 변경이면 승인 후 인자 없는 install로 lockfile 동기화."; fi
 if matches "$(cfg contract.generated)" "$rel"; then
   deny "[protect] $rel 은 계약 생성물 — $(cfg contract.source) 을 고치고 \`$(cfg contract.generate)\` 으로 재생성한다."; fi
 if matches "$(cfg tests.patterns)" "$rel"; then
