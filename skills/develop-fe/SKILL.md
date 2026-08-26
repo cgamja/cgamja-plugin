@@ -73,6 +73,7 @@ hooks:
 | `references/api-contract.md` | API가 걸린 task — 계약 상태 A/B/C/D 판정, DRAFT 스텁 템플릿, 검증된 생성기 설정(조건부 절), retrofit 절차, 백엔드와 화해 |
 | `skills/test-fe/` → `references/tdd-frontend.md` | 테스트 task — Skill 도구로 `cgamja:test-fe`. 직접 읽지 않는다 |
 | `skills/review-fe/` → `references/review-lenses-frontend.md`, `agents/reviewer-*.md` | 리뷰 단계 — Skill 도구로 `cgamja:review-fe`. 직접 읽지 않는다 |
+| `references/evidence-capture.md` | UI task 증거를 찍기 전 — 촬영 수단 탐색 순서(선언 → 프로젝트 수단 → 플랫폼 도구 → 사용자), 검증된 캡처 레시피(adr/0021) |
 | `references/a11y-frontend.md` | UI task 증거(§3)와 코드 규칙이 막지 못하는 접근성 체크(§2) |
 | `references/platform-fit-frontend.md` | `.claude/rules/platform.md`가 없을 때 프로필 기준, `summary.md`의 platform 필드 |
 | `references/model-routing.md` | 서브에이전트를 띄울 때마다 — 어떤 일을 어떤 모델에 |

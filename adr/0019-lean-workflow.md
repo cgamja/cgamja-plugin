@@ -28,4 +28,4 @@
 - 잔여 diff 0 규칙 때문에 재실행이 2회를 넘는 change 2개 → 상한 유지하되 잔여 diff 명시로 완화.
 
 ## 결과 / 영향
-workflow.md 0장(fast-path·조회 단일화)·1장 표·2장 Tier-2 3~5단계(planning boundary·리뷰 배치)·5장(커밋)·7장(재검토 조건 추가), `skills/develop-fe/SKILL.md` 시작 절차, `skills/review-fe/SKILL.md` 6번(배치·잔여 diff 0), `references/figma-design-source.md` §6(폰트). 증거 촬영 수단 탐색 순서는 증거 선언 ADR(별도 PR)의 캡처 reference가 정한다.
+workflow.md 0장(fast-path·조회 단일화)·1장 표·2장 Tier-2 3~5단계(planning boundary·리뷰 배치)·5장(커밋)·7장(재검토 조건 추가), `skills/develop-fe/SKILL.md` 시작 절차, `skills/review-fe/SKILL.md` 6번(배치·잔여 diff 0), `references/figma-design-source.md` §6(폰트). 증거 촬영 수단 탐색 순서는 `references/evidence-capture.md`(adr/0021)가 정한다.
