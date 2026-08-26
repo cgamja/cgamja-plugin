@@ -24,3 +24,4 @@
 | [0017](0017-hook-precision-and-handoff.md) | 훅 정밀화 — 읽기/쓰기 구분, 보호 파일 Edit는 deny→ask, 의존성 패턴 대칭, 스크래치 테스트 rm 허용, Stop 훅 handoff | 제안 | — |
 | [0018](0018-red-gate-batch-approval.md) | red 게이트 = 세션당 1회 승인 + 실패 원문 배치 확인 — 편집마다 ask 폐지, 변조 방지는 커밋 분리+L3 | 제안 | — |
 | [0019](0019-lean-workflow.md) | 워크플로우 다이어트 — 시작 fast-path, 단계 단위 커밋(change당 4~8), 리뷰 반영 배치+잔여 diff 0, 계획 컨텍스트 예산, propose planning boundary, 폰트 대조 | 제안 | — |
+| [0020](0020-develop-baby-fe.md) | develop-baby-fe — MVP 경량 경로: 별도 진입점, 절차 오프(스펙·red 게이트·렌즈 다중), L1 1회(sonnet), 에스컬레이션은 안내, 목표 <$5 | 제안 | — |
