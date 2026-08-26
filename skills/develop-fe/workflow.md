@@ -27,7 +27,7 @@
 | 판정 | **diff를 한 문장으로 설명할 수 있나?** | 파일 여러 개 / 새 컴포넌트·라우트 / 상태 추가 / 접근법 둘 이상 | 여러 기능이 엮임, 모르는 영역, 새 의존성·아키텍처 결정 |
 | 예 | 스타일, 오타, 조건 하나, 원인 명확한 버그 | 폼 하나, 리스트+상세, API 연동 하나 | 인증 전체, 디자인시스템 도입, 결제 |
 | OpenSpec | 안 씀 | change 1개, 스키마 `feature`(specs+tasks) | brainstorm → change N개, 스키마 `spec-driven`(full) |
-| 사람 게이트 | 없음 | 구현 전 질문 1회(묶어서, 최대 5개) | 결정 지도 합의 + change마다 시작 확인 |
+| 사람 게이트 | 없음 | 질문 1회(묶어서, 최대 5개) + red 게이트 1회(세션당, adr/0018) | 결정 지도 합의 + change마다 시작 확인 |
 | 컨텍스트 | 한 세션 | change 1개 = 세션 1개 | **change마다 새 세션** |
 
 버그는 티어와 별개로 **`/ce-debug`** 로 진입(원인 명확하면 Tier-1).
@@ -61,7 +61,7 @@
 2. **질문 1회** (AskUserQuestion, 최대 5개 묶어서). 항상 포함: ① 참고할 비슷한 기존 코드 있나 ② Figma 노드 URL(스냅샷 없을 때만) ③ 빈·로딩·에러 상태 — summary.md에 "Figma에 없음"이면 여기서 확정 ④ 반응형 범위 ⑤ 내가 가정한 기본값 목록 — 반박만 받는다 ⑥ **계약**: 스펙 URL/파일 있나? 없으면 "내가 DRAFT 스텁을 쓴다 — 이 shape(요청·응답·에러)가 맞나"를 스텁 요약과 함께
 3. **`/opsx:propose`** → `openspec/changes/<slug>/` 에 `specs/<capability>/spec.md`(delta, 시나리오 = 테스트 원천) + `tasks.md`(task마다 `→ verify:`). `[NEEDS CLARIFICATION]`이 남아 있으면 tasks 전에 해소. `openspec validate <slug> --strict`
 4. **`/opsx:apply`** — task 하나씩:
-   - 테스트 task: **`/test-fe`**(Skill 도구)로 — 계층 선택·쿼리·mock 규칙은 거기. Edit 시 권한 프롬프트가 뜬다 — **사람이 diff를 승인하는 것이 red 게이트**(adr/0009). 승인되면 실행 → **실패 출력과 이유("기능 미구현", import 오류 아님)를 보여주고** `test(scope):` 커밋. 거부되거나 비대화형이라 승인자가 없으면 **구현 task로 넘어가지 말고 멈춰서** 사람에게 알린다(테스트 없는 구현 금지)
+   - 테스트 task: **`/test-fe`**(Skill 도구)로 — 계층 선택·쿼리·mock 규칙은 거기. red 게이트는 **세션당 1회**(adr/0018): 이 세션의 첫 테스트 파일 Edit에만 권한 프롬프트가 뜨고, 이후 테스트 편집은 묻지 않는다. 대신 각 red는 **실패 출력 원문(assertion별 핵심 줄)과 이유("기능 미구현", import 오류 아님)를 사용자에게 보이는 본문에 붙인 뒤** `test(scope):` 커밋 — thinking·요약만으로는 게이트가 성립하지 않는다. 첫 ask가 거부되거나 비대화형이라 승인자가 없으면 **구현 task로 넘어가지 말고 멈춰서** 사람에게 알린다(테스트 없는 구현 금지)
    - 구현 task: 테스트 파일은 건드리지 않는다(Edit는 ask, Bash 쓰기는 deny). 초록 + PASS_TO_PASS → `[x]` → `feat(scope):` 커밋. diff에 `*.test.*`가 섞이면 안 됨
    - UI task: 뷰포트·다크모드·키보드 증거는 **`.claude/rules/platform.md` 프로필**대로(`references/platform-fit-frontend.md`; 없으면 웹 375/768/1280) 선언된 스크린샷 수단(`evidence.screenshot`; null이면 사용자에게 요청하고 경로를 받는다)으로 찍고, 콘솔 에러 0. 접근성 증거: axe `serious+` 0건 + Tab 시퀀스 목록(`references/a11y-frontend.md` §3). 스냅샷이 있으면 `reference@2x.png`와 나란히 비교해 차이 나열 — 값은 스크린샷이 아니라 `getComputedStyle`로 확인(`figma-design-source.md` §6)
    - Figma 출력(`context.tsx`)은 참고지 복사 대상이 아니다: `leading-[22.126px]`류는 토큰으로, 토큰이 없으면 사용자에게 올린다. 아이콘·이미지는 export된 에셋을 받아 커밋(URL은 7일 만료)
@@ -97,7 +97,7 @@ Tier-2 3단계(propose) **전에** 돈다. 디자인이 확정돼야 시나리�
 훅(프로젝트 `.claude/settings.json` — 세팅이 설치, 표는 `project-conventions.md` §5): `PostToolUse(Write|Edit)` → 그 파일 format+lint(1초 이내, tsc 금지) / `Stop` → `commands.verify`(코드 편집 턴만) / `PreToolUse` Write|Edit **+ Bash** → 매니페스트·lockfile·린터 설정·`tests.patterns`(구현 턴)·`contract.generated` 보호, `--no-verify` 거부 — 같은 패턴을 `permissions.deny`에도(훅 `if`는 fail-open).
 
 ### 3-2. 테스트 규칙 → `/test-fe` 스킬
-- 테스트 task는 **Skill 도구로 `cgamja:test-fe`를 부른다**(시나리오·change slug를 넘긴다). 계층 선택(단위 / 브라우저 / E2E), 쿼리·mock 규칙, red 게이트(adr/0009)는 거기에 있다. 여기서는 결과만 받는다: 실패 출력 원문 + 이유 + `test(scope):` 커밋
+- 테스트 task는 **Skill 도구로 `cgamja:test-fe`를 부른다**(시나리오·change slug를 넘긴다). 계층 선택(단위 / 브라우저 / E2E), 쿼리·mock 규칙, red 게이트(세션당 1회, adr/0018)는 거기에 있다. 여기서는 결과만 받는다: 실패 출력 원문 + 이유 + `test(scope):` 커밋
 - TDD의 목적은 품질이 아니라 **리뷰 게이트 + 변조 방지**(adr/0004). 구현 턴은 테스트 파일을 건드리지 않고(Edit ask, Bash 쓰기 deny), 기존 초록은 초록 유지(PASS_TO_PASS), `feat` diff에 `*.test.*` 금지
 - 못 만들면 **실패한 assertion 원문**과 함께 멈춘다. assertion 완화·skip·snapshot 재생성 금지
 
