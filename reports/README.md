@@ -17,6 +17,7 @@
 | 2026-08-22 | Tier-1 (brownfield Vue 3, 테스트 환경 버그) | develop-fe(adr/0014) | sonnet | 선언 기반 훅 | $0.74 | 3.5분/25턴 | 근본 원인·1파일 수정·verify 63/63·테스트 파일 무편집 | [brownfield-vue](brownfield-vue_2026-08-22.md) |
 | 2026-08-26 | retro (~/app SIM-141·SIM-139 세션 3개, 0017~0022 이전 수행분) | retro-fe(adr/0022) | fable + sonnet×3 | 세션당 분석 병렬 | $? | 감사 대상 7.7h | ask 87회→0018 사후 검증, CI 5라운드 미수렴 원인 규명, 훅 오탐 12회 중 2계열 잔존, ADR 후보 3 | [retro](retro-2026-08-26.md) |
 | 2026-08-27 | retro (~/app SIM-145 세션 4개) | retro-fe(adr/0022) | fable + sonnet×4 | 세션당 분석 병렬 (서브 합 ≈350k) | $? | 감사 대상 2.4h | 마찰 70%가 훅 오탐(advisory 스팸 31회·오탐 deny 3·Stop 훅 스펙 불일치), raw Agent 리뷰 누적 4회 → 가드 하드화 후보, CI 루프 규모 게이트 후보, ADR 후보 5 | [retro](retro-2026-08-27.md) |
+| 2026-08-27 | retro_audit (~/app 세션 4개 + 코드 감사 입력 통합 — ee7057d9·779c0f99·3b8e·0101 재집계) | retro-fe(adr/0022) | fable + sonnet×4 | 세션당 분석 병렬(서브 ≈361k) + 당일 코드 감사(렌즈 4, ≈490k)를 회고 입력으로 | $? | 감사 대상 ≈7.9h | 훅 오탐 deny 12/17(3회째 지속)·증거 국면 실측 ≈$11~14/세션(주범=운전 루프)·커밋 초과 3회째(원인 상이)·스킬 사각지대 3종(실패 의미론 스펙 부재→⛔ 2건 통과, diff 렌즈의 전역 일관성 한계, L1 React 관용구 미검출)·선행 리포트 정정 2(779c 제외 오판·advisory 귀속 오류), ADR 후보 8(보강 3·신규 5) | [retro_audit](retro-2026-08-27_audit.md) (부록: [계약](retro-2026-08-27_api-contract-sync.md)·[779c](retro-2026-08-27_779c0f99.md)·[0101](retro-2026-08-27_0101f9e8-full.md)) |
 
 ## 스크래치 프로젝트
 `~/cgamja-scratch/todos-app` — 2026-08-21 런 4개가 쌓인 Vite+TanStack 프로젝트(51커밋, 브랜치 `feat/todos-list-create`, change 3개 archive). 다음 Tier-2/Tier-3 실험의 베이스. 런 원본 JSON·프롬프트·A/B 스크립트는 `~/cgamja-scratch/logs/`.
