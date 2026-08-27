@@ -95,7 +95,8 @@ row "P7 contract.source"           $(cfgkey contract.source && echo 0 || echo 1)
 row "P7 contract.generated + 드리프트" $( (cfgkey contract.generated && (script api:check || cfgkey commands.verify)) && echo 0 || echo 1) "생성물 glob + 재생성 diff 0 검사가 verify에"
 fi
 row "P7 mock.boundary"             $(cfgkey mock.boundary && echo 0 || echo 1)     "경계 mock(계약 밖 요청 = 에러)"
-row "P8 domains.root + 경계 린트"  $( (cfgkey domains.root && ls eslint.config.* biome.json* .oxlintrc* >/dev/null 2>&1) && echo 0 || echo 1) "기존 린터에 경계 규칙(검증된 조각: references/project-conventions.md §6)"
+# 린터 셋 중 하나라도 있으면 통과 — ls에 glob 여러 개를 주면 미매칭 하나로 전체가 exit 1 (2026-08-27 오탐 수정)
+row "P8 domains.root + 경계 린트"  $( (cfgkey domains.root && { ls eslint.config.* >/dev/null 2>&1 || ls biome.json* >/dev/null 2>&1 || ls .oxlintrc* >/dev/null 2>&1; }) && echo 0 || echo 1) "기존 린터에 경계 규칙(검증된 조각: references/project-conventions.md §6)"
 row "P5 a11y.lint"                 $(cfgkey a11y.lint && echo 0 || echo 1)         "프레임워크별 a11y 린트 또는 null"
 row "P5 a11y.runtime"              $(cfgkey a11y.runtime && echo 0 || echo 1)      "axe 등 또는 null"
 row "P4 design.source"             $(cfgkey design.source && echo 0 || echo 1)     "figma:<fileKey> 또는 none"
