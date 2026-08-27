@@ -40,7 +40,12 @@ artifacts:
       Delta spec (## ADDED / MODIFIED / REMOVED Requirements). Each `### Requirement:` MUST have
       >=1 `#### Scenario:` with WHEN/THEN. UI scenarios state the viewport(s) and the visible
       evidence (text, state, screenshot). Include empty / loading / error states unless the user
-      excluded them. If the feature touches an API, add a `## Contract` section: operationId(s),
+      excluded them. If the feature mutates server state, answer three failure-semantics questions
+      (adr/0024): (1) lost-response retry — the server succeeded but the response never arrived and
+      the user retries (idempotency key reuse?); (2) resource lifetime — a token, session, signed URL
+      or cache entry expires mid-use; (3) concurrent input — double-tap, re-submit while in flight,
+      leaving the screen mid-request. Write a scenario for each that applies; if none applies, state
+      `실패 의미론: 해당 없음` in the spec so the omission is a decision, not a blind spot. If the feature touches an API, add a `## Contract` section: operationId(s),
       request/response schema refs into api/openapi.yaml, error statuses (400/401/404/409/5xx) —
       each error/empty/loading maps 1:1 to a UI scenario. If api/openapi.yaml lacks it, write the
       DRAFT stub first (develop-fe references/api-contract.md §3); never invent fields in code or mocks.

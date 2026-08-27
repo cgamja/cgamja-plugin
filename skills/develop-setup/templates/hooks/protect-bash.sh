@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
+# cgamja-hooks v2
 # PreToolUse (Bash): 훅·검증 우회, 보호 파일·생성물·테스트 파일의 쉘 쓰기 차단. 패턴은 .claude/cgamja.json(adr/0014). permissions.deny와 이중.
 # 리다이렉트 패턴은 `2>&1`, `>/dev/null`(fd 리다이렉트)을 제외한다 — 2026-08-21 `cat x.test.tsx 2>&1` 류 읽기 명령 오차단.
 # 읽기/쓰기 구분(adr/0017): hooksPath 조회·인터프리터 읽기 실행은 허용, 커밋된 적 없는 스크래치 테스트 rm은 허용.
+# 오탐 2차 정밀화(adr/0023): 따옴표 안 문자열은 파일 인자가 아니다(커밋 메시지 속 파일명 오차단), `cat <<` 단독은 stdout이라 쓰기가 아니다(`>` 동반 시 WRITE의 `>`가 잡는다), 쓰기 연산과 대상 경로가 같은 파이프라인 세그먼트에 있을 때만 deny.
 source "$(dirname "$0")/_lib.sh"
 cmd="$(j tool_input.command)"; [ -z "$cmd" ] && exit 0
-stripped="$(sed -E 's/[0-9]*>&[0-9]+//g; s/[0-9]*>>?[[:space:]]*\/dev\/null//g' <<<"$cmd")"
-WRITE='(sed -i|perl -p?i|tee |>|>>|rm |cp |mv |cat <<|open\([^)]*["'"'"']w)'
+stripped="$(sed -E -e "s/'[^']*'//g" -e 's/"[^"]*"//g' -e 's/[0-9]*>&[0-9]+//g; s/[0-9]*>>?[[:space:]]*\/dev\/null//g' <<<"$cmd")"
+WRITE='(sed -i|perl -p?i|tee |>|>>|rm |cp |mv |open\([^)]*["'"'"']w)'
+# 세그먼트 판정(adr/0023): &&·||·;·|·줄바꿈으로 나눠, 경로($1)와 쓰기 연산이 같은 세그먼트에 있을 때만 참.
+# 근사 분할이라 과분할될 수 있으나 과분할은 통과(오탐 감소) 방향으로만 작용한다 — 누락 2회면 전체 매칭 복귀(0023 재검토).
+wseg() { local seg; while IFS= read -r seg; do
+    grep -qE "$1" <<<"$seg" && grep -qE "$WRITE" <<<"$seg" && return 0
+  done < <(sed -E 's/&&|\|\||;|\|/\n/g' <<<"$stripped"); return 1; }
 if grep -qE -- '--no-verify|git commit[^|]* -n |HUSKY=0|LEFTHOOK=0|push[^|]*(--force|-f )' <<<"$cmd"; then
   deny "[protect] 훅 우회 금지(--no-verify, LEFTHOOK=0, push --force). 막힌 이유를 고치거나 사용자에게 물어라."; fi
 # core.hooksPath: 값 설정·-c 인라인만 우회. 조회(git config [--flags] core.hooksPath)는 허용(adr/0017)
@@ -23,17 +30,17 @@ if grep -qE '(node|python3?|ruby|perl) +-[ec] ' <<<"$cmd"; then
     deny "[protect] 인터프리터 일회성 실행으로 보호 파일·생성물·테스트 파일을 쓰지 않는다 — Edit 도구를 쓰거나 사용자에게 물어라."; fi
 fi
 prot="$(cfg protected | globs_to_regex)"
-if grep -qE "$prot" <<<"$cmd" && grep -qE "$WRITE" <<<"$stripped"; then
+if wseg "$prot"; then
   deny "[protect] 보호 파일(cgamja.json protected)을 쉘로 바꾸지 않는다 — Edit로 제안하면 사람이 diff를 보고 승인한다(adr/0017)."; fi
 gen="$(cfg contract.generated | globs_to_regex)"
-if [ "$gen" != "^$" ] && grep -qE "$gen" <<<"$cmd" && grep -qE "$WRITE" <<<"$stripped"; then
+if [ "$gen" != "^$" ] && wseg "$gen"; then
   deny "[protect] 계약 생성물 — $(cfg contract.source) 을 고치고 \`$(cfg contract.generate)\`."; fi
 if grep -qE '(^|[;&| ])TDD_PHASE=' <<<"$cmd"; then
   deny "[tdd] TDD_PHASE는 사람이 세션을 띄울 때 정한다(TDD_PHASE=red claude). 인라인 설정 금지 — red 턴이 필요하면 사용자에게 말하고 멈춰라."; fi
 tests="$(cfg tests.patterns | globs_to_regex)"
-if grep -qE "$tests" <<<"$cmd" && grep -qE "$WRITE" <<<"$stripped" && [ "${TDD_PHASE:-}" != "red" ]; then
+if wseg "$tests" && [ "${TDD_PHASE:-}" != "red" ]; then
   # 예외(adr/0017): 쓰기 연산이 rm뿐이고, 명령의 테스트 경로가 전부 untracked(커밋된 적 없는 스크래치)면 허용
-  if grep -qE '(^|[;&| ])rm ' <<<"$stripped" && ! grep -qE '(sed -i|perl -p?i|tee |>|>>|cat <<|cp |mv |open\()' <<<"$stripped"; then
+  if grep -qE '(^|[;&| ])rm ' <<<"$stripped" && ! grep -qE '(sed -i|perl -p?i|tee |>|>>|cp |mv |open\()' <<<"$stripped"; then
     scratch=1
     for tok in $cmd; do tok="${tok#./}"
       case "$tok" in -*|rm|"") continue;; esac

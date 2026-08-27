@@ -50,6 +50,16 @@ check "bash: hooksPath -c inline deny"    "deny" "$(hook $B "$(bashcmd 'git -c c
 check "bash: python -c reads cgamja.json allow" "" "$(hook $B "$(bashcmd "python3 -c \"import json;print(json.load(open('.claude/cgamja.json')))\"")")"
 check "bash: node -e reads package.json allow"  "" "$(hook $B "$(bashcmd "node -e \"const p=require('./package.json'); console.log(p.scripts?.verify)\"")")"
 check "bash: expo install deny"           "deny" "$(hook $B "$(bashcmd 'npx expo install expo-image-picker')")"
+# adr/0023: heredoc 커밋 메시지·세그먼트 판정 — 오탐 2종 회귀
+check "bash: commit heredoc naming test file allow" "" "$(hook $B "$(bashcmd 'git add src/a.test.ts && git commit -m "$(cat <<EOF
+test(a): a.test.ts 갱신
+EOF
+)"')")"
+check "bash: write src + run test in next segment allow" "" "$(hook $B "$(bashcmd "perl -pi -e s/a/b/ src/x.ts && pnpm exec vitest run src/x.test.ts")")"
+check "bash: sed test file same segment still deny" "읽기전용" "$(hook $B "$(bashcmd "sed -i '' s/a/b/ src/x.test.ts && echo done")")"
+check "bash: heredoc redirect to test still deny" "읽기전용" "$(hook $B "$(bashcmd 'cat <<EOF > src/a.test.ts
+x
+EOF')")"
 # adr/0017: 커밋된 적 없는 스크래치 테스트 rm 허용, 추적 중이면 deny
 (cd "$P" && git init -q 2>/dev/null; git -c user.email=t@t -c user.name=t add -A >/dev/null 2>&1 || true)
 mkdir -p "$P/src"; echo x > "$P/src/tracked.test.ts"
