@@ -18,7 +18,7 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 | P7 계약 한 곳 | `contract.*` | 원천 파일 + 생성 명령 + 생성물 glob, 재생성 diff 0 | 원천이 있으면 생성기 제안(`references/api-contract.md` §2·§8), 없으면 `null` + retrofit change 안내(§5). 기능 change와 섞지 않는다 |
 | P7 경계 mock | `mock.boundary` | 계약 밖 요청이 테스트에서 에러 | 러너에 맞는 경계 mock 도구(`skills/test-driven-development/` 규칙: mock은 네트워크 경계에서만, real→fake→stub→mock 순 선호) |
 | P8 경계는 기계가 | `domains.root`, `domains.allowed_edges` | 기존 구조 이름으로 경계 린트가 **실제로** 에러를 낸다 — 별칭 경로뿐 아니라 **상대경로 import도**(smoke 프로브 기준; 2026-08-22 Vue 런에서 `patterns: ['src/pages/*']`가 `./pages/x`를 못 막음) | 기존 린터에 경계 규칙 추가(ESLint면 `templates/react/eslint.boundaries.js` 조각). 구조를 바꾸자고 하지 않는다 |
-| P5 접근성 기본값 | `a11y.lint`, `a11y.runtime` | 린트 1층 + 런타임 2층 | 프레임워크별 a11y 린트 + axe(`references/a11y-frontend.md` §5). 없으면 `null`로 두고 리뷰 렌즈가 넓게 본다 |
+| P5 접근성 기본값 | `a11y.lint`, `a11y.runtime` | 린트 1층 + 런타임 2층 | 프레임워크별 a11y 린트 + axe(`references/a11y-frontend.md` §5). 없으면 `null`로 두고 리뷰 2축이 넓게 본다 |
 | P4 디자인 원천 | `design.source`, `design.tokens` | 원천 선언 + 토큰 파일 + 토큰 외 값 린트 | Figma면 `design/` 스냅샷(`references/figma-design-source.md` §2), 없으면 `none` + 토큰 파일 위치 |
 | P6 플랫폼 | `platform.profile` | `.claude/rules/platform.md` 프로필 | 사용자에게 프로필 1개 확인 |
 | P10 작게 자주 | (commitlint·훅) | conventional commit 린트 + 테스트/구현 커밋 분리 규칙 | 기존 훅 매니저에 `commit-msg` 규칙 추가(없으면 lefthook) |

@@ -63,7 +63,7 @@ MCP로 읽히는 채널은 **노드 이름**(`get_metadata`의 name, `get_design
 ## 6. Figma 대비 검증 — "스크린샷이 비슷해 보인다"는 증거가 아니다
 순서대로, 위가 실패하면 아래 안 한다:
 1. **토큰 린트**: 바뀐 파일에서 `var()` 밖의 `#hex`·`\d+px` grep → 0건. Figma 출력의 `leading-[22.126px]`류는 토큰으로 치환, 토큰이 없으면 **사용자에게 올린다**(하드코딩 금지). 소수점 line-height는 Figma 쪽 텍스트 스타일 문제 — 사용자에게 알림.
-2. **computed style 대조**: 추측하기 쉬운 값 5~10개(**font-family**·gap·padding·radius·border 유무·아이콘 크기·font-weight)를 `getComputedStyle`로 Figma 노드값과 비교. 스크린샷은 레이아웃용, 값은 계산된 스타일로. **폰트 패밀리가 디자인과 다르면(시스템 폰트 대체 등) 여기서 멈추고 사용자에게 보고**한다 — 2026-08-25 실측: 대체 사실을 보고하지 않아 렌즈 6개·SSIM이 전부 놓치고 사람 눈이 잡았다(adr/0019).
+2. **computed style 대조**: 추측하기 쉬운 값 5~10개(**font-family**·gap·padding·radius·border 유무·아이콘 크기·font-weight)를 `getComputedStyle`로 Figma 노드값과 비교. 스크린샷은 레이아웃용, 값은 계산된 스타일로. **폰트 패밀리가 디자인과 다르면(시스템 폰트 대체 등) 여기서 멈추고 사용자에게 보고**한다 — 2026-08-25 실측(v1): 대체 사실을 보고하지 않아 기계 검증 전부가 놓치고 사람 눈이 잡았다(adr/0019).
 3. **픽셀/SSIM 대조는 하지 않는다**(adr/0027, qa-cgamja 원칙 4) — 폰트 렌더링·안티앨리어싱 노이즈 대비 검출 가치가 없다. 디자인 일치는 1·2(토큰·computed style) + 사람 리뷰가 판정하고, 이후 회귀는 `qa-cgamja` baseline 스냅샷이 잡는다.
 4. **상태·브레이크포인트**: summary.md에 적힌 hover/focus/빈/에러 상태와 뷰포트마다 각각 확인. Figma 프레임이 정의하지 않은 상태는 3-3 코드 규칙(빈·로딩·에러 기본 포함)대로 만들고 summary에 "Figma에 없음"으로 기록.
 

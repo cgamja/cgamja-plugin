@@ -16,7 +16,7 @@ cd <project> && openspec init --tools claude --profile core .
 |---|---|---|
 | Tier-1 | 없음 (OpenSpec 안 씀) | — |
 | Tier-2 | `feature` (아래 포크본) | `specs/**/spec.md` + `tasks.md` |
-| Tier-3 | `spec-driven` (기본) | proposal → specs + design → tasks |
+| 큰 작업 | — (Tier-2 change 여러 개로 분해, adr/0026) | change마다 `feature` |
 
 ```bash
 openspec schema fork spec-driven feature
@@ -74,11 +74,11 @@ apply:
     Never edit assertions/skip/tolerances to get green; stop and report the failing assertion.
     Done = `pnpm verify` green; show its output.
 ```
-> 실험 B(adr/0001): 위 `apply.instruction`을 "Skill 도구로 `compound-engineering:ce-work`를 `mode:return-to-caller <changeRoot>/tasks.md`로 호출하고 envelope으로 체크박스 반영"으로 바꿔 Tier-2 change 2개를 돌려본다. ce-work는 체크박스를 안 찍으므로 수동 반영 필수.
+> 구현 실행은 adr/0027 — 메인이 apply.instruction대로 직접 치지 않고, unit packet 서브에이전트에 위임하고 판정·커밋만 한다(develop-fe workflow 2장 4번).
 
 ### `openspec/config.yaml` (프로젝트 시작 시 `[TODO]` 채움)
 ```yaml
-schema: feature            # 기본 스키마 = Tier-2. Tier-3만 --schema spec-driven
+schema: feature            # 기본 스키마 = Tier-2. (Tier-3·spec-driven은 폐지 — adr/0026)
 context: |
   Stack: [TODO]. Components in src/components/ui (shadcn-style). Tokens only, no arbitrary
   Tailwind values. State: local useState / shared context / server [TODO] / url [TODO].
@@ -93,13 +93,12 @@ operations:
   apply:
     guidance:
       - Commit after each task (feat|fix|test(scope): ...); tests in a separate commit before implementation
-      - UI tasks: screenshot at 375/768/1280 with agent-browser, console errors = 0
+      - UI tasks: runtime check via browser devtools (console errors = 0); screenshots go to .claude/state/evidence/ (gitignored, never committed — adr/0027)
       - Run `pnpm verify` before marking the last task complete
   archive:
     guidance:
-      - Before archiving run compound-engineering:ce-code-review with `plan:<changeRoot>/specs/<cap>/spec.md`
-        and the instruction "treat each `### Requirement:` / `#### Scenario:` as a requirement for the
-        Requirements Completeness section; report correctness and spec gaps only". Resolve gaps first.
+      - Before archiving run the two review axes (cgamja:review-cgamja for philosophy/spec compliance,
+        /code-review for bugs — adr/0026). Resolve blockers first (one batched fix pass, one recheck).
       - Confirm every `#### Scenario:` has a matching test or screenshot (Converge group) before archive
 ```
 CI: `openspec validate --archived --strict` — archive 누락이 "오래된 스펙을 믿는" 실패로 이어지므로 필수(adr/0001).

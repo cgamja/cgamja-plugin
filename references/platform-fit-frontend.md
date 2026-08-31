@@ -41,6 +41,6 @@
 ```
 
 ## 5. 검증된 구현 (2026-08-21)
-- **웹(React, Tailwind v4)**: 임의값·`h-screen` 금지는 `eslint-plugin-better-tailwindcss` `no-restricted-classes`(`^.*\[.+\].*$`, `^h-screen$|^min-h-screen$` → `dvh`). 뷰포트 스크린샷은 `agent-browser`/Playwright. 스크래치 Tier-2에서 L5 렌즈가 뷰포트 누락을 실제로 잡음(`reports/develop-fe-tier2_2026-08-21_restructured.md`).
+- **웹(React, Tailwind v4)**: 임의값·`h-screen` 금지는 `eslint-plugin-better-tailwindcss` `no-restricted-classes`(`^.*\[.+\].*$`, `^h-screen$|^min-h-screen$` → `dvh`). 뷰포트 스크린샷은 `agent-browser`/Playwright. 스크래치 Tier-2에서 리뷰가 뷰포트 누락을 실제로 잡음(v1 L5 렌즈 실측(`reports/develop-fe-tier2_2026-08-21_restructured.md`).
 - **Expo(React Native)**: 안전영역 `SafeAreaView`/`useSafeAreaInsets`, 키보드 `KeyboardAvoidingView` 또는 `react-native-keyboard-controller`, 목록 `FlatList`/`FlashList`, 오프라인 `NetInfo`, 분기 `*.web.tsx`/`*.native.tsx`, 네비 `expo-router`. 스크린샷은 시뮬레이터, 웹 렌더 필요 시 Expo Web. 절차 런은 **미실시**.
 - 그 외 스택: 표의 증거는 그대로, 도구만 조사·실측 후 여기에 추가.
