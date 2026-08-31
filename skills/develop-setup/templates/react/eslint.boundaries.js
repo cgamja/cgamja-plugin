@@ -58,10 +58,10 @@ export const boundariesConfig = {
   },
 };
 
-// API 계약 강제 — 계약은 api/openapi.yaml, 코드는 생성물(src/api/*.gen.ts)만 (develop-fe adr/0008). 검증: 위반 2 errors, src/api 0.
+// API 계약 강제 — 계약은 api/openapi.yaml, 코드는 생성물(tags-split: src/domains/<tag>/*.gen.ts + 공유 스키마 src/api/model)만 (adr/0008·0027). 검증: 위반 2 errors, 생성 폴더 0.
 export const apiContractConfig = {
   files: ["src/**/*.{ts,tsx}"],
-  ignores: ["src/api/**", "src/test/**", "**/*.test.*", "**/*.browser.test.*", "e2e/**"],
+  ignores: ["src/api/**", "src/domains/**/*.gen.ts", "src/domains/**/*.msw.ts", "src/domains/**/*.faker.ts", "src/test/**", "**/*.test.*", "**/*.browser.test.*", "e2e/**"],
   rules: {
     "no-restricted-globals": [2, { name: "fetch", message: "직접 fetch 금지 — src/api 생성 클라이언트를 쓴다. 없는 엔드포인트면 api/openapi.yaml부터(스펙 diff 제안)." }],
     "no-restricted-properties": [2,

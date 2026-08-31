@@ -5,7 +5,7 @@ paths:
 ---
 # 플랫폼 프로필: {{PLATFORM_PROFILE}}  <!-- web-desktop | web-mobile 중 develop-setup이 치환. 둘 다면 web-mobile 기준 -->
 
-UI task의 증거와 리뷰 렌즈 L5(`reviewer-platform`)가 이 파일을 읽는다. 기준 원문은 cgamja `references/platform-fit-frontend.md` §1.
+UI task의 증거와 리뷰 2축(review-cgamja·code-review)이 이 파일을 읽는다. 기준 원문은 cgamja `docs/guides/platform-fit-frontend.md` §1.
 
 - 뷰포트 스크린샷: {{VIEWPORTS}}  <!-- web-desktop: 375 / 768 / 1280 · web-mobile: 375 / 390 / 430 세로 + 768 가로 -->
 - 다크 모드: {{DARK_MODE}}  <!-- tokens.css에 dark 토큰 있으면 "각 뷰포트 2배", 없으면 "없음" -->

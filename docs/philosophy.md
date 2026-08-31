@@ -39,7 +39,7 @@
 
 ## 5. 도구·스택 지식의 자리
 
-- 특정 스택에서 검증한 사실("orval 8은 MSW+faker를 생성한다", "Vitest Browser Mode는 Chromium만")은 `references/`에 **날짜와 함께** 두고, 절차는 그 사실을 *조건부로* 참조한다. 절차에 "orval을 돌려라"가 아니라 "계약 원천에서 생성하라 — React+OpenAPI면 `references/api-contract.md`"로.
+- 특정 스택에서 검증한 사실("orval 8은 MSW+faker를 생성한다", "Vitest Browser Mode는 Chromium만")은 `docs/guides/`에 **날짜와 함께** 두고, 절차는 그 사실을 *조건부로* 참조한다. 절차에 "orval을 돌려라"가 아니라 "계약 원천에서 생성하라 — React+OpenAPI면 `docs/guides/api-contract.md`"로.
 - 새 스택·새 도구는 리서치로 결론 내지 않는다. 설치해서 돌려보고, 실패 모드를 적고, 그 뒤에 references에 넣는다.
 - 지식이 낡는 것은 정상이다. 주기적으로 드리프트를 점검하고, 틀린 것은 지운다.
 

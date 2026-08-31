@@ -8,4 +8,4 @@ paths: {{TEST_PATHS}}
 - 쿼리는 역할·라벨 우선, 자동 재시도 expect. 고정 시간 대기 금지
 - mock은 네트워크 경계(`mock.boundary`)에서만. 자식 컴포넌트·훅·store mock 금지. 브라우저 계층에서 모듈 mock과 경계 mock 혼용 금지
 - skip/only/`expect(true)`/빈 assertion 금지(린트가 막는다)
-- 상세 루프와 예시: cgamja 플러그인 `references/tdd-frontend.md` (`/test-fe` 스킬이 적용)
+- 상세 루프와 예시: cgamja 플러그인 `skills/test-driven-development/`(vendored TDD 스킬, adr/0026)

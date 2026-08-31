@@ -16,7 +16,6 @@ jobs:
         if: github.event_name == 'pull_request'
       - run: npx -y @fission-ai/openspec@latest validate --archived --strict
         env: { OPENSPEC_TELEMETRY: "0" }
-      - run: pnpm exec jscpd src --threshold 3 --reporters console
       - run: bash scripts/check-docs.sh   # CLAUDE.md/.claude/rules/docs 가 가리키는 경로·명령 존재 검사
       - name: api contract — breaking change vs base   # api/openapi.yaml 없으면 삭제
         if: github.event_name == 'pull_request'

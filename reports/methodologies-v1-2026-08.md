@@ -33,7 +33,7 @@ develop-fe 스킬 설계 근거. 원문 링크는 각 항목에. 결론은 맨 �
 
 ## 3. 프론트엔드 특화 — 에이전트가 UI를 검증하게 만드는 법
 - **브라우저 도구**: "드라이브"는 `agent-browser`(Vercel, 토큰 최저, 세션 분리, 뷰포트별 스크린샷) 또는 Playwright CLI, "디버그"는 Chrome DevTools MCP(콘솔/네트워크/perf). Next 16.3+면 `next-dev-loop` 스킬이 둘 다 묶음.
-- **컴포넌트 테스트**: Vitest Browser Mode(인터랙션·레이아웃 — 2026 재검증으로 기본값, `tdd-frontend.md`) / jsdom(훅·로직만) / MSW(네트워크 경계에서만 mock). `toMatchScreenshot()`은 디자인시스템 프리미티브 몇 개에만, 요소 단위로.
+- **컴포넌트 테스트**: Vitest Browser Mode(인터랙션·레이아웃 — 2026 재검증으로 기본값, 지금은 `skills/test-driven-development/` 스킬이 루프 담당) / jsdom(훅·로직만) / MSW(네트워크 경계에서만 mock). `toMatchScreenshot()`은 디자인시스템 프리미티브 몇 개에만, 요소 단위로.
 - **a11y**: `@axe-core/playwright`(wcag2a/2aa) — violations는 블로킹, incomplete는 사람 큐. 다이얼로그엔 `toMatchAriaSnapshot`.
 - **TDD for UI**: 역할/라벨로 쿼리, `userEvent`, 자식 컴포넌트 mock 금지. **빨간 불을 먼저 보여주게** 할 것 — 에이전트는 사람보다 mock을 많이 쓴다(36% vs 26%), 동어반복 테스트는 Stryker로.
 - **디자인 시스템 준수는 프롬프트로 안 됨**(Builder.io): 모델은 지시보다 주변 예시를 따른다 → `no-restricted-imports`, `eslint-plugin-better-tailwindcss`(no-unknown/no-conflicting classes), Deslint `no-arbitrary-colors`, 컴파일되는 `examples/` 폴더. Figma MCP `get_design_context`는 `leading-[22.126px]` 같은 임의값을 뱉으니 "토큰 먼저 추출" 단계를 분리.

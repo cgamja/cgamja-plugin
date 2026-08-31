@@ -13,14 +13,15 @@ check "setup_check warns without declaration" "cgamja.json" "$(hook $C '{"sessio
 echo '{"commands":{"verify":"x"}}' > $E/.claude/cgamja.json
 check "setup_check silent when complete" "" "$(hook $C '{"session_id":"t","cwd":"'$E'","tool_input":{}}')"
 R=skills/develop-fe/hooks/review_nudge.sh
-check "review nudge on Agent review" "ce-code-review" "$(hook $R '{"session_id":"t","tool_input":{"description":"Code review of todos","prompt":"review the diff"}}')"
+check "review nudge on Agent review" "review-cgamja" "$(hook $R '{"session_id":"t","tool_input":{"description":"Code review of todos","prompt":"review the diff"}}')"
+check "no nudge on reviewer-cgamja agent" "" "$(hook $R '{"session_id":"t","tool_input":{"subagent_type":"reviewer-cgamja","description":"철학 리뷰","prompt":"docs/spec 대조"}}')"
 check "no nudge on explore agent"   ""     "$(hook $R '{"session_id":"t","tool_input":{"description":"Explore codebase","prompt":"find usages"}}')"
 check "setup_check bypass warn"     "승인자" "$(hook $C '{"session_id":"t2","cwd":"'$E'","permission_mode":"bypassPermissions","tool_input":{}}')"
 # adr/0023: advisory 경고는 세션당 1회 — 같은 세션 두 번째 호출은 무경고
 check "setup_check bypass warn once" ""     "$(hook $C '{"session_id":"t2","cwd":"'$E'","permission_mode":"bypassPermissions","tool_input":{}}')"
 check "setup_check default no warn" ""     "$(hook $C '{"session_id":"t3","cwd":"'$E'","permission_mode":"default","tool_input":{}}')"
 N=skills/develop-fe/hooks/test_nudge.sh
-check "test nudge without test-fe"  "test-fe" "$(hook $N '{"session_id":"tn1","tool_input":{"file_path":"src/a/B.browser.test.tsx"}}')"
+check "test nudge without tdd skill" "test-driven-development" "$(hook $N '{"session_id":"tn1","tool_input":{"file_path":"src/a/B.browser.test.tsx"}}')"
 check "test nudge non-test silent"  ""        "$(hook $N '{"session_id":"tn1","tool_input":{"file_path":"src/a/B.tsx"}}')"
-hook $G '{"session_id":"tn2","tool_input":{"skill":"cgamja:test-fe"}}' >/dev/null
-check "test nudge silent after test-fe" "" "$(hook $N '{"session_id":"tn2","tool_input":{"file_path":"e2e/x.spec.ts"}}')"
+hook $G '{"session_id":"tn2","tool_input":{"skill":"cgamja:test-driven-development"}}' >/dev/null
+check "test nudge silent after tdd skill" "" "$(hook $N '{"session_id":"tn2","tool_input":{"file_path":"e2e/x.spec.ts"}}')"

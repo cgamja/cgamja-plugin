@@ -33,11 +33,11 @@
 | 직접 `claude -p --output-format stream-json` + `Skill` 호출 grep | 동작함 | 3층 임시 러너의 뼈대. `env -u CLAUDECODE`로 세션 안에서 중첩 실행. `--model` 핀 필수 |
 
 ## 4. 케이스 작성 규칙
-- **결정적 체크 먼저**: `file_exists openspec/changes/*`, `tool_used Skill(cgamja:test-fe)`, 커밋 메시지 `^test\(`·`^feat\(` 분리, `*.gen.ts` diff 없음. LLM 루브릭은 "시나리오가 스펙과 1:1인가"처럼 문자열로 못 잡는 것에만.
+- **결정적 체크 먼저**: `file_exists openspec/changes/*`, `tool_used Skill(cgamja:test-driven-development)`, 커밋 메시지 `^test\(`·`^feat\(` 분리, `*.gen.ts` diff 없음. LLM 루브릭은 "시나리오가 스펙과 1:1인가"처럼 문자열로 못 잡는 것에만.
 - **결과를 채점, 경로를 채점하지 않는다**: 툴 호출 순서 고정은 brittle. 순서가 규칙 자체인 것(테스트 커밋이 구현 커밋보다 먼저)만 `tool_order`.
 - **판별력**: 스킬 없이도 통과하는 assertion은 정보량 0 — with/without 델타가 메트릭. 델타 0인 케이스는 더 어렵게 고치거나 삭제.
 - **negative는 근접으로**: "git log 보여줘"는 무의미. "React Query와 SWR 차이"(설명 요청, 개발 아님) 같은 것.
-- **스킬을 테스트, 모델을 테스트하지 않는다**: 모델이 원래 잘하는 것(버튼 하나 추가)은 케이스가 아니다. 스킬이 *바꾸는* 것(티어 판정·red 게이트·리뷰 렌즈)만.
+- **스킬을 테스트, 모델을 테스트하지 않는다**: 모델이 원래 잘하는 것(버튼 하나 추가)은 케이스가 아니다. 스킬이 *바꾸는* 것(티어 판정·red 게이트·리뷰 2축)만.
 - 20~50 케이스면 충분. 실제 실패(`reports/`, 4층)에서 뽑는다. 0% 통과는 모델 문제가 아니라 케이스 결함.
 - 모델 핀: 2·3층은 `--model` 없이 돌린 숫자를 비교하지 않는다.
 

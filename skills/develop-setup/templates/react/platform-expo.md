@@ -5,7 +5,7 @@ paths:
 ---
 # 플랫폼 프로필: expo (iOS · Android)
 
-UI task의 증거와 리뷰 렌즈 L5(`reviewer-platform`)가 이 파일을 읽는다. 기준 원문은 cgamja `references/platform-fit-frontend.md` §1.
+UI task의 증거와 리뷰 2축(review-cgamja·code-review)이 이 파일을 읽는다. 기준 원문은 cgamja `docs/guides/platform-fit-frontend.md` §1.
 
 - 스크린샷: iPhone SE(375×667) · iPhone 15(393×852) · Pixel 7(412×915), **라이트·다크 각 1회**
 - 안전영역: `useSafeAreaInsets`/`SafeAreaView` — 상단·하단 탭바 겹침 0

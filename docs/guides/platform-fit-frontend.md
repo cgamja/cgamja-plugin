@@ -1,6 +1,6 @@
 # 플랫폼 적합성 — 데스크톱 웹 / 모바일 웹 / 네이티브, 같은 화면이라도 증거가 다르다 (`adr/0010`, `adr/0014`)
 
-**원칙**: "반응형"은 체크 항목이 아니라 **프로필**이다. 프로젝트가 `.claude/cgamja.json` `platform.profile`(`web-desktop` | `web-mobile` | `native`)을 선언하고 `.claude/rules/platform.md`(템플릿 `templates/rules/platform-{web,expo}.md`)에 뷰포트·증거·금지 목록을 둔다. develop-fe UI task와 review-fe L5 렌즈는 그 프로필만 읽는다. 스킬 본문에는 스택 분기를 쓰지 않는다. §5는 검증된 구현.
+**원칙**: "반응형"은 체크 항목이 아니라 **프로필**이다. 프로젝트가 `.claude/cgamja.json` `platform.profile`(`web-desktop` | `web-mobile` | `native`)을 선언하고 `.claude/rules/platform.md`(템플릿 `templates/rules/platform-{web,expo}.md`)에 뷰포트·증거·금지 목록을 둔다. develop-fe UI task와 리뷰는 그 프로필만 읽는다. 스킬 본문에는 스택 분기를 쓰지 않는다. §5는 검증된 구현.
 
 ## 1. 프로필 표
 | | `web-desktop` | `web-mobile` / PWA | `native` (iOS·Android) |
@@ -41,6 +41,6 @@
 ```
 
 ## 5. 검증된 구현 (2026-08-21)
-- **웹(React, Tailwind v4)**: 임의값·`h-screen` 금지는 `eslint-plugin-better-tailwindcss` `no-restricted-classes`(`^.*\[.+\].*$`, `^h-screen$|^min-h-screen$` → `dvh`). 뷰포트 스크린샷은 `agent-browser`/Playwright. 스크래치 Tier-2에서 L5 렌즈가 뷰포트 누락을 실제로 잡음(`reports/develop-fe-tier2_2026-08-21_restructured.md`).
+- **웹(React, Tailwind v4)**: 임의값·`h-screen` 금지는 `eslint-plugin-better-tailwindcss` `no-restricted-classes`(`^.*\[.+\].*$`, `^h-screen$|^min-h-screen$` → `dvh`). 뷰포트 스크린샷은 `agent-browser`/Playwright. 스크래치 Tier-2에서 리뷰가 뷰포트 누락을 실제로 잡음(v1 L5 렌즈 실측(`reports/develop-fe-tier2_2026-08-21_restructured.md`).
 - **Expo(React Native)**: 안전영역 `SafeAreaView`/`useSafeAreaInsets`, 키보드 `KeyboardAvoidingView` 또는 `react-native-keyboard-controller`, 목록 `FlatList`/`FlashList`, 오프라인 `NetInfo`, 분기 `*.web.tsx`/`*.native.tsx`, 네비 `expo-router`. 스크린샷은 시뮬레이터, 웹 렌더 필요 시 Expo Web. 절차 런은 **미실시**.
 - 그 외 스택: 표의 증거는 그대로, 도구만 조사·실측 후 여기에 추가.

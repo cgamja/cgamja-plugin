@@ -1,6 +1,6 @@
 # Figma를 디자인 원천으로 쓰는 법 (리서치 2026-08-21)
 
-디자인 원천은 프로젝트가 `.claude/cgamja.json` `design.source`로 선언한다(`figma:<fileKey>` 또는 `none`; 다른 원천이면 같은 원칙 — 원천은 진실, 저장소 스냅샷은 캐시). 아래는 Figma일 때. Figma 파일에 디자인이 있고, 일부는 미완성(와이어프레임 상태)으로 표시돼 있다. 에이전트는 ① 완성된 화면은 Figma대로 구현하고 ② 미완성 부분은 Artifact로 후보를 뽑아 사용자와 확정한 뒤 코드로 만들고 Figma에 거울로 남기며 ③ **단순 기능 개발에선 Figma를 부르지 않는다**. 결정은 `adr/0002`, `adr/0003`.
+디자인 원천은 프로젝트가 `.claude/cgamja.json` `design.source`로 선언한다(`figma:<fileKey>` 또는 `none`; 다른 원천이면 같은 원칙 — 원천은 진실, 저장소 스냅샷은 캐시). 아래는 Figma일 때. Figma 파일에 디자인이 있고, 일부는 미완성(와이어프레임 상태)으로 표시돼 있다. 에이전트는 ① 완성된 화면은 Figma대로 구현하고 ② 미완성 부분은 Artifact로 후보를 뽑아 사용자와 확정한 뒤 코드로 만들며(Figma로의 역캡처는 하지 않는다 — adr/0026 §9) ③ **단순 기능 개발에선 Figma를 부르지 않는다**. 결정은 `adr/0002`, `adr/0003`.
 
 ## 0. 먼저 알아야 할 플랜 게이트 ([rate limits](https://developers.figma.com/docs/figma-mcp-server/rate-limits-access/))
 | 기능 | 조건 |
@@ -57,17 +57,14 @@ MCP로 읽히는 채널은 **노드 이름**(`get_metadata`의 name, `get_design
 1. **입력 수집**: 해당 노드 `get_design_context`(와이어프레임 구조·카피는 살린다) + `summary.md` + 토큰 파일(`design.tokens`) + `components.md` + 같은 플로우의 Ready 화면 `reference@2x.png`(톤 맞추기). `app-ref-to-figma`로 모은 레퍼런스 파일이 있으면 같은 기능의 타앱 화면 2~3장.
 2. **후보 생성**: `design` 스킬(Claude Design 캔버스 Artifact)로 **2~3안**, 한 캔버스에 나란히. 제약: 토큰·기존 컴포넌트만, 와이어프레임의 정보 구조 유지, 각 안에 "무엇을 다르게 했나" 한 줄. 사용자는 캔버스에서 직접 고치고 저장한다.
 3. **확정**: 사용자가 안을 고르거나 합친다. 결정을 `design/screens/<slug>/summary.md`의 "디자인 결정" 항목에 한 줄 기록(왜 그 안인지).
-4. **코드 먼저 구현** (Tier-2 절차). 검증은 Artifact 확정본과 비교.
-5. **Figma에 거울 남기기**: 실행 중인 화면을 `generate_figma_design`으로 `🧩 Built-in-code` 섹션에 평면 캡처. 프레임 이름에 `source: code · <날짜>`. **`use_figma`로 인스턴스 재조립은 하지 않는다** — 이미지 불가·폰트 업로드·베타 품질이라 비용 대비 가치 없음. 재사용 컴포넌트로 승격될 때만 사용자가 Figma에서 손으로 만든다.
-6. 스냅샷 생성(§2). 이때부터 이 화면은 Ready와 동일하게 취급.
-
-Full seat가 없으면 5단계는 건너뛰고 summary.md의 기록 + Artifact 링크로 대신한다.
+4. **코드 먼저 구현** (Tier-2 절차). 검증은 Artifact 확정본과 비교. summary.md의 기록 + Artifact 링크가 이 부분의 디자인 원천이다. **Figma로의 역캡처(거울)는 하지 않는다**(adr/0026 §9 — Figma는 읽기 전용 원천).
+5. 스냅샷 생성(§2). 이때부터 이 화면은 Ready와 동일하게 취급.
 
 ## 6. Figma 대비 검증 — "스크린샷이 비슷해 보인다"는 증거가 아니다
 순서대로, 위가 실패하면 아래 안 한다:
 1. **토큰 린트**: 바뀐 파일에서 `var()` 밖의 `#hex`·`\d+px` grep → 0건. Figma 출력의 `leading-[22.126px]`류는 토큰으로 치환, 토큰이 없으면 **사용자에게 올린다**(하드코딩 금지). 소수점 line-height는 Figma 쪽 텍스트 스타일 문제 — 사용자에게 알림.
-2. **computed style 대조**: 추측하기 쉬운 값 5~10개(**font-family**·gap·padding·radius·border 유무·아이콘 크기·font-weight)를 `getComputedStyle`로 Figma 노드값과 비교. 스크린샷은 레이아웃용, 값은 계산된 스타일로. **폰트 패밀리가 디자인과 다르면(시스템 폰트 대체 등) 여기서 멈추고 사용자에게 보고**한다 — 2026-08-25 실측: 대체 사실을 보고하지 않아 렌즈 6개·SSIM이 전부 놓치고 사람 눈이 잡았다(adr/0019).
-3. **픽셀/SSIM 비교 1회**: 2x로 캡처(Figma export와 동일 배율), `document.fonts.ready` 대기, 애니메이션 끄기, mock 데이터 고정, 텍스트 마스킹. **97~98% 이상 통과**, 98~99.5% 구간은 대개 폰트 렌더링 차이 — 단, 이 해석은 **2의 font-family 일치가 확인된 뒤에만** 적용한다(폰트 패밀리 자체가 다른 것을 "렌더링 차이"로 합리화하지 않는다). EXPECTED/ACTUAL/DIFF 3장을 PR에 첨부(점수만 주면 에이전트가 합리화한다). 도구: `design-check-mcp`, `figma-pixel-kit`(pixelmatch+`--ignore-text`) 중 `[TODO: 택1]`.
+2. **computed style 대조**: 추측하기 쉬운 값 5~10개(**font-family**·gap·padding·radius·border 유무·아이콘 크기·font-weight)를 `getComputedStyle`로 Figma 노드값과 비교. 스크린샷은 레이아웃용, 값은 계산된 스타일로. **폰트 패밀리가 디자인과 다르면(시스템 폰트 대체 등) 여기서 멈추고 사용자에게 보고**한다 — 2026-08-25 실측(v1): 대체 사실을 보고하지 않아 기계 검증 전부가 놓치고 사람 눈이 잡았다(adr/0019).
+3. **픽셀/SSIM 대조는 하지 않는다**(adr/0027, qa-cgamja 원칙 4) — 폰트 렌더링·안티앨리어싱 노이즈 대비 검출 가치가 없다. 디자인 일치는 1·2(토큰·computed style) + 사람 리뷰가 판정하고, 이후 회귀는 `qa-cgamja` baseline 스냅샷이 잡는다.
 4. **상태·브레이크포인트**: summary.md에 적힌 hover/focus/빈/에러 상태와 뷰포트마다 각각 확인. Figma 프레임이 정의하지 않은 상태는 3-3 코드 규칙(빈·로딩·에러 기본 포함)대로 만들고 summary에 "Figma에 없음"으로 기록.
 
 무시할 것: 서브픽셀 안티앨리어싱, 1px 전역 오프셋, 스크롤바, 이미지 압축.
