@@ -83,14 +83,15 @@ components:
 import { defineConfig } from "orval";
 export default defineConfig({
   api: { input: "./api/openapi.yaml",
-    output: { target: "./src/api/client.gen.ts", schemas: "./src/api/model", client: "react-query", httpClient: "fetch", mock: true,
+    output: { mode: "tags-split", target: "./src/domains/api.gen.ts", schemas: "./src/api/model", client: "react-query", httpClient: "fetch", mock: true,
               baseUrl: { getBaseUrlFromSpecification: true } } },   // 없으면 servers.url(/api/v1)을 무시하고 `/todos`를 부른다 — retrofit 리뷰 P1(실측)
-  zod: { input: "./api/openapi.yaml", output: { target: "./src/api/zod.gen.ts", client: "zod", fileExtension: ".gen.ts" } },
+  zod: { input: "./api/openapi.yaml", output: { mode: "tags-split", target: "./src/domains/zod.gen.ts", client: "zod", fileExtension: ".gen.ts" } },
 });
 ```
+- **§8-b 도메인 분리(adr/0027)**: 생성물을 한 곳(`src/api/`)에 모으면 FSD 도메인 응집이 깨진다 — `mode: "tags-split"`으로 OpenAPI `tags`(= 도메인 이름)별 폴더에 생성해 각 도메인의 api 세그먼트에 앉힌다. 규칙: ① 모든 endpoint에 `tags` 정확히 1개(도메인 이름) — 없거나 2개면 스펙 린트로 거부(새 feature 추가 = 새 태그 = 새 도메인 폴더) ② 공유 스키마(`schemas`)는 도메인 밖 한 곳(shared 취급) — 도메인 간 타입 공유는 여기로만 ③ 다른 도메인의 생성물 import는 기존 경계 린트가 그대로 막는다. tags-split 모드 자체는 2026-08-31 문서 반영·경로 미실측 — 첫 적용 시 생성 경로를 실측해 이 절과 템플릿 주석을 갱신할 것.
 - `mock: true`면 MSW 핸들러가 `client.gen.ts`에 인라인. 묶음 이름은 `info.title`에서 나오므로 title은 짧게(`App API`), DRAFT 표시는 `info.description`에.
 - 재생성은 결정적(두 번 돌려도 diff 0). **단 포맷터가 생성물을 건드리면 깨진다** — `.prettierignore`에 `src/api`·lockfile·`routeTree.gen.ts` 필수(2026-08-22 smoke 실측: 누락 시 첫 커밋의 lint-staged가 포맷해 `api:check` 항상 빨강).
-- 선언 예: `contract: { source: "api/openapi.yaml", generate: "pnpm api:gen", generated: ["src/api/**/*.gen.ts", "src/api/model/**"] }`, `package.json` `"api:pull": "curl -sf $API_SPEC_URL -o api/openapi.yaml"`, `"api:gen": "orval"`, `"api:check": "orval && git diff --exit-code -- src/api"`, `verify`에 `api:check` 포함.
+- 선언 예: `contract: { source: "api/openapi.yaml", generate: "pnpm api:gen", generated: ["src/domains/**/*.gen.ts", "src/api/model/**"] }`, `package.json` `"api:pull": "curl -sf $API_SPEC_URL -o api/openapi.yaml"`, `"api:gen": "orval"`, `"api:check": "orval && git diff --exit-code -- src/domains/**/*.gen.ts src/api/model"`, `verify`에 `api:check` 포함.
 - 린트: `no-restricted-globals` `fetch` + `no-restricted-imports` `axios`/`ky`(`src/api/**`·테스트 제외). 검증: 위반 파일 2 errors, 생성 폴더 0.
 - MSW: `setupServer(...).listen({ onUnhandledRequest: "error" })` — 검증: `fetch("/api/v1/userz")` rejects.
 - CI: `oasdiff breaking`(base vs HEAD). 스펙 확보 도구: FastAPI `/openapi.json`, NestJS `@nestjs/swagger` CLI 플러그인, springdoc; 없으면 `mitmproxy2swagger -i capture.har -o api/openapi.yaml -p <base>` (`--examples/--headers` 끄기). 린트 `redocly lint`. 화해 퍼징 `schemathesis run api/openapi.yaml --url <staging>`.

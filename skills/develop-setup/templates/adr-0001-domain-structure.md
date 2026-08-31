@@ -24,6 +24,6 @@
 
 ## 왜
 - FSD 2.1 자체가 "pages부터, 거기서 멈춰도 됨". 솔로·단기엔 풀 FSD 비추(FSD 블로그). 이 구조는 bulletproof-react `features/` + FSD 세그먼트명 + public API
-- 에이전트 코드베이스의 실증된 실패는 층 위반이 아니라 **의미적 중복**(사람의 1.87배)과 상태 sprawl → 경계 린트 + jscpd + "만들기 전 grep"
+- 에이전트 코드베이스의 실증된 실패는 층 위반이 아니라 **의미적 중복**(사람의 1.87배)과 상태 sprawl → 경계 린트 + "만들기 전 grep" + 철학 문서 대조(cgamja `docs/spec/GOOD-BAD-PATTERN.md`·`CLEAN-CODE.md`) — jscpd는 오탐 수리 비용이 검출 가치를 넘어 폐지(cgamja adr/0027)
 - 아키텍처는 spec(행동)이 아니라 여기+린트에. OpenSpec `design.md`는 archive 때 버려진다
-- 근거 리서치: cgamja `references/verdicts-2026-08-21.md` ④, `adr/0006`
+- 근거 리서치: cgamja `reports/verdicts-2026-08-21.md` ④(역사 기록), `adr/0006`

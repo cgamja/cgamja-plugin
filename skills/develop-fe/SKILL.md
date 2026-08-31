@@ -26,7 +26,7 @@ hooks:
 
 # develop-fe (v2 — adr/0026)
 
-프론트엔드 작업을 받아서 PR까지 가는 **오케스트레이터**. 절차 전체는 `workflow.md`에 있고, 이 파일은 **언제 무엇을 읽고 어떤 스킬을 부를지**만 정한다. `references/`·`adr/`·`agents/`·`docs/spec/` 경로는 **플러그인 루트** 기준이다.
+프론트엔드 작업을 받아서 PR까지 가는 **오케스트레이터** — 메인 세션은 티어 판정·스펙·task 분해·결과 통합·커밋만 소유하고, **구현·테스트 작성은 unit packet 서브에이전트로 위임**한다(adr/0027; inline 예외는 Tier-1·1~2파일 trivial). 절차 전체는 `workflow.md`에 있고, 이 파일은 **언제 무엇을 읽고 어떤 스킬을 부를지**만 정한다. 독립 change 병렬 작업은 `workflow.md` 2-P(터미널별 `claude --worktree <slug>`). `references/`·`adr/`·`agents/`·`docs/spec/` 경로는 **플러그인 루트** 기준이다.
 
 ## 왜 이런 구조인가 (한 문단)
 에이전트 개발 방법론은 전부 같은 다섯 동작으로 환원된다 — 의도를 글로 고정, 편집 전 계획, **돌릴 수 있는 체크를 먼저**, 작성자와 검증자 분리, 컨텍스트 작게. v2는 그 다섯을 자작 대신 **검증된 외부 스킬 조합**으로 채운다(adr/0026): 스펙·tasks는 OpenSpec, TDD는 `test-driven-development`(vendored), 런타임 검증은 `browser-testing-with-devtools`, 비주얼 QA는 `qa-cgamja`, 리뷰는 `review-cgamja`(철학 대조) + `/code-review`(신뢰도 스코어링 버그 리뷰) 2축. 코드 작성 기준(SPEC)은 `docs/spec/`가 원천이고, 커밋·푸시 품질은 git pre-commit/pre-push 훅이 강제한다.

@@ -91,10 +91,12 @@
 1. **탐색**: 관련 코드, 기존 컴포넌트, `openspec/specs/`, `docs/solutions/`, `design/screens/<slug>/`(있으면 Figma 안 연다). 긴 문서·티켓은 서브에이전트가 읽고 요약만(`context-engineering` 원칙). 코드가 이미 답하는 건 묻지 않는다
 2. **질문 1회** (AskUserQuestion, 최대 5개): ① 참고할 기존 코드 ② Figma 노드 URL(스냅샷 없을 때만) ③ 빈·로딩·에러 상태 ④ 반응형 범위 ⑤ 가정한 기본값 목록(반박만 받기) ⑥ 계약 DRAFT 스텁 shape(해당 시)
 3. **`/opsx:propose`** → `openspec/changes/<slug>/` 에 spec delta(시나리오 = 테스트 원천) + `tasks.md`(task마다 `→ verify:`). `openspec validate <slug> --strict`. propose 중엔 프로젝트 코드를 편집하지 않는다(planning boundary, adr/0019)
-4. **`/opsx:apply`** — task 하나씩:
-   - **테스트 task**: `test-driven-development` 스킬 로드 — 실패하는 테스트 먼저, 버그는 재현 테스트 먼저. red 게이트는 세션당 1회 승인(adr/0018)이되, 각 red의 **실패 출력 원문과 이유("기능 미구현", import 오류 아님)를 본문에 붙인 뒤** `test(scope):` 커밋. 쿼리 우선순위는 role/label > 텍스트 > testID(3-2). 승인자가 없으면 구현으로 넘어가지 말고 멈춘다
-   - **구현 task**: 테스트 파일은 건드리지 않는다(Edit ask, Bash 쓰기 deny). 코드 기준은 `docs/spec/`(CLEAN-CODE·ARCHITECTURE·WEB/APP-SPEC). 컴포넌트 합성은 `vercel-composition-patterns`, 네이티브면 `react-native-skills` 로드. 초록 + PASS_TO_PASS → `[x]` → `feat(scope):` 커밋
-   - **UI task**: 뷰포트·다크모드 증거는 `.claude/rules/platform.md` 프로필대로. 런타임 확인은 `browser-testing-with-devtools`(DOM·콘솔 에러 0·네트워크) 우선, 안 되면 `references/evidence-capture.md` 순서로 촬영. 접근성: axe serious+ 0건 + Tab 시퀀스(`references/a11y-frontend.md`)
+4. **`/opsx:apply`** — task 하나씩, **메인은 위임·판정·커밋만 한다(adr/0027)**:
+   - **위임 기본**: 구현·테스트 작성 unit은 서브에이전트 1개(fresh context, `model:` 명시 — 구현·테스트 sonnet)로 내린다. inline 예외: 1~2파일 trivial, 사용자 상호작용이 중간에 필요한 task. **unit packet**(위임 프롬프트)에 넣을 것: 해당 requirement 발췌 + 대상 파일 + 테스트 시나리오 + 검증 명령 + `docs/spec/` 절대 경로(서브에이전트는 대화 이력·로드된 스킬을 못 본다 — CLAUDE.md·rules·훅은 자동 적용) + "커밋 금지, 최종 메시지는 `{status, changed_files, evidence(red 관찰·검증 결과)}` JSON". "스펙 전체를 읽어라"는 금지
+   - **수신·검증**: worker 리포트 JSON만 받고, diff 전문은 컨텍스트에 넣지 않는다 — `git diff --stat` + 검증 명령 재실행으로 실물 확인 후 메인이 커밋. `blocked`/`scope_expansion`이면 packet을 고쳐 1회 re-dispatch, 2회 실패 시 inline 강등. 깨진 트리 위에 다음 unit을 보내지 않는다
+   - **테스트 unit**: `test-driven-development` 스킬 규칙(packet에 명시) — 실패하는 테스트 먼저, 버그는 재현 테스트 먼저. red 게이트는 세션당 1회 승인(adr/0018)이되, 각 red의 **실패 출력 원문과 이유("기능 미구현", import 오류 아님)를 본문에 붙인 뒤** `test(scope):` 커밋. 쿼리 우선순위는 role/label > 텍스트 > testID(3-2). 승인자가 없으면 구현으로 넘어가지 말고 멈춘다
+   - **구현 unit**: 테스트 파일은 건드리지 않는다(Edit ask, Bash 쓰기 deny). 코드 기준은 `docs/spec/`(CLEAN-CODE·ARCHITECTURE·WEB/APP-SPEC — packet에 경로 포함). 컴포넌트 합성은 `vercel-composition-patterns`, 네이티브면 `react-native-skills`(packet에 명시). 초록 + PASS_TO_PASS → `[x]` → `feat(scope):` 커밋
+   - **UI task**: 뷰포트·다크모드 증거는 `.claude/rules/platform.md` 프로필대로. 런타임 확인은 `browser-testing-with-devtools`(DOM·콘솔 에러 0·네트워크) 우선, 안 되면 `references/evidence-capture.md` 순서로 촬영 — **저장은 `.claude/state/evidence/<slug>/`(gitignored)에만, 커밋 금지**(adr/0027). 접근성: axe serious+ 0건 + Tab 시퀀스(`references/a11y-frontend.md`)
    - Figma 값(`leading-[22.126px]`류)은 토큰으로, 토큰 없으면 질문. 아이콘·이미지는 export 에셋 커밋
    - 마지막 Converge: spec 시나리오 ↔ 코드 대조, 빠진 건 task로 append
 5. **리뷰 (2축, adr/0026 §3)**:
@@ -107,17 +109,31 @@
 ### 2-D. 디자인 갭 루프 (미완성·미디자인 부분, adr/0003)
 Tier-2 3단계(propose) 전에 돈다. 1-b의 `--wf-and-design` 절차와 동일하되 같은 세션에서 이어간다: 입력 수집(해당 노드 `get_design_context` 1회 + tokens + components + Ready 화면) → `frontend-design`·`taste-skills`·`frontend-ui-engineering` 로드해 후보 2~3안 → 사용자 확정 → `summary.md` 기록(확정 Artifact 링크 포함 — 이것이 코드 우선 부분의 디자인 원천) → 코드 먼저 구현. **Figma로의 역캡처(거울)는 하지 않는다**(adr/0026 — Figma는 읽기 전용 원천).
 
+### 2-P. 병렬 작업 (독립 change — adr/0027 §3)
+직렬이 필요한 건 직렬로, 독립인 건 병렬로 — 실제 개발처럼. 진입은 두 경로:
+- **사용자 주도(기본)**: 독립 change마다 터미널을 띄워 `claude --worktree <change-slug>` 세션에서 각각 `/develop-fe`. 세션 간 상태 공유는 git·파일뿐이라고 가정한다
+- **세션 내**: 서브에이전트 `isolation: worktree`. **메인이 `git worktree add`를 직접 하지 않는다** — 격리는 하네스의 일
+
+**병렬 가능 판정** (하나라도 걸리면 직렬 — 불확실해도 직렬, 속도는 옵션):
+1. 의존하는 unit/change가 아직 커밋 안 됨 → 직렬
+2. 파일 겹침 — 겹치지 않아도 **semantic 표면**(공유 타입·계약(`api/openapi.yaml`)·lockfile·생성물(`*.gen.ts`)·config)이 겹치면 직렬
+3. 환경 싱글턴 충돌 — dev server 포트·브라우저 세션·패키지 설치가 필요한 unit은 한 번에 하나
+4. 동시 상한 3
+
+**머지**: 의존성 순서로 **1개씩 integrate → verify → commit**. clean merge는 호환 증명이 아니다 — 전진한 트리에서 재검증하고, 충돌 unit은 새 base에 re-dispatch. 세팅: `.claude/worktrees/`를 gitignore, `.worktreeinclude`에 `.env`(worktree별 PORT).
+
 ## 3. 공통 규칙
 
 ### 3-1. 검증 스택 — 싸게 → 비싸게, 위가 깨지면 아래로 안 내려간다
 1. **결정적** = `commands.verify` 한 명령(계약 드리프트+타입+린트+테스트). 완료 정의는 이 이름 한 곳(adr/0005). git 훅이 같은 명령을 pre-push에서 강제한다(0-b)
 2. **행동** = `browser-testing-with-devtools`로 실제 런타임 확인(DOM·콘솔·네트워크) + Playwright 스모크 2~3개 + axe
-3. **시각** = `cgamja:qa-cgamja` 회귀 스냅샷(THEN 시점, baseline 게이트) + 뷰포트 스크린샷을 사람이 본다
+3. **시각** = `cgamja:qa-cgamja` 회귀 스냅샷(THEN 시점, baseline 게이트)이 유일한 저장 경로다. **저장소에 커밋되는 시각 파일은 qa-cgamja baseline(LFS)뿐**(adr/0027) — 확인용 스크린샷은 `.claude/state/evidence/`(gitignored)에 찍고 사람이 본 뒤 버린다. `evidence/` 류 디렉터리를 저장소에 만들지 않는다
 4. **LLM judge**: 안 쓴다. 취향은 사람
 
 ### 3-2. 테스트 규칙 — `test-driven-development` 스킬 + 게이트
 - 방법은 스킬이(실패 먼저·재현 먼저·"seems right"는 done이 아님), **게이트는 워크플로우가**: red 승인(세션당 1회, adr/0018) → `test(scope):` 커밋 분리 → 구현 turn 테스트 파일 보호(훅) → PASS_TO_PASS
 - 잃지 않는 v1 규칙 요약: 쿼리는 role/접근성 label > 텍스트 > testID · mock은 네트워크 경계(선언된 `mock.boundary` 도구)에서만, 내부 모듈 mock 금지 · 계층은 프로젝트 선언 `tests.layers`에서 하나 고른다(단위/브라우저/E2E) · assertion 완화·skip·snapshot 재생성으로 초록 만들기 금지 — 못 만들면 실패 원문과 함께 멈춘다
+- **테스트 동결 — 수정 최소화(adr/0027)**: `test(scope):` 커밋 이후 테스트는 동결이다. 다시 여는 조건은 둘뿐 — ① 스펙 변경이 확정됐을 때 ② 테스트 자체 결함(구현이 아니라 테스트의 버그)일 때. 어느 쪽이든 **모아서 `test(scope):` 커밋 1개**로, 사유를 커밋 본문에 한 줄. 리뷰 지적이 테스트 수정을 요구하면 즉시 고치지 말고 스펙과 대조해 위 ①/②인지 판정부터 — 아니면 "수정 안 함 + 이유"로 답한다. 리뷰→테스트 수정→코드 수정 루프는 재검사 1회 상한(2장 5번)을 넘겨 돌지 않는다
 - 비주얼 스냅샷은 일반 TDD의 red가 성립하지 않는다 — `qa-cgamja`의 baseline 게이트(사람 승인)를 따른다
 
 ### 3-3. 코드 규칙 — 원천은 `docs/spec/`
@@ -129,6 +145,7 @@ Tier-2 3단계(propose) 전에 돈다. 1-b의 `--wf-and-design` 절차와 동일
 - 성능 요구가 있는 task는 `performance-optimization`, 로깅·계측 task는 `observability-and-instrumentation` 로드
 
 ### 3-4. 컨텍스트 규칙 (`context-engineering` 원칙)
+- **컨텍스트 예산(adr/0027 §2)**: 페이즈 경계(스펙 확정 후·구현 완료 후)에서 컨텍스트 ~50% 초과면 보존 지시 포함 `/compact` 또는 handoff 문서 작성 후 **새 세션에서 리뷰~PR**. 구현 diff·테스트 로그 전문을 메인에 들이지 않는 것이 수치 관리보다 우선
 - 같은 수정 2번 실패 → `/clear`, `docs/solutions/` 확인, 접근 변경 — "더 열심히"가 아니라 빠진 도구/규칙을 찾는다
 - 탐색은 Explore 서브에이전트로, 본 컨텍스트에 파일 덤프 금지. 서브에이전트는 `model:` 명시(`references/model-routing.md`): 탐색 haiku / 구현 sonnet / 리뷰 opus
 - 에이전트가 규칙을 어기면 CLAUDE.md에 줄을 늘리지 말고 린트·훅·config rules로 내린다
@@ -149,7 +166,7 @@ Tier-2 3단계(propose) 전에 돈다. 1-b의 `--wf-and-design` 절차와 동일
 ## 검증 증거
 - [ ] verify (typecheck/lint/test): <출력 요약>
 - [ ] 브라우저 검증(devtools) / Playwright+axe: <결과>
-- [ ] 스크린샷(프로필 뷰포트, 다크 해당 시): <경로>
+- [ ] 스크린샷(프로필 뷰포트, 다크 해당 시): <PR 본문 첨부 또는 .claude/state/evidence/ 경로 — 저장소 커밋 아님>
 - [ ] 비주얼 QA: qa-cgamja 스냅샷 <n장> · baseline <신규/갱신 승인 여부>
 - [ ] 리뷰: review-cgamja <PASS/FAIL·수정 n건> · code-review <blocker 0 · should n>
 ```
