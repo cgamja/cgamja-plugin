@@ -48,7 +48,7 @@ artifacts:
       `실패 의미론: 해당 없음` in the spec so the omission is a decision, not a blind spot. If the feature touches an API, add a `## Contract` section: operationId(s),
       request/response schema refs into api/openapi.yaml, error statuses (400/401/404/409/5xx) —
       each error/empty/loading maps 1:1 to a UI scenario. If api/openapi.yaml lacks it, write the
-      DRAFT stub first (develop-fe references/api-contract.md §3); never invent fields in code or mocks.
+      DRAFT stub first (develop-fe docs/guides/api-contract.md §3); never invent fields in code or mocks.
       Mark anything you had to guess with `[NEEDS CLARIFICATION: ...]` and ask (max 5 questions,
       batched) before writing tasks.
     requires: []

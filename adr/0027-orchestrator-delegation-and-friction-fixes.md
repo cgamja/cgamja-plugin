@@ -26,11 +26,11 @@
    - 병렬 가능 판정(ce-work Parallel Safety Check 이식): 의존 unit이 이미 커밋됨 + 파일 겹침 없음 + **semantic 표면**(공유 타입·계약·lockfile·생성물·config)도 겹침 없음 + 환경 싱글턴(dev server 포트·브라우저 세션) 불충돌. **불확실하면 직렬** — 속도는 옵션. 동시 상한 3
    - 머지: 의존성 순서로 1개씩 integrate → verify → commit. clean merge는 호환 증명이 아니다 — 전진한 트리에서 재검증. 충돌 unit은 새 base에 re-dispatch
    - 오케스트레이터가 `git worktree add`를 직접 하지 않는다 — 격리는 하네스(`--worktree`, `isolation: worktree`)의 일. `.claude/worktrees/`는 gitignore, `.worktreeinclude`로 `.env` 복사(worktree별 PORT)
-4. **계약 생성물 도메인 분리 (마찰 1).** orval `mode: "tags-split"` — OpenAPI `tags` = 도메인 이름, endpoint마다 태그 정확히 1개(스펙 린트로 강제), 생성물이 각 도메인 api 세그먼트로 갈라진다. 공유 스키마는 한 곳(shared 취급). 새 feature 추가 = 새 태그 = 새 도메인 폴더. `references/api-contract.md` §8-b. (tags-split 경로는 문서 반영만 — 첫 적용 시 실측해 갱신)
+4. **계약 생성물 도메인 분리 (마찰 1).** orval `mode: "tags-split"` — OpenAPI `tags` = 도메인 이름, endpoint마다 태그 정확히 1개(스펙 린트로 강제), 생성물이 각 도메인 api 세그먼트로 갈라진다. 공유 스키마는 한 곳(shared 취급). 새 feature 추가 = 새 태그 = 새 도메인 폴더. `docs/guides/api-contract.md` §8-b. (tags-split 경로는 문서 반영만 — 첫 적용 시 실측해 갱신)
 5. **테스트 동결 (마찰 2).** `test(scope):` 커밋 후 테스트는 동결. 다시 여는 조건은 ① 스펙 변경 확정 ② 테스트 자체 결함 둘뿐이고, 모아서 커밋 1개. 리뷰 지적이 테스트 수정을 요구하면 ①/② 판정부터 — 아니면 "수정 안 함 + 이유". 리뷰 재검사 1회 상한(0019)과 결합해 수정 루프를 끊는다.
 6. **증거 비저장 (마찰 10).** 확인용 스크린샷은 `.claude/state/evidence/`(gitignored)에만 — 저장소에 커밋되는 시각 파일은 **qa-cgamja baseline(LFS)뿐**. `evidence/` 류 커밋 디렉터리 폐지.
 7. **jscpd 폐지 (마찰 13).** CI에서 jscpd 제거. 중복·품질 검출은 "만들기 전 grep" + 철학 문서 대조(`docs/spec/GOOD-BAD-PATTERN.md`·`CLEAN-CODE.md`, review-cgamja가 강제)로 대체. 커밋 형식 제약은 CI가 아니라 **pre-commit/pre-push git 훅**(0026 §6)에서 푸시 전에 잡아 커밋을 고치게 한다 — CI는 사후 고발이라 수리 비용이 크다.
-8. **references 재편.** 오래된 v1 근거 문서(`methodologies.md`, `verdicts-2026-08-21.md`)는 `reports/`(역사 기록)로 이동, `figma-design-source.md`에서 픽셀 대조(§6)·Figma 쓰기 경로 삭제(0026 §9와 정합). references에는 현행 절차가 참조하는 문서만 남긴다.
+8. **문서 폴더 재편.** 오래된 v1 근거 문서(`methodologies.md`, `verdicts-2026-08-21.md`)는 `reports/`(역사 기록)로 이동, `figma-design-source.md`에서 픽셀 대조(§6)·Figma 쓰기 경로 삭제(0026 §9와 정합). 남은 `references/`는 **`docs/guides/`로 통합** — 문서가 답하는 질문으로 나눈다: `docs/spec/`(무엇이 좋은 코드인가 — 판정 기준), `docs/guides/`(어떻게 작업하는가 — 절차 지식), `docs/` 루트(플러그인 자기 설명), `adr/`·`reports/`(기록 — 불변 이력이라 docs 밖). "references"라는 이름은 폐지.
 
 ## 대안과 트레이드오프
 

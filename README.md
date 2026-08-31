@@ -88,11 +88,10 @@ v1에서 Tier-2 비용의 절반 이상이 렌즈 리뷰였다(연구상 리뷰 
 ```
 skills/            절차 — develop-setup · develop-fe(+workflow.md, hooks/, templates/git-hooks/) · develop-baby-fe · review-cgamja · qa-cgamja · test-driven-development(vendored) · browser-testing-with-devtools(vendored) · retro-fe
 agents/            reviewer-cgamja(철학 대조) · reviewer-correctness(baby용 L1)
-references/        관심사별 지식 — 앞부분은 스택 무관 원칙, 뒷부분은 "검증된 구현"(스택·날짜 라벨)
 adr/               결정 기록 0001~0026 — 절차를 바꾸려면 ADR 먼저, 문서는 ADR을 참조
 reports/           실측 기록 — 시나리오·비용·모델·통과표·결함·렌즈 원장
 tests/             훅·preflight·문서 경로·스택 단어의 결정적 회귀 테스트 (LLM 호출 없음)
-docs/              philosophy.md(고정점) · positioning.md(지형) · spec/(코드 철학 SPEC — cgamja-philosophy 사본)
+docs/              philosophy.md(고정점) · positioning.md(지형) · spec/(판정 기준 — 코드 철학 SPEC, cgamja-philosophy 사본) · guides/(작업 지식 — 스택 무관 원칙 + "검증된 구현", 구 references)
 licenses/          vendored 스킬 원 라이선스(MIT)
 bin/               openspec 래퍼
 ```

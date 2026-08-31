@@ -5,7 +5,7 @@ description: Tests in real browsers via Chrome DevTools MCP. Use when building o
 
 # Browser Testing with DevTools
 
-> Vendored from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT — see `licenses/addyosmani-agent-skills-LICENSE.txt`). cgamja develop-fe가 UI task 런타임 검증에서 로드한다(adr/0026). chrome-devtools MCP 미설정이면 `references/evidence-capture.md` 경로로 대체.
+> Vendored from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT — see `licenses/addyosmani-agent-skills-LICENSE.txt`). cgamja develop-fe가 UI task 런타임 검증에서 로드한다(adr/0026). chrome-devtools MCP 미설정이면 `docs/guides/evidence-capture.md` 경로로 대체.
 
 ## Overview
 

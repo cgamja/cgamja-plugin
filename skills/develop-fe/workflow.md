@@ -17,10 +17,10 @@
 | 디자인 산출 | `frontend-design` + `design-taste-frontend`(taste-skill) + `frontend-ui-engineering` | `design` 스킬 + `docs/spec/WEB-SPEC.md` 토큰 규칙 |
 | 구현 | `vercel-composition-patterns`(컴포넌트 합성), `react-native-skills`(네이티브), typescript-lsp MCP | `docs/spec/` SPEC만으로 진행 |
 | 테스트 | `cgamja:test-driven-development` (vendored, MIT) | — (내장, 항상 있음) |
-| 브라우저 검증 | `cgamja:browser-testing-with-devtools` (vendored — chrome-devtools MCP 필요) | 스크린샷 수단 탐색(`references/evidence-capture.md`) |
+| 브라우저 검증 | `cgamja:browser-testing-with-devtools` (vendored — chrome-devtools MCP 필요) | 스크린샷 수단 탐색(`docs/guides/evidence-capture.md`) |
 | 비주얼 QA | `cgamja:qa-cgamja` | — (플러그인 내장, 항상 있음) |
 | 리뷰 | `cgamja:review-cgamja` + `/code-review`(공식 플러그인) | — (review-cgamja는 내장) |
-| 성능 task | `performance-optimization` | `references/platform-fit-frontend.md` 기준만 |
+| 성능 task | `performance-optimization` | `docs/guides/platform-fit-frontend.md` 기준만 |
 | 관측 task | `observability-and-instrumentation` | 생략(스펙에 없으면 안 만든다) |
 | 보안 점검 | `claude-security` | 사용자 요청 시에만 |
 | 설명·현황 | `eli5`, `project-artifact` | 사용자 요청 시에만 |
@@ -38,7 +38,7 @@
 3. `docs/solutions/` 를 task 키워드로 grep — 이미 푼 문제인가
 4. `commands.typecheck` 1회 — 깨져 있으면 새 작업 전에 고친다
 4-1. API가 걸린 작업이면 계약 원천(`contract.source`) + 생성물 드리프트 검사(1장 계약 판정)
-5. 화면 작업이면 `design/screens/<slug>/summary.md` 확인. 없으면 Figma 호출 규칙(`references/figma-design-source.md` §3)대로 스냅샷부터
+5. 화면 작업이면 `design/screens/<slug>/summary.md` 확인. 없으면 Figma 호출 규칙(`docs/guides/figma-design-source.md` §3)대로 스냅샷부터
 
 ## 1. Task 분석 → 티어 판정 (2단계, adr/0026)
 기준은 작업량이 아니라 **불확실성과 파급 범위**. 판정에 1분 이상 쓰지 않는다. 애매하면 Tier-1로 시작하고 기준을 넘으면 올린다.
@@ -61,7 +61,7 @@
 | — | `📝 TODO:`/`🚧 WIP`/`⬜ PLACEHOLDER` | 그 부분은 2-D 디자인 갭 루프 |
 | — | 디자인 자체가 없음 | 2-D, 입력은 `tokens.css`+`components.md`+같은 플로우 Ready 화면 |
 
-**계약 상태 판정** (API task만 — 상세 `references/api-contract.md`, adr/0008): A 스펙 있음 → 생성물만 import / B 스펙 없음 → DRAFT 스텁 → 질문 ⑥ → 생성 / C 기존 코드에 스펙 없음 → 별도 Tier-2 change `api-contract`(retrofit) / D 스펙에 없는 게 필요 → 멈추고 스펙 diff 제안.
+**계약 상태 판정** (API task만 — 상세 `docs/guides/api-contract.md`, adr/0008): A 스펙 있음 → 생성물만 import / B 스펙 없음 → DRAFT 스텁 → 질문 ⑥ → 생성 / C 기존 코드에 스펙 없음 → 별도 Tier-2 change `api-contract`(retrofit) / D 스펙에 없는 게 필요 → 멈추고 스펙 diff 제안.
 
 ## 1-b. 디자인 플래그 (adr/0026 §7)
 
@@ -96,7 +96,7 @@
    - **수신·검증**: worker 리포트 JSON만 받고, diff 전문은 컨텍스트에 넣지 않는다 — `git diff --stat` + 검증 명령 재실행으로 실물 확인 후 메인이 커밋. `blocked`/`scope_expansion`이면 packet을 고쳐 1회 re-dispatch, 2회 실패 시 inline 강등. 깨진 트리 위에 다음 unit을 보내지 않는다
    - **테스트 unit**: `test-driven-development` 스킬 규칙(packet에 명시) — 실패하는 테스트 먼저, 버그는 재현 테스트 먼저. red 게이트는 세션당 1회 승인(adr/0018)이되, 각 red의 **실패 출력 원문과 이유("기능 미구현", import 오류 아님)를 본문에 붙인 뒤** `test(scope):` 커밋. 쿼리 우선순위는 role/label > 텍스트 > testID(3-2). 승인자가 없으면 구현으로 넘어가지 말고 멈춘다
    - **구현 unit**: 테스트 파일은 건드리지 않는다(Edit ask, Bash 쓰기 deny). 코드 기준은 `docs/spec/`(CLEAN-CODE·ARCHITECTURE·WEB/APP-SPEC — packet에 경로 포함). 컴포넌트 합성은 `vercel-composition-patterns`, 네이티브면 `react-native-skills`(packet에 명시). 초록 + PASS_TO_PASS → `[x]` → `feat(scope):` 커밋
-   - **UI task**: 뷰포트·다크모드 증거는 `.claude/rules/platform.md` 프로필대로. 런타임 확인은 `browser-testing-with-devtools`(DOM·콘솔 에러 0·네트워크) 우선, 안 되면 `references/evidence-capture.md` 순서로 촬영 — **저장은 `.claude/state/evidence/<slug>/`(gitignored)에만, 커밋 금지**(adr/0027). 접근성: axe serious+ 0건 + Tab 시퀀스(`references/a11y-frontend.md`)
+   - **UI task**: 뷰포트·다크모드 증거는 `.claude/rules/platform.md` 프로필대로. 런타임 확인은 `browser-testing-with-devtools`(DOM·콘솔 에러 0·네트워크) 우선, 안 되면 `docs/guides/evidence-capture.md` 순서로 촬영 — **저장은 `.claude/state/evidence/<slug>/`(gitignored)에만, 커밋 금지**(adr/0027). 접근성: axe serious+ 0건 + Tab 시퀀스(`docs/guides/a11y-frontend.md`)
    - Figma 값(`leading-[22.126px]`류)은 토큰으로, 토큰 없으면 질문. 아이콘·이미지는 export 에셋 커밋
    - 마지막 Converge: spec 시나리오 ↔ 코드 대조, 빠진 건 task로 append
 5. **리뷰 (2축, adr/0026 §3)**:
@@ -147,7 +147,7 @@ Tier-2 3단계(propose) 전에 돈다. 1-b의 `--wf-and-design` 절차와 동일
 ### 3-4. 컨텍스트 규칙 (`context-engineering` 원칙)
 - **컨텍스트 예산(adr/0027 §2)**: 페이즈 경계(스펙 확정 후·구현 완료 후)에서 컨텍스트 ~50% 초과면 보존 지시 포함 `/compact` 또는 handoff 문서 작성 후 **새 세션에서 리뷰~PR**. 구현 diff·테스트 로그 전문을 메인에 들이지 않는 것이 수치 관리보다 우선
 - 같은 수정 2번 실패 → `/clear`, `docs/solutions/` 확인, 접근 변경 — "더 열심히"가 아니라 빠진 도구/규칙을 찾는다
-- 탐색은 Explore 서브에이전트로, 본 컨텍스트에 파일 덤프 금지. 서브에이전트는 `model:` 명시(`references/model-routing.md`): 탐색 haiku / 구현 sonnet / 리뷰 opus
+- 탐색은 Explore 서브에이전트로, 본 컨텍스트에 파일 덤프 금지. 서브에이전트는 `model:` 명시(`docs/guides/model-routing.md`): 탐색 haiku / 구현 sonnet / 리뷰 opus
 - 에이전트가 규칙을 어기면 CLAUDE.md에 줄을 늘리지 말고 린트·훅·config rules로 내린다
 
 ## 4. 기록

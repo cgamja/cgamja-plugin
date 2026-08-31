@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# develop-setup 자가 검증 프로브 — 검증 1층(adr/0013, references/skill-verification.md §1). LLM 호출 없음, 스택 가정 없음.
+# develop-setup 자가 검증 프로브 — 검증 1층(adr/0013, docs/guides/skill-verification.md §1). LLM 호출 없음, 스택 가정 없음.
 #   smoke.sh check <project-dir>   .claude/cgamja.json(adr/0014)을 읽어 "강제 수단이 실제로 작동하는가"를 프로브한다
 # 종료코드 0 = 전부 통과. 선언에 없는(null) 강제 수단은 "skip"으로 표시(실패 아님 — 대조표의 몫).
 set -u

@@ -42,6 +42,6 @@
 - **다이얼로그**: 개발 클라이언트 딥링크 확인 등 OS 다이얼로그는 자동화가 자주 막힌다(macOS 권한) — 1회 사용자 클릭 요청이 검증된 경로.
 - **상태 재현**: 선언된 경계 mock 핸들러 재사용. 즉석 mock 서버는 리뷰에서 이중 mock 드리프트로 지적됐다.
 ### 웹 (2026-08-21 실측)
-- `agent-browser` 또는 E2E 러너의 스크린샷 기능(`references/platform-fit-frontend.md` §5). 뷰포트는 프로필 표.
+- `agent-browser` 또는 E2E 러너의 스크린샷 기능(`docs/guides/platform-fit-frontend.md` §5). 뷰포트는 프로필 표.
 ### 그 외 스택
 - 표의 규칙은 그대로, 도구만 조사·실측 후 여기에 날짜와 함께 추가한다.

@@ -15,11 +15,11 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 |---|---|---|---|
 | P3 완료 정의 한 곳 | `commands.verify` | 한 명령이 타입·린트·테스트(·계약 드리프트·미사용)를 전부 돈다 | 기존 스크립트들을 묶는 `verify` 한 줄 추가 |
 | P2 테스트는 게이트 | `tests.patterns`, `tests.layers` | 테스트 파일 glob이 정확하고 훅이 그 파일 Edit를 `ask`로 막는다 | 훅 설치(§2-4) — 러너는 그대로 |
-| P7 계약 한 곳 | `contract.*` | 원천 파일 + 생성 명령 + 생성물 glob, 재생성 diff 0 | 원천이 있으면 생성기 제안(`references/api-contract.md` §2·§8), 없으면 `null` + retrofit change 안내(§5). 기능 change와 섞지 않는다 |
+| P7 계약 한 곳 | `contract.*` | 원천 파일 + 생성 명령 + 생성물 glob, 재생성 diff 0 | 원천이 있으면 생성기 제안(`docs/guides/api-contract.md` §2·§8), 없으면 `null` + retrofit change 안내(§5). 기능 change와 섞지 않는다 |
 | P7 경계 mock | `mock.boundary` | 계약 밖 요청이 테스트에서 에러 | 러너에 맞는 경계 mock 도구(`skills/test-driven-development/` 규칙: mock은 네트워크 경계에서만, real→fake→stub→mock 순 선호) |
 | P8 경계는 기계가 | `domains.root`, `domains.allowed_edges` | 기존 구조 이름으로 경계 린트가 **실제로** 에러를 낸다 — 별칭 경로뿐 아니라 **상대경로 import도**(smoke 프로브 기준; 2026-08-22 Vue 런에서 `patterns: ['src/pages/*']`가 `./pages/x`를 못 막음) | 기존 린터에 경계 규칙 추가(ESLint면 `templates/react/eslint.boundaries.js` 조각). 구조를 바꾸자고 하지 않는다 |
-| P5 접근성 기본값 | `a11y.lint`, `a11y.runtime` | 린트 1층 + 런타임 2층 | 프레임워크별 a11y 린트 + axe(`references/a11y-frontend.md` §5). 없으면 `null`로 두고 리뷰 2축이 넓게 본다 |
-| P4 디자인 원천 | `design.source`, `design.tokens` | 원천 선언 + 토큰 파일 + 토큰 외 값 린트 | Figma면 `design/` 스냅샷(`references/figma-design-source.md` §2), 없으면 `none` + 토큰 파일 위치 |
+| P5 접근성 기본값 | `a11y.lint`, `a11y.runtime` | 린트 1층 + 런타임 2층 | 프레임워크별 a11y 린트 + axe(`docs/guides/a11y-frontend.md` §5). 없으면 `null`로 두고 리뷰 2축이 넓게 본다 |
+| P4 디자인 원천 | `design.source`, `design.tokens` | 원천 선언 + 토큰 파일 + 토큰 외 값 린트 | Figma면 `design/` 스냅샷(`docs/guides/figma-design-source.md` §2), 없으면 `none` + 토큰 파일 위치 |
 | P6 플랫폼 | `platform.profile` | `.claude/rules/platform.md` 프로필 | 사용자에게 프로필 1개 확인 |
 | P10 작게 자주 | (commitlint·훅) | conventional commit 린트 + 테스트/구현 커밋 분리 규칙 | 기존 훅 매니저에 `commit-msg` 규칙 추가(없으면 lefthook) |
 | 보호 | `protected`, `lint_file` | 매니페스트·lockfile·린트 설정·훅 보호, 편집 파일 포맷+린트 | 훅 설치 |
@@ -35,13 +35,13 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 | 4 | `.claude/settings.json` + `.claude/hooks/*.sh` | `templates/settings.json`, `templates/hooks/` **그대로 복사** | 훅은 선언을 읽는다 — 수정 금지. 기존 settings가 있으면 hooks·deny 병합. `.claude/state/` 디렉터리를 만들고(Stop 훅 verify 로그·handoff 마커, adr/0017) `.gitignore`에 |
 | 5 | `docs/adr/0001-domain-structure.md`, `docs/conventions.md` | `templates/adr-0001-domain-structure.md`, `templates/conventions.md` | 구조 이름은 발견한 것(`domains.root`) |
 | 6 | 커밋 규약: commitlint + 훅 매니저 `commit-msg`/`pre-commit` | `templates/lefthook.yml`(기존 husky 등이 있으면 그 안에 규칙만) | 대화형 훅 금지 |
-| 7 | `verify` 한 줄 + 대조표 ✗ 중 사용자가 승인한 강제 수단 | `references/*` 의 "검증된 구현" 절 조각(`templates/react/`는 그 절에서 검증된 스택용 — 각 파일 머리에 스택·날짜) | **새 의존성은 승인 후에만.** 검증된 조각이 없는 스택이면: 조사 → 설치 → 프로브 → 되면 references에 날짜와 함께 추가(`feedback-install-and-verify`) |
-| 8 | OpenSpec(**척추 — null 불가**. 설치가 필요하면 "새 의존성" 일반 규칙과 별개로 승인을 묻는다; 비대화형이면 설치하고 보고): `openspec init --tools claude --profile core .` → `schema fork spec-driven feature` → 템플릿 교체 → `config.yaml` `context:`를 **`.claude/cgamja.json`에서 생성**(같은 사실을 두 번 손으로 쓰지 않는다) | `references/openspec-setup.md` | 이미 있으면 `feature` 스키마만 확인 |
-| 9 | `design/`: `design.source`가 Figma면 초기 스냅샷(map·tokens·components), 아니면 `design/NO_FIGMA` | `references/figma-design-source.md` §2 | 화면 스냅샷은 여기서 안 함 |
+| 7 | `verify` 한 줄 + 대조표 ✗ 중 사용자가 승인한 강제 수단 | `docs/guides/*` 의 "검증된 구현" 절 조각(`templates/react/`는 그 절에서 검증된 스택용 — 각 파일 머리에 스택·날짜) | **새 의존성은 승인 후에만.** 검증된 조각이 없는 스택이면: 조사 → 설치 → 프로브 → 되면 references에 날짜와 함께 추가(`feedback-install-and-verify`) |
+| 8 | OpenSpec(**척추 — null 불가**. 설치가 필요하면 "새 의존성" 일반 규칙과 별개로 승인을 묻는다; 비대화형이면 설치하고 보고): `openspec init --tools claude --profile core .` → `schema fork spec-driven feature` → 템플릿 교체 → `config.yaml` `context:`를 **`.claude/cgamja.json`에서 생성**(같은 사실을 두 번 손으로 쓰지 않는다) | `docs/guides/openspec-setup.md` | 이미 있으면 `feature` 스키마만 확인 |
+| 9 | `design/`: `design.source`가 Figma면 초기 스냅샷(map·tokens·components), 아니면 `design/NO_FIGMA` | `docs/guides/figma-design-source.md` §2 | 화면 스냅샷은 여기서 안 함 |
 | 10 | CI: 기존 워크플로우에 `verify`·commitlint·`openspec validate`·문서 경로 검사 단계 추가 | `templates/check-docs.sh`, 예시 `templates/react/ci.yml` | 기존 CI를 대체하지 않는다 |
 
 ## 3. 자가 검증 — 만들었다가 아니라 작동한다를 보인다
-`bash scripts/smoke.sh check <dir>` — 선언을 읽어 프로브를 돌린다: `commands.verify` 초록 / 경계 린트가 **실제로** 에러를 내는가(`domains.root` 밖에서 import 주입) / a11y 린트가 대체 텍스트 없는 이미지·클릭만 있는 컨테이너를 잡는가 / 계약 린트가 직접 HTTP 호출을 잡는가(`contract` 선언 시) / 훅 9종(테스트 Edit `ask`, 생성물 deny, 보호 파일 `ask`(adr/0017), 쉘 우회 deny, 읽기 허용) / commitlint / 재생성 diff 0 / openspec `new change` / 선언·규칙 파일 존재·미치환 변수 0. **하나라도 ✗면 완료라고 하지 않는다.** 통과해 버리는 프로브(예: 경계 린트가 조용히 통과)는 설정 문제다 — `references/project-conventions.md` §6 함정 참고.
+`bash scripts/smoke.sh check <dir>` — 선언을 읽어 프로브를 돌린다: `commands.verify` 초록 / 경계 린트가 **실제로** 에러를 내는가(`domains.root` 밖에서 import 주입) / a11y 린트가 대체 텍스트 없는 이미지·클릭만 있는 컨테이너를 잡는가 / 계약 린트가 직접 HTTP 호출을 잡는가(`contract` 선언 시) / 훅 9종(테스트 Edit `ask`, 생성물 deny, 보호 파일 `ask`(adr/0017), 쉘 우회 deny, 읽기 허용) / commitlint / 재생성 diff 0 / openspec `new change` / 선언·규칙 파일 존재·미치환 변수 0. **하나라도 ✗면 완료라고 하지 않는다.** 통과해 버리는 프로브(예: 경계 린트가 조용히 통과)는 설정 문제다 — `docs/guides/project-conventions.md` §6 함정 참고.
 
 ## 4. 끝맺음
 - 결과를 표로 보고한다: 발견한 것 / 붙인 것 / `null`로 남긴 것(이유) / 프로브 결과.
@@ -60,5 +60,5 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 | `scripts/preflight.sh` | 발견 표 + 대조표(종료코드 0=✗ 없음, 1=✗ 있음) |
 | `scripts/smoke.sh check` | 자가 검증 프로브(LLM 없음) |
 | `templates/` | 스택 무관 조각: `cgamja.json`, `CLAUDE.md`, `rules/`, `hooks/`, `settings.json`, `lefthook.yml`, `adr-0001`, `conventions.md`, `check-docs.sh`, `openapi.draft.yaml`(OpenAPI일 때) |
-| `templates/react/` | 특정 스택에서 **검증된** 조각(각 파일 머리에 스택·날짜; `references/*` 검증 구현 절이 가리킨다) — 발견한 스택이 맞을 때만 |
-| cgamja `references/project-conventions.md` | 배치표·훅 표·brownfield 규칙 |
+| `templates/react/` | 특정 스택에서 **검증된** 조각(각 파일 머리에 스택·날짜; `docs/guides/*` 검증 구현 절이 가리킨다) — 발견한 스택이 맞을 때만 |
+| cgamja `docs/guides/project-conventions.md` | 배치표·훅 표·brownfield 규칙 |

@@ -1,6 +1,6 @@
 ---
 name: develop-baby-fe
-description: MVP·프로토타입·데모·실험·해커톤용 프론트엔드 경량 개발 루프 — 티어 판정·OpenSpec·테스트 먼저(red 게이트)·다중 리뷰·증거 매트릭스를 전부 끄고, 탐색 → 구현 → 정확성 리뷰 1회 → verify 1회 → 스크린샷 1장 → 커밋 1~3개로 끝낸다(목표 <$5). 사용자가 "MVP 만들어줘", "프로토타입 뽑아줘", "데모 빨리 만들자", "간단하게 돌아가게만" 처럼 속도·비용을 명시한 요청을 하거나 /develop-baby-fe 를 호출할 때, 또는 프로젝트 선언에 mode: baby-default 가 있을 때 사용한다. 단 제외 조건이 항상 우선한다(mode: baby-default보다도): 프로덕션 레포의 티켓 기반 작업·API 계약 신설·여러 화면이 엮이는 기능은 이 스킬이 아니라 develop-fe 담당 — 그런 요청이 오면 baby-default가 선언돼 있어도 이 스킬을 트리거하지 않는다.
+description: 'MVP·프로토타입·데모·실험·해커톤용 프론트엔드 경량 개발 루프 — 티어 판정·OpenSpec·테스트 먼저(red 게이트)·다중 리뷰·증거 매트릭스를 전부 끄고, 탐색 → 구현 → 정확성 리뷰 1회 → verify 1회 → 스크린샷 1장 → 커밋 1~3개로 끝낸다(목표 <$5). 사용자가 "MVP 만들어줘", "프로토타입 뽑아줘", "데모 빨리 만들자", "간단하게 돌아가게만" 처럼 속도·비용을 명시한 요청을 하거나 /develop-baby-fe 를 호출할 때, 또는 프로젝트 선언에 mode=baby-default 가 있을 때 사용한다. 단 제외 조건이 항상 우선한다(baby-default 선언보다도) — 프로덕션 레포의 티켓 기반 작업·API 계약 신설·여러 화면이 엮이는 기능은 이 스킬이 아니라 develop-fe 담당이며, 그런 요청이 오면 baby-default가 선언돼 있어도 이 스킬을 트리거하지 않는다.'
 ---
 
 # develop-baby-fe
@@ -53,5 +53,5 @@ MVP에는 절차의 무게가 곧 비용이다. 이 스킬은 develop-fe의 하�
 |---|---|
 | `adr/0020-develop-baby-fe.md` | 이 스킬의 근거·재검토 조건 |
 | `agents/reviewer-correctness.md` | 3단계 리뷰 persona (model은 sonnet으로 덮어쓴다) |
-| `references/model-routing.md` | 모델 하향의 기준선 확인 |
+| `docs/guides/model-routing.md` | 모델 하향의 기준선 확인 |
 | `skills/develop-fe/` | 에스컬레이션 안내 대상 |
