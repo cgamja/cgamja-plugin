@@ -1,4 +1,4 @@
-// vitest.config.ts — 웹(React). unit(jsdom) + browser(chromium) 두 프로젝트. develop-fe tdd-frontend.md §1·§7.
+// vitest.config.ts — 웹(React). unit(jsdom) + browser(chromium) 두 프로젝트. develop-fe workflow 3-2·test-driven-development 스킬.
 import { defineConfig } from "vitest/config";
 import { playwright } from "@vitest/browser-playwright";
 import react from "@vitejs/plugin-react";

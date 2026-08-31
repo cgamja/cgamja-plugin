@@ -11,7 +11,7 @@
 | 코드 탐색(Explore: 유사 컴포넌트 검색, 사용처 찾기, `docs/solutions` grep) | **`haiku`** | 읽고 위치만 보고. 결론은 본체가 |
 | 구현 task(`opsx:apply` 안에서 서브에이전트로 뺄 때), 테스트 코드 작성, 스냅샷 `summary.md` 작성 | **`sonnet`** | 스펙·테스트가 정해진 뒤의 실행. 초록/빨강이 오라클 |
 | 스크린샷 촬영·비교 나열, computed style 수집, 린트 결과 정리 | **`haiku`** | 기계적 수집 |
-| 코드 리뷰 렌즈 에이전트(`review-fe`의 persona, `agents/`) | **`opus`** 기본, 정확성·스펙 완전성 렌즈는 Tier-3에서 **`fable`** | 리뷰어는 작성자보다 약하면 안 된다. 단 a11y·플랫폼 렌즈는 체크리스트 대조라 `sonnet` |
+| 코드 리뷰 에이전트(`reviewer-cgamja`, baby의 `reviewer-correctness`) | **`opus`** 기본(baby는 `sonnet` 하향, adr/0020** | 리뷰어는 작성자보다 약하면 안 된다. 단 a11y·플랫폼 렌즈는 체크리스트 대조라 `sonnet` |
 | `/ce-code-review`, `/ce-simplify-code`, `/ce-commit*` | 세션 모델 (지정 불가) | CE 스킬은 Skill 도구 — 내부에서 자체 서브에이전트를 띄움 |
 | 변이 테스트 결과 해석, flaky 원인 분류 | `sonnet` | — |
 
@@ -19,7 +19,7 @@
 - **Agent 도구**: `model: "haiku" | "sonnet" | "opus" | "fable"`. 생략하면 세션 모델을 상속한다 — **생략 = 비싼 기본값**이므로 이 플러그인의 스킬은 Agent 호출마다 표대로 명시한다.
 - **Workflow**: `agent(prompt, {model: 'sonnet'})`. 렌즈별로 다르게.
 - **Skill 도구**: 모델 인자 없음. ce-*·opsx:* 는 세션 모델. 이게 비용의 상수항 — 줄이려면 세션 자체를 `/model opus`로 띄우고, 티어 판정·갭 루프처럼 Fable이 필요한 순간만 `/model fable`로 올린다(사람이 결정).
-- `agents/*.md` persona 파일의 frontmatter `model:`이 기본값이고, review-fe가 티어에 따라 올린다(`review-lenses-frontend.md` §3).
+- `agents/*.md` persona 파일의 frontmatter `model:`이 기본값이다(렌즈 체계는 adr/0026으로 폐지, git 이력 참조).
 
 ## 3. 하지 않는 것
 - 본체를 haiku/sonnet으로 띄우고 "중요하면 올리기" — 티어 판정을 약한 모델이 하면 낮은 티어로 새는 쪽으로 틀린다(관찰: 작업량으로 판단해 버림).

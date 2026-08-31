@@ -43,11 +43,15 @@ ln -s ~/cgamja-plugin ~/.claude/skills/cgamja
 | 스킬 | 역할 | 사람 게이트 |
 |---|---|---|
 | [`develop-setup`](skills/develop-setup/SKILL.md) | 프로젝트를 읽어(스택 불문·brownfield) 철학의 강제 수단을 대조 → 없는 것만 최소 제안 → 프로브로 "진짜 막나" 확인 → `.claude/cgamja.json` 선언 | 질문 ≤5개 묶음 1회 |
-| [`develop-fe`](skills/develop-fe/SKILL.md) | 오케스트레이터 — 티어 판정 → 스펙 → 테스트 먼저 → 구현 → 증거 → 리뷰 → 커밋/PR | 질문 1회 + red 승인 1회 |
+| [`develop-fe`](skills/develop-fe/SKILL.md) | 오케스트레이터(v2, adr/0026) — 티어 판정(1/2) → OpenSpec → TDD → 구현 → 증거 → 리뷰 2축 → 비주얼 QA → 커밋/PR. 디자인 플래그 `--only-wf`/`--only-design`/`--wf-and-design` | 질문 1회 + red 승인 1회 |
 | [`develop-baby-fe`](skills/develop-baby-fe/SKILL.md) | MVP·프로토타입·데모용 경량 루프 — 절차를 끄고 비용·속도 우선(목표 <$5), API 계약이 걸리면 develop-fe로 에스컬레이션 | 질문 ≤1회 |
-| [`test-fe`](skills/test-fe/SKILL.md) | 시나리오 → 계층 선택 → 역할 쿼리·경계 mock → red(실패 원문 보고) → `test():` 커밋. 구현은 하지 않는다 | red 승인(세션당 1회) |
-| [`review-fe`](skills/review-fe/SKILL.md) | 티어별 렌즈 L1~L7을 persona 서브에이전트로 병렬 실행, blocker를 모아 수정 1패스 → 재실행 1회 → 판정 한 줄 | — |
+| [`test-driven-development`](skills/test-driven-development/SKILL.md) | vendored TDD 스킬(addyosmani, MIT) — 실패 테스트 먼저, 버그는 재현 테스트 먼저(Prove-It) | red 승인(세션당 1회, workflow가 얹음) |
+| [`browser-testing-with-devtools`](skills/browser-testing-with-devtools/SKILL.md) | vendored(addyosmani, MIT) — Chrome DevTools MCP로 런타임 검증(콘솔 0·DOM·네트워크·성능) | — |
+| [`review-cgamja`](skills/review-cgamja/SKILL.md) | 철학·SPEC(`docs/spec/`) 대조 게이트 — reviewer-cgamja 서브에이전트가 문서 조항 인용 판정, FAIL이면 수정 → 재검사 1회 | — |
+| [`qa-cgamja`](skills/qa-cgamja/SKILL.md) | 비주얼 회귀 QA — 동작 플로우 THEN 시점 스냅샷(웹 Playwright / 앱 Maestro), baseline 사람 승인 | baseline 승인 |
 | [`retro-fe`](skills/retro-fe/SKILL.md) | 실사용 세션 트랜스크립트를 감사해 마찰(훅 차단·인터럽트·되물음)을 집계하고 개선을 **제안까지만** — 반영은 ADR로 | — |
+
+버그 리뷰 축은 공식 `code-review` 플러그인(`/code-review`)을 함께 쓴다. 구 `test-fe`·`review-fe`(렌즈 L1~L7)는 adr/0026으로 폐지 — git 이력에 있다.
 
 ### develop-fe 흐름
 
@@ -56,12 +60,13 @@ flowchart LR
     A[요청] --> B{티어 판정}
     B -->|"Tier-1 · 한 문장 diff"| C[수정 + 증거 1개]
     B -->|"Tier-2 · 기능"| D[OpenSpec change]
-    B -->|"Tier-3 · 에픽"| E[brainstorm → change N개<br/>change마다 새 세션]
-    D --> F[red 테스트<br/>세션당 1회 승인]
+    B -->|"큰 작업"| E[brainstorm → Tier-2 change N개 분해]
+    D --> F[red 테스트 TDD<br/>세션당 1회 승인]
     F --> G[구현<br/>테스트 파일 읽기전용]
-    G --> H[증거<br/>스크린샷 · axe · verify]
-    H --> I[렌즈 리뷰<br/>blocker 배치 수정 1회]
-    I --> J[커밋 4~8개 · PR]
+    G --> H[증거<br/>devtools · 스크린샷 · axe · verify]
+    H --> I[리뷰 2축<br/>review-cgamja + code-review]
+    I --> K[비주얼 QA<br/>qa-cgamja baseline]
+    K --> J[커밋 4~8개 · pre-push 게이트 · PR]
     E --> D
 ```
 
@@ -73,21 +78,22 @@ flowchart LR
 |---|---|---|
 | 대상 | MVP, 프로토타입, 데모, 해커톤 | 프로덕션 레포, 티켓 기반 작업 |
 | 우선순위 | 비용·속도 | 정확성·증거·스펙 유지 |
-| 스펙 / 테스트 / 리뷰 | 없음 / 기존 초록 유지 / L1 1회 | OpenSpec / red 게이트 / 렌즈 3~7개 |
-| 실측 비용 | 목표 <$5 | Tier-1 $0.74 · Tier-2 $30~45 |
+| 스펙 / 테스트 / 리뷰 | 없음 / 기존 초록 유지 / L1 1회 | OpenSpec / red 게이트 / 리뷰 2축 |
+| 실측 비용 | 목표 <$5 | Tier-1 $0.74 · Tier-2(v1 렌즈 체계 실측 $30~45 — v2 2축은 재측정 예정) |
 
-Tier-2 비용의 절반 이상이 리뷰인데, 이는 멀티에이전트 파이프라인의 보편 현상(연구상 리뷰 단계 토큰 59.4%)이다 — 렌즈를 줄이는 것(`/review-fe --lens`)은 사용자 선택이고, 렌즈별 실효(반영률)는 [`reports/lens-ledger.md`](reports/lens-ledger.md)에 누적된다.
+v1에서 Tier-2 비용의 절반 이상이 렌즈 리뷰였다(연구상 리뷰 단계 토큰 59.4%) — v2가 렌즈 7개를 2축(review-cgamja + code-review)으로 줄인 이유다(adr/0026). 렌즈별 실효 기록은 [`reports/lens-ledger.md`](reports/lens-ledger.md).
 
 ## 구조
 
 ```
-skills/            절차 — develop-setup · develop-fe(+workflow.md, hooks/) · develop-baby-fe · test-fe · review-fe · retro-fe
-agents/            리뷰 렌즈 persona 7개 (reviewer-correctness … reviewer-performance)
+skills/            절차 — develop-setup · develop-fe(+workflow.md, hooks/, templates/git-hooks/) · develop-baby-fe · review-cgamja · qa-cgamja · test-driven-development(vendored) · browser-testing-with-devtools(vendored) · retro-fe
+agents/            reviewer-cgamja(철학 대조) · reviewer-correctness(baby용 L1)
 references/        관심사별 지식 — 앞부분은 스택 무관 원칙, 뒷부분은 "검증된 구현"(스택·날짜 라벨)
-adr/               결정 기록 0001~0025 — 절차를 바꾸려면 ADR 먼저, 문서는 ADR을 참조
+adr/               결정 기록 0001~0026 — 절차를 바꾸려면 ADR 먼저, 문서는 ADR을 참조
 reports/           실측 기록 — 시나리오·비용·모델·통과표·결함·렌즈 원장
 tests/             훅·preflight·문서 경로·스택 단어의 결정적 회귀 테스트 (LLM 호출 없음)
-docs/              philosophy.md(고정점) · positioning.md(지형)
+docs/              philosophy.md(고정점) · positioning.md(지형) · spec/(코드 철학 SPEC — cgamja-philosophy 사본)
+licenses/          vendored 스킬 원 라이선스(MIT)
 bin/               openspec 래퍼
 ```
 

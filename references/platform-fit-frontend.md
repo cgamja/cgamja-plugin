@@ -1,6 +1,6 @@
 # 플랫폼 적합성 — 데스크톱 웹 / 모바일 웹 / 네이티브, 같은 화면이라도 증거가 다르다 (`adr/0010`, `adr/0014`)
 
-**원칙**: "반응형"은 체크 항목이 아니라 **프로필**이다. 프로젝트가 `.claude/cgamja.json` `platform.profile`(`web-desktop` | `web-mobile` | `native`)을 선언하고 `.claude/rules/platform.md`(템플릿 `templates/rules/platform-{web,expo}.md`)에 뷰포트·증거·금지 목록을 둔다. develop-fe UI task와 review-fe L5 렌즈는 그 프로필만 읽는다. 스킬 본문에는 스택 분기를 쓰지 않는다. §5는 검증된 구현.
+**원칙**: "반응형"은 체크 항목이 아니라 **프로필**이다. 프로젝트가 `.claude/cgamja.json` `platform.profile`(`web-desktop` | `web-mobile` | `native`)을 선언하고 `.claude/rules/platform.md`(템플릿 `templates/rules/platform-{web,expo}.md`)에 뷰포트·증거·금지 목록을 둔다. develop-fe UI task와 리뷰는 그 프로필만 읽는다. 스킬 본문에는 스택 분기를 쓰지 않는다. §5는 검증된 구현.
 
 ## 1. 프로필 표
 | | `web-desktop` | `web-mobile` / PWA | `native` (iOS·Android) |
