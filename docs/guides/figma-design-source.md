@@ -1,6 +1,6 @@
 # Figma를 디자인 원천으로 쓰는 법 (리서치 2026-08-21)
 
-디자인 원천은 프로젝트가 `.claude/cgamja.json` `design.source`로 선언한다(`figma:<fileKey>` 또는 `none`; 다른 원천이면 같은 원칙 — 원천은 진실, 저장소 스냅샷은 캐시). 아래는 Figma일 때. Figma 파일에 디자인이 있고, 일부는 미완성(와이어프레임 상태)으로 표시돼 있다. 에이전트는 ① 완성된 화면은 Figma대로 구현하고 ② 미완성 부분은 Artifact로 후보를 뽑아 사용자와 확정한 뒤 코드로 만들고 Figma에 거울로 남기며 ③ **단순 기능 개발에선 Figma를 부르지 않는다**. 결정은 `adr/0002`, `adr/0003`.
+디자인 원천은 프로젝트가 `.claude/cgamja.json` `design.source`로 선언한다(`figma:<fileKey>` 또는 `none`; 다른 원천이면 같은 원칙 — 원천은 진실, 저장소 스냅샷은 캐시). 아래는 Figma일 때. Figma 파일에 디자인이 있고, 일부는 미완성(와이어프레임 상태)으로 표시돼 있다. 에이전트는 ① 완성된 화면은 Figma대로 구현하고 ② 미완성 부분은 Artifact로 후보를 뽑아 사용자와 확정한 뒤 코드로 만들며(Figma로의 역캡처는 하지 않는다 — adr/0026 §9) ③ **단순 기능 개발에선 Figma를 부르지 않는다**. 결정은 `adr/0002`, `adr/0003`.
 
 ## 0. 먼저 알아야 할 플랜 게이트 ([rate limits](https://developers.figma.com/docs/figma-mcp-server/rate-limits-access/))
 | 기능 | 조건 |

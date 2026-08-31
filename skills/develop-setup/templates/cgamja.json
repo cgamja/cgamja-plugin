@@ -5,7 +5,7 @@
     "patterns": ["**/*.test.*", "**/*.browser.test.*", "**/*.spec.*", "e2e/**", "**/*.stories.*"],
     "layers": { "unit": "pnpm test:unit", "browser": "pnpm test:browser", "e2e": "pnpm e2e" }
   },
-  "contract": { "source": "api/openapi.yaml", "generate": "pnpm api:gen", "generated": ["src/api/**/*.gen.ts", "src/api/model/**"] },
+  "contract": { "source": "api/openapi.yaml", "generate": "pnpm api:gen", "generated": ["src/domains/**/*.gen.ts", "src/domains/**/*.msw.ts", "src/domains/**/*.faker.ts", "src/api/model/**"] },
   "mock": { "boundary": "msw" },
   "design": { "source": "none", "tokens": "src/styles/tokens.css" },
   "platform": { "profile": "web-desktop" },

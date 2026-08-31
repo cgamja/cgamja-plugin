@@ -58,13 +58,15 @@ await expect(page).toHaveScreenshot('checkout-error.png', {
     id: "checkout-button"      # 코드에서 확인한 실제 testID — 추론 금지
 - assertVisible: "주문 확인"
 - assertScreenshot:
-    baseline: "checkout-confirm"
+    path: "baselines/checkout-confirm.png"   # 기준 이미지 경로 필드는 path
     thresholdPercentage: 95    # 차트 등 픽셀 민감 화면은 98~99
     cropOn:
-      id: "order-summary"      # 동적 영역(시계·배터리·타임스탬프) 제외
+      id: "order-summary"      # 주의: cropOn은 마스킹이 아니라 **지정 요소 영역만 비교** — 나머지 화면은 검증되지 않는다
 ```
 
-- `takeScreenshot`은 baseline 최초 생성 시에만 쓴다.
+- 기본은 **전체 화면 비교**다. 동적 값(시계·배터리·타임스탬프)은 cropOn으로 피하지 말고 상태바 고정·mock 픽스처로 **소스에서 제거**한다. cropOn은 "이 컴포넌트만 보는" 좁은 검증에만 쓰고, baseline도 **같은 cropOn 설정으로** 생성해야 비교가 성립한다.
+
+- `takeScreenshot`은 baseline 최초 생성 시에만 쓴다(검증 플로우와 같은 상태·같은 crop 설정에서).
 - 시뮬레이터 기종·OS 버전을 고정하고, 상태바를 고정한다: `xcrun simctl status_bar <device> override --time "9:41"`.
 - 애니메이션·전환 효과는 테스트 빌드에서 비활성화하고, 데이터는 mock 서버 고정 픽스처를 쓴다.
 

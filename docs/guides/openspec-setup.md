@@ -67,10 +67,12 @@ apply:
   requires: [tasks]
   tracks: tasks.md
   instruction: |
-    For each test task: run it, paste the failure output, state why it fails (missing behavior,
-    not import/typo), commit as `test(scope): ...`, then stop for the human to review.
-    Implementation tasks: test files are read-only; green + all previously green tests still green;
-    commit `feat(scope): ...`. Mark [x] only with evidence (test output or screenshot path).
+    For each test task: the worker runs it and reports the failure output and why it fails
+    (missing behavior, not import/typo); the main session commits as `test(scope): ...` and
+    stops for the human to review. Implementation tasks: test files are read-only; the worker
+    reports green + all previously green tests still green; the main session verifies and
+    commits `feat(scope): ...` (workers never commit — adr/0027). Mark [x] only with evidence
+    (test output or screenshot path).
     Never edit assertions/skip/tolerances to get green; stop and report the failing assertion.
     Done = `pnpm verify` green; show its output.
 ```
