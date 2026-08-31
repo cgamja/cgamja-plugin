@@ -69,13 +69,13 @@
 
 | 플래그 | 입력 | 산출 | 로드할 스킬 |
 |---|---|---|---|
-| `--only-wf` | 와이어프레임(Figma 노드·스케치·요구사항)만 | **와이어프레임** — 정보 구조·플로우·상태(빈/로딩/에러)만, 스타일 없음(그레이스케일·플레이스홀더) | `design` 스킬 캔버스 (또는 Figma `generate_figma_design`) |
+| `--only-wf` | 와이어프레임(Figma 노드·스케치·요구사항)만 | **와이어프레임** — 정보 구조·플로우·상태(빈/로딩/에러)만, 스타일 없음(그레이스케일·플레이스홀더) | `design` 스킬 캔버스 |
 | `--only-design` | 확정 디자인(Figma·스타일 가이드)만 | **하이파이 디자인** — 토큰·컴포넌트 준수한 신규/변형 화면 | `frontend-design` + `taste-skills` + `frontend-ui-engineering` |
 | `--wf-and-design` | 와이어프레임 | **하이파이 디자인** — 와이어프레임의 정보 구조를 유지하며 스타일 입힘 | 위 셋 + 와이어프레임 구조 보존 검증 |
 
 공통 절차:
 1. 입력 수집: 지정된 입력만 읽는다(--only-wf에서 기존 하이파이 화면을 참조해 스타일을 끌어오지 않는다; --only-design에서 와이어프레임이 있어도 무시하지 않되 "입력이 디자인뿐"임을 보고)
-2. 산출: 후보 **2~3안**을 캔버스 Artifact 또는 Figma에 나란히 — 안마다 "무엇이 다른가" 한 줄. 제약: `tokens.css`·기존 컴포넌트만(하이파이일 때), 새 색·간격 값 발명 금지
+2. 산출: 후보 **2~3안**을 `design` 스킬 캔버스 Artifact에 나란히 — 안마다 "무엇이 다른가" 한 줄. **Figma에 쓰지 않는다**(Figma는 읽기 전용 원천, adr/0026). 제약: `tokens.css`·기존 컴포넌트만(하이파이일 때), 새 색·간격 값 발명 금지
 3. **디자인 리뷰**: `cgamja:qa-cgamja` 기준으로 검증 시점(THEN 상태 — 모달·에러·다크모드)이 커버되는지 체크리스트로 확인 + 사용자 확정
 4. 확정안과 이유를 `design/screens/<slug>/summary.md` "디자인 결정"에 기록 → 여기서 세션 종료. 구현은 별도 세션
 
@@ -105,7 +105,7 @@
 7. **`/opsx:archive`** → 5장 커밋 → 6장 PR
 
 ### 2-D. 디자인 갭 루프 (미완성·미디자인 부분, adr/0003)
-Tier-2 3단계(propose) 전에 돈다. 1-b의 `--wf-and-design` 절차와 동일하되 같은 세션에서 이어간다: 입력 수집(해당 노드 `get_design_context` 1회 + tokens + components + Ready 화면) → `frontend-design`·`taste-skills`·`frontend-ui-engineering` 로드해 후보 2~3안 → 사용자 확정 → `summary.md` 기록 → 코드 먼저 구현 → `generate_figma_design`으로 Figma에 평면 캡처(거울) → 스냅샷 생성.
+Tier-2 3단계(propose) 전에 돈다. 1-b의 `--wf-and-design` 절차와 동일하되 같은 세션에서 이어간다: 입력 수집(해당 노드 `get_design_context` 1회 + tokens + components + Ready 화면) → `frontend-design`·`taste-skills`·`frontend-ui-engineering` 로드해 후보 2~3안 → 사용자 확정 → `summary.md` 기록(확정 Artifact 링크 포함 — 이것이 코드 우선 부분의 디자인 원천) → 코드 먼저 구현. **Figma로의 역캡처(거울)는 하지 않는다**(adr/0026 — Figma는 읽기 전용 원천).
 
 ## 3. 공통 규칙
 

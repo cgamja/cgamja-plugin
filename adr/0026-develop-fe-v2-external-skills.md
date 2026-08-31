@@ -26,6 +26,7 @@ develop-fe v1은 자급자족형이었다 — 테스트(`test-fe`), 리뷰(`revi
    - `--only-design`: 디자인만 입력으로 하이파이 디자인 산출
    - `--wf-and-design`: 와이어프레임을 입력으로 하이파이 디자인 산출
    플래그 없으면 v1대로 구현까지 간다. 디자인 산출에는 `frontend-design`·`taste-skills`·`frontend-ui-engineering`을 로드.
+9. **Figma는 읽기 전용 원천.** v1의 코드→Figma 역캡처(`generate_figma_design` 평면 거울, adr/0003 4단계)와 Figma 산출 옵션을 전부 제거 — 디자인 산출물은 `design` 스킬 캔버스 Artifact + `design/screens/<slug>/summary.md`에만 남긴다. Figma 호출은 읽기(스냅샷·get_design_context)만.
 8. **외부 스킬 배치표.** AI-SPEC의 스킬들을 단계별로 고정 배치(워크플로우 본문 표 참조): 탐색=`context-engineering`, 구현=`composition-patterns`(+RN이면 `react-native-skills`)+`typescript-lsp`, 성능 task=`performance-optimization`, 관측 task=`observability-and-instrumentation`, 보안 점검=`claude-security`(요청 시), 설명=`eli5`(사용자용), 장기 작업 현황=`project-artifact`(요청 시).
 
 ## 대안과 트레이드오프

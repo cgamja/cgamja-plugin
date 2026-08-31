@@ -50,7 +50,7 @@ hooks:
 ## 디자인은 Figma가 원천, 작업 입력은 `design/` 스냅샷
 - 화면 task는 `design/screens/<slug>/summary.md`와 `reference@2x.png`를 읽고 시작한다. 있으면 **Figma를 열지 않는다**(비용). Figma MCP 호출은 네 경우뿐: 새 화면, 디자인 변경, 최종 검증 `get_screenshot` 1회, 토큰 동기화 — 판단 표는 `references/figma-design-source.md` §3.
 - Figma 노드에 `📝 TODO:` / `🚧 WIP` / `⬜ PLACEHOLDER`가 있으면 구현하지 않고 `workflow.md` 2-D 디자인 갭 루프로.
-- Figma 읽기 전엔 `figma:figma-design-to-code`, 쓰기 전엔 `figma:figma-use`/`figma-generate-design`을 먼저 로드한다(플러그인 규칙).
+- Figma 읽기 전엔 `figma:figma-design-to-code`를 먼저 로드한다(플러그인 규칙). **Figma에 쓰지 않는다** — 디자인 산출물은 `design` 스킬 캔버스 Artifact와 `design/screens/<slug>/summary.md`에만(adr/0026).
 
 ## API 계약은 `api/openapi.yaml` 하나, 코드는 생성물만
 - 계약 상태 A/B/C/D 판정은 `workflow.md` 1장, 절차는 `references/api-contract.md`(adr/0008). 스펙에 없는 게 필요하면 코드·목에 먼저 넣지 않는다 — 멈추고 스펙 diff 제안.
