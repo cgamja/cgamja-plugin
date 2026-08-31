@@ -89,7 +89,8 @@
 
 ### Tier-2 기능 — OpenSpec
 1. **탐색**: 관련 코드, 기존 컴포넌트, `openspec/specs/`, `docs/solutions/`, `design/screens/<slug>/`(있으면 Figma 안 연다). 긴 문서·티켓은 서브에이전트가 읽고 요약만(`context-engineering` 원칙). 코드가 이미 답하는 건 묻지 않는다
-2. **질문 1회** (AskUserQuestion, 최대 5개): ① 참고할 기존 코드 ② Figma 노드 URL(스냅샷 없을 때만) ③ 빈·로딩·에러 상태 ④ 반응형 범위 ⑤ 가정한 기본값 목록(반박만 받기) ⑥ 계약 DRAFT 스텁 shape(해당 시)
+2. **질문은 예외다 — 기본은 전진**(adr/0029). 정지 허용 목록(3-0)에 없으면 묻지 말고 **가정 3줄**을 남기고 같은 턴에서 계속한다. 목록에 해당해 진짜로 물을 때만 AskUserQuestion 1회(묶어서, 최대 5개): ① 참고할 기존 코드 ② Figma 노드 URL(스냅샷 없을 때만) ③ 빈·로딩·에러 상태 ④ 반응형 범위 ⑤ 계약 DRAFT 스텁 shape(해당 시). 각 질문에 **"답이 없으면 이것으로 진행합니다"** 기본값을 명시한다
+   > 구 ⑤ "가정한 기본값 목록(반박만 받기)"은 폐지 — AskUserQuestion은 답이 올 때까지 턴이 끝나므로 "반박만 받기"가 성립하지 않았다. 가정은 3-0의 3줄로 낸다
 3. **`/opsx:propose`** → `openspec/changes/<slug>/` 에 spec delta(시나리오 = 테스트 원천) + `tasks.md`(task마다 `→ verify:`). `openspec validate <slug> --strict`. propose 중엔 프로젝트 코드를 편집하지 않는다(planning boundary, adr/0019)
 4. **`/opsx:apply`** — task 하나씩, **메인은 위임·판정·커밋만 한다(adr/0027)**:
    - **위임 기본**: 구현·테스트 작성 unit은 서브에이전트 1개(fresh context, `model:` 명시 — 구현·테스트 sonnet)로 내린다. inline 예외: 1~2파일 trivial, 사용자 상호작용이 중간에 필요한 task. **unit packet**(위임 프롬프트)에 넣을 것: 해당 requirement 발췌 + 대상 파일 + 테스트 시나리오 + 검증 명령 + `docs/spec/` 절대 경로(서브에이전트는 대화 이력·로드된 스킬을 못 본다 — CLAUDE.md·rules·훅은 자동 적용) + "커밋 금지, 최종 메시지는 `{status, changed_files, evidence(red 관찰·검증 결과)}` JSON". "스펙 전체를 읽어라"는 금지
@@ -107,7 +108,7 @@
 7. **`/opsx:archive`** → 5장 커밋 → 6장 PR
 
 ### 2-D. 디자인 갭 루프 (미완성·미디자인 부분, adr/0003)
-Tier-2 3단계(propose) 전에 돈다. 1-b의 `--wf-and-design` 절차와 동일하되 같은 세션에서 이어간다: 입력 수집(해당 노드 `get_design_context` 1회 + tokens + components + Ready 화면) → `frontend-design`·`taste-skills`·`frontend-ui-engineering` 로드해 후보 2~3안 → 사용자 확정 → `summary.md` 기록(확정 Artifact 링크 포함 — 이것이 코드 우선 부분의 디자인 원천) → 코드 먼저 구현. **Figma로의 역캡처(거울)는 하지 않는다**(adr/0026 — Figma는 읽기 전용 원천).
+Tier-2 3단계(propose) 전에 돈다. **허가를 묻지 않고 진입한다**(adr/0029 §3 — "디자인 세션이 필요합니다"라며 턴을 끝내는 것이 2026-08-31 런의 61분 공백이었다). 1-b의 `--wf-and-design` 절차와 동일하되 같은 세션에서 이어간다: 입력 수집(해당 노드 `get_design_context` 1회 + tokens + components + Ready 화면) → `frontend-design`·`taste-skills`·`frontend-ui-engineering` 로드해 후보 2~3안 → **그중 하나를 골라 구현까지 진행**하고 고른 이유와 나머지 안을 함께 보고 → 사용자가 다른 안을 고르면 교체(섹션 하나 교체는 되돌리는 비용이 낮다) → `summary.md` 기록(확정 Artifact 링크 포함 — 이것이 코드 우선 부분의 디자인 원천). **Figma로의 역캡처(거울)는 하지 않는다**(adr/0026 — Figma는 읽기 전용 원천).
 
 ### 2-P. 병렬 작업 (독립 change — adr/0027 §3)
 직렬이 필요한 건 직렬로, 독립인 건 병렬로 — 실제 개발처럼. 진입은 두 경로:
@@ -115,14 +116,37 @@ Tier-2 3단계(propose) 전에 돈다. 1-b의 `--wf-and-design` 절차와 동일
 - **세션 내**: 서브에이전트 `isolation: worktree`. **메인이 `git worktree add`를 직접 하지 않는다** — 격리는 하네스의 일
 
 **병렬 가능 판정** (하나라도 걸리면 직렬 — 불확실해도 직렬, 속도는 옵션):
+0. **전제 체크**(adr/0030): 선언 `parallel`이 `null`이거나 `.worktreeinclude`가 없으면 → **직렬**. 병렬을 원하면 `/develop-setup`으로 전제부터 깐다. 문서에만 있는 2-P는 실행되지 않는다 — 2026-08-31 런은 61커밋을 쌓고도 worktree가 0개였다
 1. 의존하는 unit/change가 아직 커밋 안 됨 → 직렬
 2. 파일 겹침 — 겹치지 않아도 **semantic 표면**(공유 타입·계약(`api/openapi.yaml`)·lockfile·생성물(`*.gen.ts`)·config)이 겹치면 직렬
 3. 환경 싱글턴 충돌 — dev server 포트·브라우저 세션·패키지 설치가 필요한 unit은 한 번에 하나
 4. 동시 상한 3
 
-**머지**: 의존성 순서로 **1개씩 integrate → verify → commit**. clean merge는 호환 증명이 아니다 — 전진한 트리에서 재검증하고, 충돌 unit은 새 base에 re-dispatch. 세팅: `.claude/worktrees/`를 gitignore, `.worktreeinclude`에 `.env`(worktree별 PORT).
+**머지**: 의존성 순서로 **1개씩 integrate → verify → commit**. clean merge는 호환 증명이 아니다 — 전진한 트리에서 재검증하고, 충돌 unit은 새 base에 re-dispatch.
+
+**세팅은 `develop-setup`이 깐다**(adr/0030) — 선언 `parallel.{worktrees, port_env, max_concurrent}`, `.gitignore`의 `.claude/worktrees/`·`.env`, `.worktreeinclude`(worktree별 `.env`), dev 포트를 `port_env`로 파라미터화 + **strictPort**. strictPort가 핵심이다: 포트가 잡혔을 때 조용히 옆 포트로 옮겨 뜨면 증거 캡처가 엉뚱한 포트를 때린다 — 자동 이동은 사람에겐 편의지만 에이전트에겐 관측 불가능한 상태다.
 
 ## 3. 공통 규칙
+
+### 3-0. 게이트 — 정지는 예외, 전진이 기본 (adr/0029)
+2026-08-31 런에서 하루의 36%(181분)가 사람 대기였고, 최장 두 공백 110분이 얻어낸 답은 두 번 다 "네가 알아서 해"였다. 그래서 기본값을 뒤집는다.
+
+**정지 허용 목록 — 이것만 사람을 기다린다**
+| | 사유 |
+|---|---|
+| a | 되돌리기 어렵거나 밖으로 나가는 행동 — 배포·푸시·외부 전송·삭제 |
+| b | 계약 판정 **D**(스펙에 없는 필드가 필요) |
+| c | 사용자만 아는 사실 — 비즈니스 규칙·우선순위·법적 제약·실제 데이터 형태 |
+| d | red 게이트 세션당 1회(adr/0018) |
+| e | 디자인 후보 **확정** — 후보를 낸 *뒤*의 사후 확인이지 진입 허가가 아니다 |
+
+**그 외는 가정 전진** — 멈추는 대신 세 줄을 남기고 같은 턴에서 계속한다:
+```
+가정: <무엇을 정했나>
+근거: <PRD §n / 기존 코드 / 토큰 / 관례>
+되돌리는 비용: <틀렸을 때 다시 해야 하는 것>
+```
+정지 직전 자문 한 줄: **"이 답이 '알아서 해'로 돌아올 확률이 높은가?"** 높으면 가정 전진이다. "되돌리는 비용"이 섹션 하나 다시 만들기보다 크면 정지 목록으로 올린다. 가정은 작업 **시작 시점**에 내고, 세션 마무리 보고에 누적 목록을 다시 낸다.
 
 ### 3-1. 검증 스택 — 싸게 → 비싸게, 위가 깨지면 아래로 안 내려간다
 1. **결정적** = `commands.verify` 한 명령(계약 드리프트+타입+린트+테스트). 완료 정의는 이 이름 한 곳(adr/0005). git 훅이 같은 명령을 pre-push에서 강제한다(0-b)
@@ -154,7 +178,8 @@ Tier-2 3단계(propose) 전에 돈다. 1-b의 `--wf-and-design` 절차와 동일
 - **살아있는 스펙** = `openspec/specs/`(archive가 갱신) · **학습** = `/ce-compound` → `docs/solutions/` · **결정** = 프로젝트 `docs/adr/`(형식은 `docs/spec/ADR` 규약과 philosophy 레포 ADR.md) · **디자인** = `design/`(스냅샷 덮어쓰기 = 이력) · **일회용** = `docs/plans/`, archive, 후보 캔버스
 
 ## 5. 커밋 — pre-commit/pre-push가 게이트
-- 형식은 `docs/spec/COMMIT.md`: `feat|fix|refactor|test|chore|docs(scope): 요약`. **단계 1개 = 커밋 1개**(change당 4~8개): `docs(spec)` 1 · `test` 1~3 · `feat` 1~3 · `fix(review)` 1. task마다 커밋하지 않는다
+- 형식은 `docs/spec/COMMIT.md`: `feat|fix|refactor|test|chore|docs(scope): 요약`. **단계 1개 = 커밋 1개**(change당 4~8개): `docs(spec)` 1 · `test` 1~3 · `feat` 1~3 · `fix(review)` 1. task마다 커밋하지 않는다 **[pre-push 경고 — adr/0031]**
+  > 2026-08-31 런은 5개 change 전원이 상한을 넘겼다(12·16·12·9·9). 산문으로만 있어서 아무도 세지 않았다. 이제 pre-push가 나가는 커밋을 세어 초과면 **경고**한다(차단 아님 — 리뷰 라운드가 정당하게 커밋을 늘린다). 초과 시 사유를 PR 본문에 한 줄
 - 테스트 변경은 **별도 커밋**(pre-push가 feat/fix 커밋의 테스트 혼입을 차단한다)
 - **pre-push에 막히면**: 커밋을 고치는 게 정답이다 — verify 실패면 `git commit --fixup <실패 원인 sha>` → `git rebase --autosquash`, 메시지 형식이면 `git rebase -i`로 reword, 테스트 혼입이면 커밋 분리. `--no-verify`·훅 삭제로 우회하지 않는다(스킬 훅이 거부)
 - `/ce-commit` 사용. 푸시는 change 단위
