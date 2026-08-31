@@ -180,6 +180,9 @@ for p in sys.stdin.read().split('\n'):
             bad "worktree .env 쓰기" "$d/.env 를 쓰지 못했다"; fi
           # `( … ) &` 형태여야 $! 가 서브셸의 pid 다. `( … & echo $! )` 는 pid 기록이
           # 원래 디렉터리에서 실행돼 엉뚱한 곳에 파일을 남긴다(같은 날 실측).
+          # 러너(npm)가 서버(vite)를 손자로 띄우므로 서브셸 pid 만 죽이면 서버가 남아 포트를
+          # 계속 문다(2026-08-31 실측). setsid 는 macOS 에 없어 못 쓴다 — 대신 정리를
+          # **포트 기준**으로 한다(아래). 누가 물고 있든 포트가 비면 정리된 것이다.
           ( cd "$d" && env "${penv:-PORT}=$pt" bash -c "$dev" ) >"$logdir/$pt.log" 2>&1 &
           pids="$pids $!"
         done
@@ -194,7 +197,13 @@ for p in sys.stdin.read().split('\n'):
         else bad "worktree 동시 실행" "응답 $okcount/2 — port_env(${penv:-PORT}) 미반영 또는 포트 충돌
   $p1: $(tail -3 "$logdir/$p1.log" 2>/dev/null | tr '\n' ' ')
   $p2: $(tail -3 "$logdir/$p2.log" 2>/dev/null | tr '\n' ' ')"; fi
-        for pid in $pids; do kill "$pid" 2>/dev/null; pkill -P "$pid" 2>/dev/null; done
+        # 3단 정리: 서브셸 → 그 자식 → 그래도 포트를 물고 있으면 포트 기준으로.
+        # 마지막 단이 실질적인 보증이다 — 다음 실행이 같은 포트를 쓰므로 여기서 안 비우면
+        # 그다음 프로브가 "포트 충돌"로 거짓 빨강을 낸다.
+        for pid in $pids; do pkill -P "$pid" 2>/dev/null; kill "$pid" 2>/dev/null; done
+        sleep 1
+        for pt in $p1 $p2; do
+          lp="$(lsof -ti "tcp:$pt" 2>/dev/null)"; [ -n "$lp" ] && kill -9 $lp 2>/dev/null; done
         sleep 1
         git worktree remove --force "$wa" 2>/dev/null; git worktree remove --force "$wb" 2>/dev/null
         rm -rf "$wa" "$wb" "$logdir"; git worktree prune 2>/dev/null
