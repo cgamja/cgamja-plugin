@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# cgamja develop-fe pre-push — 전체 게이트: commands.verify + 나가는 커밋 검사.
+# 조건이 안 맞으면 푸시가 막힌다. 대응은 커밋을 고치는 것(fixup/reword/rebase)이지 --no-verify 우회가 아니다.
+set -u
+decl=".claude/cgamja.json"
+cmd() { python3 -c 'import json,sys
+try: print(json.load(open(sys.argv[1])).get("commands",{}).get(sys.argv[2]) or "")
+except Exception: print("")' "$decl" "$1" 2>/dev/null; }
+
+fail=0
+
+# 1) 완료 정의 한 곳 = commands.verify (계약 드리프트+타입+린트+테스트)
+verify="$(cmd verify)"
+if [ -n "$verify" ]; then
+  echo "[pre-push] verify: $verify"
+  if ! eval "$verify"; then
+    echo "[pre-push] verify 실패 — 실패 커밋을 fixup으로 고친 뒤 다시 푸시하라 (git commit --fixup <sha> && git rebase --autosquash)."
+    fail=1
+  fi
+else
+  echo "[pre-push] commands.verify 선언 없음 — 건너뜀 (/develop-setup 권장)"
+fi
+
+# 2) 나가는 커밋 검사: stdin으로 들어오는 ref 범위마다
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    range="$local_sha --not --remotes"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+  # 2-a) 커밋 메시지 형식 (docs/spec/COMMIT.md — conventional)
+  bad_msg="$(git log --format='%h %s' $range | grep -vE '^[0-9a-f]+ (feat|fix|refactor|test|chore|docs|style|perf|ci|build|revert)(\([^)]+\))?!?: ' || true)"
+  if [ -n "$bad_msg" ]; then
+    echo "[pre-push] 커밋 메시지 형식 위반 (docs/spec/COMMIT.md — type(scope): 요약):"
+    echo "$bad_msg"
+    echo "[pre-push] git rebase -i 로 reword 후 다시 푸시하라."
+    fail=1
+  fi
+  # 2-b) feat/fix 커밋에 테스트 파일 섞임 금지 (테스트 변경은 test(scope): 별도 커밋 — 변조 방지)
+  for sha in $(git log --format='%h' $range); do
+    t="$(git show --format='%s' --name-only "$sha" | head -1)"
+    case "$t" in
+      feat*|fix*)
+        mixed="$(git show --name-only --format='' "$sha" | grep -E '\.(test|spec)\.[jt]sx?$|/e2e/' || true)"
+        if [ -n "$mixed" ]; then
+          echo "[pre-push] $sha ($t) 에 테스트 파일이 섞임 — 테스트 변경은 test(scope): 별도 커밋으로 분리하라:"
+          echo "$mixed"
+          fail=1
+        fi;;
+    esac
+  done
+done
+
+[ $fail -ne 0 ] && echo "[pre-push] 푸시 차단. 커밋을 고친 뒤 재시도. --no-verify 는 develop-fe 훅이 거부한다."
+exit $fail

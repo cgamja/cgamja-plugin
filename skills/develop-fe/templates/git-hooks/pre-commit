@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# cgamja develop-fe pre-commit — 빠른 게이트만 (lint + typecheck).
+# 설치: develop-fe workflow 0-b (git config core.hooksPath .githooks)
+# 선언(.claude/cgamja.json)의 commands.lint / commands.typecheck 를 읽는다. 없으면 통과(경고만).
+set -u
+decl=".claude/cgamja.json"
+cmd() { python3 -c 'import json,sys
+try: print(json.load(open(sys.argv[1])).get("commands",{}).get(sys.argv[2]) or "")
+except Exception: print("")' "$decl" "$1" 2>/dev/null; }
+
+fail=0
+for key in lint typecheck; do
+  c="$(cmd $key)"
+  if [ -z "$c" ]; then echo "[pre-commit] commands.$key 선언 없음 — 건너뜀 (/develop-setup 권장)"; continue; fi
+  echo "[pre-commit] $key: $c"
+  if ! eval "$c"; then echo "[pre-commit] $key 실패 — 커밋 전에 고쳐라. --no-verify 우회 금지."; fail=1; fi
+done
+exit $fail
