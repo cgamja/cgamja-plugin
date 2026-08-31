@@ -30,3 +30,4 @@
 | [0023](0023-hook-false-positive-round2.md) | 훅 오탐 2차 정밀화(0017 개정) — cat<< 제외, 세그먼트 단위 쓰기 판정, advisory 세션당 1회, 훅 버전 마커·드리프트 감지 | 제안 | — |
 | [0024](0024-detection-blindspot-checklists.md) | 검출 사각지대 체크리스트 승격 — 스펙에 실패 의미론 3질문(유실 재시도·자원 만료·동시 입력), L1에 React 관용구 3항목 | 제안 | — |
 | [0025](0025-evidence-drive-scripting.md) | 증거 캡처 운전 스크립트화(0021 개정) — 화면당 레시피 스크립트, 상태당 1장·재조정 상한 3회·재읽기 금지, 미검증 플랫폼 조기 스킵 | 제안 | — |
+| [0026](0026-develop-fe-v2-external-skills.md) | develop-fe v2 — 티어 2단계(Tier-3 폐지), test-fe 삭제→TDD 스킬 vendoring, 리뷰 2축(review-cgamja+code-review), QA=qa-cgamja, SPEC 문서 docs/spec/ 이관, git pre-commit/pre-push 게이트, 디자인 플래그 3종 | 제안 | — |
