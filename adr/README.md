@@ -37,3 +37,4 @@
 | [0030](0030-parallel-prerequisites-in-setup.md) | 병렬 전제를 develop-setup이 깔고 `parallel` 선언으로 참조 — worktree·`.worktreeinclude`·포트 env·strictPort, smoke 프로브 1종, 2-P 진입 체크 0번 | 제안 | — |
 | [0031](0031-prose-rules-must-be-machine-checked.md) | 산문 규칙 금지 — rules 각 항목에 `[강제 수단]` 표기, 셀 수 있는 셋(커밋 수·zoom200·성능)은 훅/선언으로, 정본 없으면 가리키지 않기, 회고에 "산출물↔rules 대조" 추가 | 제안 | — |
 | [0032](0032-spec-is-the-stack-source-for-greenfield.md) | 빈 레포에서 스택의 원천은 SPEC — 스캐폴더는 결정권자가 아니고 결과가 SPEC과 다르면 세팅이 고친다, 대조표에 스택 축, 이탈은 `docs/adr/` 기록해야 완료(프로브 11) | 제안 | — |
+| [0033](0033-copies-need-an-update-path.md) | 복사본에는 갱신 경로가 있어야 한다 — `develop-update` 스킬, 드리프트를 정수 마커가 아니라 **내용**으로 판정(0023 개정), 선언 없는 프로젝트는 setup 대상, 덮는 것과 보존하는 것 구분 | 제안 | — |
