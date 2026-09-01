@@ -32,7 +32,7 @@
 | [0025](0025-evidence-drive-scripting.md) | 증거 캡처 운전 스크립트화(0021 개정) — 화면당 레시피 스크립트, 상태당 1장·재조정 상한 3회·재읽기 금지, 미검증 플랫폼 조기 스킵 | 제안 | — |
 | [0026](0026-develop-fe-v2-external-skills.md) | develop-fe v2 — 티어 2단계(Tier-3 폐지), test-fe 삭제→TDD 스킬 vendoring, 리뷰 2축(review-cgamja+code-review), QA=qa-cgamja, SPEC 문서 docs/spec/ 이관, git pre-commit/pre-push 게이트, 디자인 플래그 3종 | 제안 | — |
 | [0027](0027-orchestrator-delegation-and-friction-fixes.md) | 실사용 마찰 반영 — 메인은 오케스트레이터만(구현·테스트는 unit packet 서브에이전트 위임), worktree 병렬(Parallel Safety Check), orval tags-split 도메인 분리, 테스트 동결, 증거 비저장(.claude/state/evidence), jscpd 폐지, 컨텍스트 예산 ~50% | 제안 | — |
-| [0028](0028-hook-target-resolution.md) | 훅 판정을 "명령 텍스트"→"명령의 대상"으로 — heredoc 본문·리다이렉트·프로젝트 밖 경로 제거, `hook-cases.sh` 21케이스 신설 | 채택 | 1런(오탐 4건 해소) |
+| [0028](0028-hook-target-resolution.md) | 훅 판정을 "명령 텍스트"→"명령의 대상"으로 — heredoc 본문·리다이렉트·프로젝트 밖 경로 제거, `hook-cases.sh` 36케이스 신설 | 제안 | 1런(오탐 4건 해소) |
 | [0029](0029-gates-advance-by-default.md) | 게이트 기본값을 정지→전진 — 정지 허용 목록 5종만 차단, 그 외는 "가정/근거/되돌리는 비용" 3줄 남기고 같은 턴 계속, 디자인 갭은 허가 없이 진입 | 제안 | — |
 | [0030](0030-parallel-prerequisites-in-setup.md) | 병렬 전제를 develop-setup이 깔고 `parallel` 선언으로 참조 — worktree·`.worktreeinclude`·포트 env·strictPort, smoke 프로브 1종, 2-P 진입 체크 0번 | 제안 | — |
 | [0031](0031-prose-rules-must-be-machine-checked.md) | 산문 규칙 금지 — rules 각 항목에 `[강제 수단]` 표기, 셀 수 있는 셋(커밋 수·zoom200·성능)은 훅/선언으로, 정본 없으면 가리키지 않기, 회고에 "산출물↔rules 대조" 추가 | 제안 | — |

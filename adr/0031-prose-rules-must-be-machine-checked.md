@@ -14,9 +14,16 @@
 | 색·간격·폰트는 토큰만 | CLAUDE.md, rules/platform.md | 하드코딩 0건 | `contrast.test.ts`, oxlint |
 | `export *` 금지 | CLAUDE.md, rules/state.md | 도메인 0건 | eslint |
 | 도메인 간 import 금지 | CLAUDE.md | 0건 | eslint boundaries |
-| 테스트 이름 `WHEN … THEN …` | rules/tests.md | 52개 전원 | 파일에 보이는 관례 |
 | 뷰포트 375·390·430 | rules/platform.md | 4 change 전원 | `capture.mjs` 인자 |
-| 컴포넌트 200줄·props 7개 | rules/components.md | 최대 121줄·props 0 | — (여유가 커서 안 걸림) |
+
+### 지켜졌지만 기계가 강제하지 않은 규칙 — 이번엔 운이 좋았다
+
+강제 수단이 없으므로 다음 런에 깨져도 아무것도 알려주지 않는다. 위 표에 넣으면 커버리지가 있는 것처럼 읽힌다(PR#10 지적).
+
+| 규칙 | 출처 | 결과 | 왜 안 깨졌나 |
+|---|---|---|---|
+| 테스트 이름 `WHEN … THEN …` | rules/tests.md | 52개 전원 | 파일에 이미 보이는 관례를 따라 씀 — 검사는 없다 |
+| 컴포넌트 200줄·props 7개 | rules/components.md | 최대 121줄·props 0 | 여유가 커서 한계에 닿지 않음 — 검사는 없다 |
 
 ### 안 지켜진 규칙 — 전부 산문으로만 있다
 
