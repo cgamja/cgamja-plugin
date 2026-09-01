@@ -26,10 +26,12 @@ for ln in lines:
     if skip_until is not None:
         if ln.strip()==skip_until: skip_until=None
         continue
-    m=re.search(r"<<-?\s*'?\"?([A-Za-z_][A-Za-z0-9_]*)'?\"?", ln)
+    m=re.search(r"<<-?\s*(?:'([^']+)'|\"([^\"]+)\"|([^\s;&|<>()'\"]+))", ln)
     if m:
-        skip_until=m.group(1)
-        out.append(re.sub(r"<<-?\s*'?\"?[A-Za-z_][A-Za-z0-9_]*'?\"?","",ln))
+        # 구분자 **전체**를 종료어로 쓴다. 앞부분만 읽으면(`<<END-OF` → `END`) 진짜 종료 줄을
+        # 못 만나 그 뒤의 실제 명령까지 heredoc 본문으로 지워진다(PR#10 지적).
+        skip_until=m.group(1) or m.group(2) or m.group(3)
+        out.append(re.sub(r"<<-?\s*(?:'[^']+'|\"[^\"]+\"|[^\s;&|<>()'\"]+)","",ln,count=1))
         continue
     out.append(ln)
 print("\n".join(out))
@@ -50,17 +52,22 @@ stripped="$(sed -E -e "s/'[^']*'//g" -e 's/"[^"]*"//g' -e 's/[0-9]*>&[0-9]+//g; 
 # 절대·상대 양쪽을 지운다 — worktree 경로는 상대로 쓰는 경우가 많아 (3)의 절대경로 규칙에 안 걸린다.
 WT="$(cfg parallel.worktrees)"; WT="${WT:-.claude/worktrees}"
 pathsafe="$(ROOT="$ROOT" WT="$WT" python3 -c '
-import os,re,sys
+import os,re,sys,posixpath
 root=os.environ["ROOT"].rstrip("/")
 wt=os.environ.get("WT",".claude/worktrees").strip("/")
+def norm(p):
+    # 완화 판정 전에 ROOT 기준으로 정규화한다. `..` 를 그대로 두면
+    # `.claude/worktrees/../../package.json` 이 "worktree 사본"으로 읽혀 지워지고,
+    # 셸은 정작 루트의 package.json 을 쓴다(PR#10 지적).
+    return posixpath.normpath(p if p.startswith("/") else posixpath.join(root,p))
 def outside(p):
     return not (p==root or p.startswith(root+"/"))
 def in_worktree(p):
     # 절대/상대 모두: 경로 어딘가에 <worktrees>/ 세그먼트가 있으면 사본이다
     return re.search(r"(?:^|/)"+re.escape(wt)+r"/", p) is not None
 def repl(m):
-    p=m.group(1)
-    return "" if (p.startswith("/") and outside(p)) or in_worktree(p) else p
+    p=norm(m.group(1))
+    return "" if outside(p) or in_worktree(p) else m.group(1)
 sys.stdout.write(re.sub(r"(?<![^\s>=])((?:/|\./|[A-Za-z0-9_.-]+/)[^\s\x27\"|;&()]*)", repl, sys.stdin.read()))' <<<"$stripped" 2>/dev/null || printf '%s' "$stripped")"
 WRITE='(sed -i|perl -p?i|tee |>|>>|rm |cp |mv |open\([^)]*["'"'"']w)'
 # 세그먼트 판정(adr/0023): &&·||·;·|·줄바꿈으로 나눠, 경로($1)와 쓰기 연산이 같은 세그먼트에 있을 때만 참.
@@ -80,7 +87,13 @@ if grep -qE 'core\.hooksPath' <<<"$cmd" && ! grep -qE 'git config([[:space:]]+--
 # (`echo "npm install lodash 는 막힌다"`)이 실제 설치로 읽히던 오탐. 따옴표를 지우는 방식은
 # `npm install "lodash"` 를 뚫으므로 쓰지 않는다.
 pkgadd() { local seg; while IFS= read -r seg; do
-    seg="$(sed -E -e 's/^[[:space:]]*//' -e 's/^(cd|sudo|env)[[:space:]]+[^[:space:]]+[[:space:]]+//' <<<"$seg")"
+    seg="$(sed -E -e 's/^[[:space:]]*//' -e 's/^cd[[:space:]]+[^[:space:]]+[[:space:]]+//' <<<"$seg")"
+    # 선행 `NAME=value`·`sudo`·`env` 는 **소비하되 매니저 토큰은 남긴다**(PR#10 지적).
+    # 예전 규칙은 두 토큰을 함께 지워 `sudo npm install lodash` → `install lodash` 가 되면서
+    # 첫 단어 검사에서 빠져나갔다. `NODE_ENV=production npm …` 은 아예 안 걸렸다.
+    while grep -qE '^([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*|sudo|env)[[:space:]]' <<<"$seg"; do
+      seg="$(sed -E 's/^([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*|sudo|env)[[:space:]]+//' <<<"$seg")"
+    done
     grep -qE '^(pnpm|yarn|bun|npm|npx|pip3?|cargo|go)([[:space:]]|$)' <<<"$seg" || continue
     seg="$(sed -E -e 's/[0-9]*>&[0-9]+//g' -e 's/[0-9]*>>?[[:space:]]*[^ |;&]+//g' -e 's/[[:space:]]--?[A-Za-z][A-Za-z0-9=-]*//g' <<<"$seg")"
     grep -qE '^(pnpm|yarn|bun|npm) +(add|remove|rm|uninstall|un|i|install) +[^ |;&]' <<<"$seg" && return 0

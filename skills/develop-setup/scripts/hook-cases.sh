@@ -98,6 +98,19 @@ want deny "따옴표로 감싼 패키지명"               'npm install "lodash"
 want deny "cd 뒤에 오는 설치"                    'cd packages/web && npm install lodash'
 want deny "echo 뒤 세그먼트의 설치"              'echo start; npm install lodash'
 
+# CodeRabbit(PR#10) 지적 — 전처리가 판정 자체를 건너뛰게 만드는 세 경로.
+# 완화 규칙((1)heredoc·(3)프로젝트 밖·(4)worktree)은 "대상이 아닌 것"만 지워야 하는데,
+# 구분자·`..`·선행 토큰을 헐겁게 읽으면 **대상인 것까지** 지워져 검사가 통과한다.
+want deny "지원 안 하는 heredoc 구분자 뒤의 보호 파일 쓰기" \
+  'cat <<END-OF
+설명
+END-OF
+echo x > .env'
+want deny "worktree 경유 .. 로 원본 보호 파일"   'printf x > .claude/worktrees/../../package.json'
+want deny "worktree 경유 .. 로 원본 .env"        'echo x > .claude/worktrees/a/../../.env'
+want deny "선행 환경변수 + 설치"                 'NODE_ENV=production npm install lodash'
+want deny "sudo + 설치"                          'sudo npm install lodash'
+
 echo
 echo "hook-cases: passed $pass, failed $fail"
 [ "$fail" -eq 0 ]
