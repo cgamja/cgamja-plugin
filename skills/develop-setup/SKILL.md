@@ -8,7 +8,7 @@ description: 기존 또는 새 프론트엔드 프로젝트(스택 불문, brown
 develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언·규칙·스펙)을 갖는다(adr/0014). 이 스킬은 프로젝트를 읽어 그 사실을 `.claude/cgamja.json`에 선언하고, 철학(`docs/philosophy.md`)의 강제 수단이 빠진 곳만 기존 도구 위에 붙인 뒤, 실제로 강제되는지 확인하고 끝난다. 한 프로젝트에 1회(이후엔 대조표에 ✗가 생겼을 때만). **스택을 묻지 않고, 바꾸자고 하지 않고, 스캐폴드하지 않는다.**
 
 ## 0. 발견 — 묻기 전에 읽는다
-`bash scripts/preflight.sh [dir]` — 매니페스트(package.json / pyproject / Gemfile / …), 프레임워크, 패키지 러너, 테스트 러너·기존 테스트 위치·파일 규약, 린터, 포맷터, 커밋 훅, CI, 계약 원천 후보(openapi·graphql·proto), 디자인 자산, 기존 `.claude/`·CLAUDE.md·AGENTS.md를 읽어 **발견 표**와 **대조표**(§1)를 출력한다. 이미 있는 것은 건드리지 않는다(멱등). 빈 폴더면 "스캐폴드가 필요합니다 — 어떤 것으로?"를 묻고 사용자가 고른 스캐폴더 명령을 **그대로 실행만** 한 뒤 다시 0으로.
+`bash scripts/preflight.sh [dir]` — 매니페스트(package.json / pyproject / Gemfile / …), 프레임워크, 패키지 러너, 테스트 러너·기존 테스트 위치·파일 규약, 린터, 포맷터, 커밋 훅, CI, 계약 원천 후보(openapi·graphql·proto), 디자인 자산, 기존 `.claude/`·CLAUDE.md·AGENTS.md를 읽어 **발견 표**와 **대조표**(§1)를 출력한다. 이미 있는 것은 건드리지 않는다(멱등). **빈 폴더면 스택의 원천은 `docs/spec/WEB-SPEC.md`(웹)·`APP-SPEC.md`(앱)다**(adr/0032) — 백지로 묻지 않는다. SPEC의 스택을 읽어 그것을 기본 제안으로 내고(가정 3줄, adr/0029), 반박이 오면 바꾼 값을 `docs/adr/`에 남긴다. 스캐폴더는 파일을 놓는 도구지 결정권자가 아니다 — **스캐폴드 결과가 SPEC과 다르면 세팅이 고친다**(2026-08-31: 스캐폴더 기본값의 `strict` 미설정이 그대로 살아남았다).
 
 ## 1. 대조표 — 철학 원칙 ↔ 이 프로젝트의 강제 수단
 | 원칙 | 선언 키 | 있음의 기준 | 없을 때 제안(기존 도구 위에, 최소) |
@@ -23,6 +23,8 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 | P6 플랫폼 | `platform.profile` | `.claude/rules/platform.md` 프로필 | 사용자에게 프로필 1개 확인 |
 | P10 작게 자주 | (commitlint·훅) | conventional commit 린트 + 테스트/구현 커밋 분리 규칙 | 기존 훅 매니저에 `commit-msg` 규칙 추가(없으면 lefthook) |
 | 보호 | `protected`, `lint_file` | 매니페스트·lockfile·린트 설정·훅 보호, 편집 파일 포맷+린트 | 훅 설치 |
+
+**스택 축**(adr/0032): 위 표와 별개로, SPEC이 정한 항목(언어·프레임워크·CSS·상태·번들러·러너·포맷터)마다 `SPEC 값 / 이 프로젝트 값 / 일치·이탈`을 낸다. **이탈은 `docs/adr/`에 기록해야 세팅이 끝난다** — WEB-SPEC 머리말이 그렇게 정했고, 2026-08-31 런은 이탈 6건에 ADR 0건이었다. 프로브 11이 검사한다.
 
 ✗마다 "제안 / 설치 / 건너뜀(null)"을 사용자에게 **한 번에 묶어** 묻는다(AskUserQuestion, 5개 이하). 코드로 답이 나오는 건 묻지 않는다. 사용자가 거부한 항목은 `null`로 선언하고 대조표에 남긴다 — 다음 세팅 때 다시 보인다.
 
@@ -39,9 +41,11 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 | 8 | OpenSpec(**척추 — null 불가**. 설치가 필요하면 "새 의존성" 일반 규칙과 별개로 승인을 묻는다; 비대화형이면 설치하고 보고): `openspec init --tools claude --profile core .` → `schema fork spec-driven feature` → 템플릿 교체 → `config.yaml` `context:`를 **`.claude/cgamja.json`에서 생성**(같은 사실을 두 번 손으로 쓰지 않는다) | `docs/guides/openspec-setup.md` | 이미 있으면 `feature` 스키마만 확인 |
 | 9 | `design/`: `design.source`가 Figma면 초기 스냅샷(map·tokens·components), 아니면 `design/NO_FIGMA` | `docs/guides/figma-design-source.md` §2 | 화면 스냅샷은 여기서 안 함 |
 | 10 | CI: 기존 워크플로우에 `verify`·commitlint·`openspec validate`·문서 경로 검사 단계 추가 | `templates/check-docs.sh`, 예시 `templates/react/ci.yml` | 기존 CI를 대체하지 않는다 |
+| 11 | **병렬 전제**(adr/0030): 선언 `parallel` + `.gitignore`(`.claude/worktrees/`, `.env`) + `.worktreeinclude`(최소 `.env`) + dev 포트를 `port_env`로 + **strictPort** | — | 병렬을 안 쓰면 `"parallel": null` 로 두고 이 항목 건너뜀. strictPort는 필수 — 조용한 포트 이동은 에이전트에게 관측 불가능하다 |
+| 12 | **rules 각 항목에 `[강제 수단]` 표기**(adr/0031). 표기는 **선언 슬롯 이름**으로 — `[a11y.lint]` `[commands.perf]` `[evidence.zoom200]` `[사람 — 리뷰 2축]` `[없음]`. 도구 이름을 적지 않는다(adr/0014) | `templates/rules/` | `[없음]`도 유효한 답이다 — 목표는 0이 아니라 **수단이 없다는 사실이 보이는 것**. 규칙만 있고 수단이 없는 항목 수를 §4 보고에 넣는다 |
 
 ## 3. 자가 검증 — 만들었다가 아니라 작동한다를 보인다
-`bash scripts/smoke.sh check <dir>` — 선언을 읽어 프로브를 돌린다: `commands.verify` 초록 / 경계 린트가 **실제로** 에러를 내는가(`domains.root` 밖에서 import 주입) / a11y 린트가 대체 텍스트 없는 이미지·클릭만 있는 컨테이너를 잡는가 / 계약 린트가 직접 HTTP 호출을 잡는가(`contract` 선언 시) / 훅 9종(테스트 Edit `ask`, 생성물 deny, 보호 파일 `ask`(adr/0017), 쉘 우회 deny, 읽기 허용) / commitlint / 재생성 diff 0 / openspec `new change` / 선언·규칙 파일 존재·미치환 변수 0. **하나라도 ✗면 완료라고 하지 않는다.** 통과해 버리는 프로브(예: 경계 린트가 조용히 통과)는 설정 문제다 — `docs/guides/project-conventions.md` §6 함정 참고.
+`bash scripts/smoke.sh check <dir>` — 선언을 읽어 프로브를 돌린다: `commands.verify` 초록 / 경계 린트가 **실제로** 에러를 내는가(`domains.root` 밖에서 import 주입) / a11y 린트가 대체 텍스트 없는 이미지·클릭만 있는 컨테이너를 잡는가 / 계약 린트가 직접 HTTP 호출을 잡는가(`contract` 선언 시) / 훅 9종(테스트 Edit `ask`, 생성물 deny, 보호 파일 `ask`(adr/0017), 쉘 우회 deny, 읽기 허용) / commitlint / 재생성 diff 0 / openspec `new change` / 선언·규칙 파일 존재·미치환 변수 0 / **병렬**(adr/0030 — worktree 2개를 만들어 각각 다른 `PORT`로 dev가 뜨고 둘 다 응답하는가, 끝나면 정리. `parallel: null`이면 건너뜀) / **rules 무결성**(adr/0031 — 모든 불릿에 `[강제 수단]` 표기가 있는가 · rules가 가리키는 경로가 **실재하는가**. 2026-08-31 런에서 `rules/components.md`가 정본으로 가리킨 `src/shared/ui/`에 컴포넌트가 0개였다). / **스택↔SPEC**(adr/0032 — SPEC의 스택 항목이 매니페스트에도 `docs/adr/`에도 없으면 ✗. `strict`는 따로 검사). **하나라도 ✗면 완료라고 하지 않는다.** 통과해 버리는 프로브(예: 경계 린트가 조용히 통과)는 설정 문제다 — `docs/guides/project-conventions.md` §6 함정 참고.
 
 ## 4. 끝맺음
 - 결과를 표로 보고한다: 발견한 것 / 붙인 것 / `null`로 남긴 것(이유) / 프로브 결과.
@@ -59,6 +63,7 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 |---|---|
 | `scripts/preflight.sh` | 발견 표 + 대조표(종료코드 0=✗ 없음, 1=✗ 있음) |
 | `scripts/smoke.sh check` | 자가 검증 프로브(LLM 없음) |
+| `scripts/hook-cases.sh` | 훅 케이스 표 — 진짜 차단·읽기 통과·오탐 31건(adr/0028·0031). 훅을 고칠 땐 **케이스를 먼저 추가해 빨강을 보고** 고친다. `hook-cases.sh <dir> [hook-path]` 로 설치 전 템플릿도 검증 |
 | `templates/` | 스택 무관 조각: `cgamja.json`, `CLAUDE.md`, `rules/`, `hooks/`, `settings.json`, `lefthook.yml`, `adr-0001`, `conventions.md`, `check-docs.sh`, `openapi.draft.yaml`(OpenAPI일 때) |
 | `templates/react/` | 특정 스택에서 **검증된** 조각(각 파일 머리에 스택·날짜; `docs/guides/*` 검증 구현 절이 가리킨다) — 발견한 스택이 맞을 때만 |
 | cgamja `docs/guides/project-conventions.md` | 배치표·훅 표·brownfield 규칙 |
