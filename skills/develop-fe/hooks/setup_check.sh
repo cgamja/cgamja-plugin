@@ -2,6 +2,10 @@
 # PreToolUse (Edit|Write|MultiEdit) once:true — 프로젝트 세팅이 없으면 경고 컨텍스트(차단 아님: Tier-1 예외).
 # adr/0023: once:true가 실사용에서 보장되지 않아(회고 3b8e61e1에서 경고 31회 발화) 세션 키 마커로 스크립트가 직접 1회를 보장한다. 훅 버전 드리프트 감지도 여기서(세션당 1회).
 source "$(dirname "$0")/_lib.sh"
+# 템플릿 경로는 **cd 전에** 절대경로로 굳힌다. 상대경로로 두면 아래 `cd "$d"` 뒤에
+# 해석되지 않아 드리프트 감지가 조용히 통째로 건너뛰어진다(2026-09-01 실측 — 마커가
+# 안 올라간 것과 별개로 이 경로 때문에 애초에 한 번도 비교되지 않았다).
+TDIR="$(cd "$(dirname "$0")/../../develop-setup/templates/hooks" 2>/dev/null && pwd)"
 # 프로젝트 루트 고정(adr/0017): 직전 Bash의 cd로 cwd가 하위 디렉터리여도 오경보가 나지 않게 — 위로 올라가며 선언/매니페스트를 찾고, 없으면 git 루트, 그것도 없으면 cwd
 cwd="$(j cwd)"; d="${cwd:-$PWD}"
 while [ "$d" != "/" ] && [ ! -f "$d/.claude/cgamja.json" ] && [ ! -f "$d/package.json" ]; do d="$(dirname "$d")"; done
@@ -13,13 +17,19 @@ warn=""
 if [ ! -f "$mark" ]; then
   pm="$(j permission_mode)"
   case "$pm" in bypassPermissions|dontAsk) warn="[develop-fe] permission_mode=$pm — 승인자가 없는 세션일 수 있다. 첫 테스트 파일 Edit는 사람 승인(ask, 세션당 1회)이 필요해 Tier-2 테스트 task에서 멈추게 된다(adr/0018). Tier-2 이상이면 사용자에게 대화형 세션을 권하고, 진행하더라도 테스트 없이 구현으로 넘어가지 마라. ";; esac
-  # 훅 버전 드리프트(adr/0023): 프로젝트에 심긴 훅이 템플릿보다 낮으면 경고 — 고치는 건 /develop-setup 재실행(사람)
-  tmpl="$(dirname "$0")/../../develop-setup/templates/hooks/protect-bash.sh"
-  if [ -f .claude/hooks/protect-bash.sh ] && [ -f "$tmpl" ]; then
-    tv="$(sed -n 's/^# cgamja-hooks v\([0-9][0-9]*\)$/\1/p' "$tmpl" | head -1)"
-    pv="$(sed -n 's/^# cgamja-hooks v\([0-9][0-9]*\)$/\1/p' .claude/hooks/protect-bash.sh | head -1)"
-    if [ -n "$tv" ] && [ "${pv:-0}" -lt "$tv" ]; then
-      warn="${warn}[develop-fe] 프로젝트 훅이 구판(v${pv:-0} < v$tv) — 오탐 수정이 반영 안 된 상태다. /develop-setup 재실행으로 .claude/hooks/ 동기화를 사용자에게 제안하라(adr/0023). "; fi
+  # 훅 드리프트: 정수 마커가 아니라 **내용**으로 본다.
+  # 0023 은 `# cgamja-hooks v<N>` 을 손으로 올리게 했는데, 2026-09-01 세 번의 훅 수정에서
+  # 한 번도 안 올랐다 — 마커는 같은데 내용은 90줄 달랐고 경고는 울리지 않았다.
+  # 손으로 지키는 규칙은 지켜지지 않는다(adr/0031). 그리고 protect-bash 한 파일만 보던 것도
+  # 넓힌다 — 같은 날 protect-files·verify-on-stop 도 구판이었고 red-mark 는 파일이 없었다.
+  if [ -n "$TDIR" ] && [ -d .claude/hooks ]; then
+    stale=""
+    for t in "$TDIR"/*.sh; do
+      f="$(basename "$t")"
+      if [ ! -f ".claude/hooks/$f" ]; then stale="$stale $f(없음)"
+      elif ! cmp -s "$t" ".claude/hooks/$f"; then stale="$stale $f"; fi
+    done
+    [ -n "$stale" ] && warn="${warn}[develop-fe] 프로젝트 훅이 플러그인과 다르다:$stale — 오탐·우회 수정이 반영 안 된 상태다. /develop-update 로 동기화를 사용자에게 제안하라. "
   fi
   [ -n "$warn" ] && { mkdir -p .claude/state 2>/dev/null; : > "$mark" 2>/dev/null; }
 fi
