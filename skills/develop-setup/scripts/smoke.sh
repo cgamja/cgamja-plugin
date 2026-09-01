@@ -156,6 +156,15 @@ for p in sys.stdin.read().split('\n'):
       [ -e "$ref" ] || missing="$missing $ref"
     done < <(grep -ho '`[a-z][a-zA-Z0-9_/.-]*/`\?' .claude/rules/*.md 2>/dev/null | tr -d '`' | grep -E '^(src|app|lib|test)/' | sort -u)
     [ -z "$missing" ] && ok "rules: 가리키는 경로가 실재" || bad "rules: 없는 경로를 가리킴" "$missing"
+    # 강제 수단으로 **선언을 가리키는데 그 선언이 null** 이면 그 줄은 산문이다(PR#10 지적).
+    # platform-web.md 의 성능 줄이 `[commands.perf]` 를 달고 남아 있는데 perf 가 null 인 경우.
+    local dangling=""; local decl
+    while IFS= read -r decl; do
+      [ -z "$decl" ] && continue
+      [ -n "$(cfg "$decl")" ] || dangling="$dangling $decl"
+    done < <(grep -ho '\*\*\[[a-z_]*\.[a-z_.]*\]\*\*' .claude/rules/*.md 2>/dev/null | tr -d '*[]' | sort -u)
+    [ -z "$dangling" ] && ok "rules: [강제 수단]이 가리키는 선언이 채워져 있음" \
+      || bad "rules: null 선언을 강제 수단으로 가리킴" "$dangling — 선언을 채우거나 그 줄을 [없음] 으로 바꾸거나 삭제한다(adr/0031)"
   else skp "rules 무결성"; fi
 
   echo "# 10 병렬 전제 (adr/0030)"
@@ -169,6 +178,12 @@ for p in sys.stdin.read().split('\n'):
       # 실패했을 때 왜인지 보이게 만든다 — dev 로그를 남기고 마지막 줄을 실패 메시지에 싣는다.
       # 진단 안 되는 프로브는 프로브가 아니다(2026-08-31: 첫 구현이 조용히 실패해 원인을 못 봤다).
       local p1=5391 p2=5392 wa="$wt/_probe_a" wb="$wt/_probe_b" okcount=0
+      # 시작 전에 포트가 비어 있어야 한다(PR#10 지적). 남이 물고 있으면 (a) curl 이 남의
+      # 서버에 성공해 거짓 초록이 되고 (b) 정리 단계의 포트 기준 kill 이 **남의 프로세스**를
+      # 죽인다. 점유돼 있으면 죽이지 말고 건너뛴다 — 프로브는 남의 상태를 바꾸지 않는다.
+      local busy=""
+      for pt in $p1 $p2; do lsof -ti "tcp:$pt" >/dev/null 2>&1 && busy="$busy $pt"; done
+      if [ -n "$busy" ]; then skp "병렬 실행 프로브(포트$busy 이미 사용 중 — 비우고 다시 실행)"; else
       local logdir; logdir="$(mktemp -d)"
       git worktree add -q --detach "$wa" >/dev/null 2>&1; git worktree add -q --detach "$wb" >/dev/null 2>&1
       if [ -d "$wa" ] && [ -d "$wb" ]; then
@@ -193,7 +208,22 @@ for p in sys.stdin.read().split('\n'):
           curl -sf -o /dev/null --max-time 2 "http://localhost:$p2/" && okcount=$((okcount+1))
           [ "$okcount" = 2 ] && break; sleep 1; t=$((t+1))
         done
-        if [ "$okcount" = 2 ]; then ok "worktree 2개가 서로 다른 포트($p1/$p2)로 동시에 응답"
+        # 응답만으로는 부족하다 — 그 리스너가 **우리 worktree 프로세스**여야 한다(PR#10 지적).
+        # 포트를 비워두고 시작했으므로 자손이 아니면 dev 서버가 포트를 못 잡고 남이 답한 것이다.
+        local owned=1 lp anc
+        if [ "$okcount" = 2 ]; then
+          for pt in $p1 $p2; do
+            for lp in $(lsof -ti "tcp:$pt" 2>/dev/null); do
+              anc="$lp"
+              while [ -n "$anc" ] && [ "$anc" != 1 ] && ! grep -qw "$anc" <<<"$pids"; do
+                anc="$(ps -o ppid= -p "$anc" 2>/dev/null | tr -d ' ')"; done
+              grep -qw "${anc:-0}" <<<"$pids" || owned=0
+            done
+          done
+        fi
+        if [ "$okcount" = 2 ] && [ "$owned" = 0 ]; then
+          bad "worktree 동시 실행" "포트 $p1/$p2 가 응답했지만 리스너가 프로브의 자손이 아니다 — dev 서버가 포트를 못 잡았거나 다른 프로세스가 답했다"
+        elif [ "$okcount" = 2 ]; then ok "worktree 2개가 서로 다른 포트($p1/$p2)로 동시에 응답"
         else bad "worktree 동시 실행" "응답 $okcount/2 — port_env(${penv:-PORT}) 미반영 또는 포트 충돌
   $p1: $(tail -3 "$logdir/$p1.log" 2>/dev/null | tr '\n' ' ')
   $p2: $(tail -3 "$logdir/$p2.log" 2>/dev/null | tr '\n' ' ')"; fi
@@ -208,23 +238,29 @@ for p in sys.stdin.read().split('\n'):
         git worktree remove --force "$wa" 2>/dev/null; git worktree remove --force "$wb" 2>/dev/null
         rm -rf "$wa" "$wb" "$logdir"; git worktree prune 2>/dev/null
       else bad "worktree 생성" "git worktree add 실패"; fi
+      fi
     fi
   fi
 
   echo "# 11 스택 ↔ SPEC 대조 (adr/0032)"
   # 빈 레포에서 스택의 원천은 SPEC 이다. SPEC 과 다른 선택은 **docs/adr/ 에 기록해야** 완료다.
-  local spec="$(dirname "$0")/../../../docs/spec/WEB-SPEC.md"
-  if [ ! -f "$spec" ] || [ ! -f package.json ]; then skp "스택↔SPEC(웹 SPEC 또는 매니페스트 없음)"; else
+  # 프로필이 원천을 고른다(PR#10 지적) — 앱 프로필에 WEB-SPEC 을 대면 APP-SPEC 의 스택이
+  # 통째로 검사되지 않고, 웹 SPEC 이 없다는 이유로 strict 검사까지 함께 건너뛰던 구멍.
+  local specname=WEB-SPEC; [ "$(cfg platform.profile)" = native ] && specname=APP-SPEC
+  local spec="$(dirname "$0")/../../../docs/spec/$specname.md"
+  if [ ! -f "$spec" ] || [ ! -f package.json ]; then skp "스택↔SPEC($specname 또는 매니페스트 없음)"; else
+    # 토큰은 **의존성 필드에서만** 찾는다(PR#10 지적) — 매니페스트 전문 grep 은
+    # 프로젝트 이름(`my-react-app`)이나 scripts 의 한 단어로도 "준수"가 돼버린다.
+    local deps; deps="$(python3 -c 'import json;d=json.load(open("package.json"));print("\n".join(k for f in ("dependencies","devDependencies","peerDependencies","optionalDependencies") for k in (d.get(f) or {})))' 2>/dev/null)"
     local undocumented=""
     while IFS= read -r tok; do
       [ -z "$tok" ] && continue
-      grep -qi "\"$tok" package.json && continue                       # 의존성에 있음 = 준수
-      grep -qi "$tok" package.json && continue
+      grep -qi -- "$tok" <<<"$deps" && continue                        # 의존성에 있음 = 준수
       grep -rliq -- "$tok" docs/adr/ 2>/dev/null && continue           # 이탈이지만 ADR 있음 = 완료
       undocumented="$undocumented $tok"
     done < <(sed -n 's/^\*\*\([A-Za-z][A-Za-z0-9.@/-]*\).*/\1/p' "$spec" | sort -u)
     [ -z "$undocumented" ] && ok "SPEC 이탈이 없거나 전부 docs/adr/ 에 기록됨" \
-      || bad "SPEC 이탈인데 docs/adr/ 기록 없음" "$undocumented — WEB-SPEC 머리말: '이 스펙에서 벗어날 때는 해당 프로젝트의 adr/에 기록한다'"
+      || bad "SPEC 이탈인데 docs/adr/ 기록 없음" "$undocumented — $specname 머리말: '이 스펙에서 벗어날 때는 해당 프로젝트의 adr/에 기록한다'"
     if [ -f tsconfig.app.json ] || [ -f tsconfig.json ]; then
       grep -qs '"strict"[[:space:]]*:[[:space:]]*true' tsconfig*.json && ok "TypeScript strict" \
         || bad "TypeScript strict" "SPEC 첫 항목이 'TypeScript 5.x (strict)' 인데 strict 가 켜져 있지 않다"
