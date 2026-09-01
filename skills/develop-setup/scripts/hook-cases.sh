@@ -12,6 +12,25 @@ set -uo pipefail
 DIR="${1:?project dir (cgamja.json 이 있는 곳)}"
 HOOK="${2:-$DIR/.claude/hooks/protect-bash.sh}"
 [ -f "$HOOK" ] || { echo "✗ $HOOK 없음"; exit 1; }
+[ -f "$DIR/.claude/cgamja.json" ] || {
+  echo "✗ $DIR/.claude/cgamja.json 없음 — 훅은 선언에서 패턴을 읽는다(adr/0014). 선언이 없으면"
+  echo "  훅이 아무것도 보호하지 않으므로 케이스가 전부 실패한다. develop-setup 을 먼저 돌려라."; exit 1; }
+
+# 테스트 경로는 **프로젝트 선언에서 만든다**. 하드코딩하면 `*.spec.ts` 를 쓰는 레포에서
+# `src/x.test.ts` 가 테스트로 안 잡혀 "훅이 안 막는다"는 오경보가 난다(2026-09-01 brownfield-vue 실측).
+# 오경보를 내는 가드는 무시당한다 — adr/0031 이 막으려는 바로 그 실패다.
+TESTFILE="$(python3 - "$DIR/.claude/cgamja.json" <<'PY2'
+import json,sys,posixpath
+pats=(json.load(open(sys.argv[1])).get("tests") or {}).get("patterns") or ["**/*.test.*"]
+for g in pats:
+    base=posixpath.basename(g)
+    if "*" not in base: continue          # 디렉터리 전용 글롭(e2e/**)로는 파일명을 못 만든다
+    p=g.replace("**/","").replace("*","x")
+    if p.endswith(".x"): p=p[:-2]+".ts"   # `**/*.test.*` → `x.test.ts`
+    print(p if "/" in p else "src/"+p); break
+else: print("src/x.test.ts")
+PY2
+)"
 
 pass=0; fail=0
 run() { printf '{"cwd":"%s","tool_input":{"command":%s}}' "$DIR" "$(python3 -c 'import json,sys;print(json.dumps(sys.argv[1]))' "$1")" | bash "$HOOK" >/dev/null 2>&1; echo $?; }
@@ -31,16 +50,16 @@ want deny "훅 우회 --no-verify"                 'git commit --no-verify -m x'
 want deny "푸시 강제"                            'git push --force origin main'
 want deny "패키지 추가"                          'npm install lodash'
 want deny "패키지 추가(pnpm)"                    'pnpm add lodash'
-want deny "테스트 파일 리다이렉트 쓰기"          'echo x > src/x.test.ts'
-want deny "테스트 파일 sed -i"                   "sed -i '' s/a/b/ src/x.test.ts"
-want deny "테스트 파일 perl -pi"                 'perl -pi -e s/a/b/ src/x.test.ts'
+want deny "테스트 파일 리다이렉트 쓰기"          "echo x > $TESTFILE"
+want deny "테스트 파일 sed -i"                   "sed -i '' s/a/b/ $TESTFILE"
+want deny "테스트 파일 perl -pi"                 "perl -pi -e s/a/b/ $TESTFILE"
 want deny "보호 파일 리다이렉트 쓰기"            'echo x > package.json'
 want deny "TDD_PHASE 인라인"                     'TDD_PHASE=red npx vitest run'
 want deny "core.hooksPath 설정"                  'git config core.hooksPath /dev/null'
 
 echo
 echo "## 읽기·조회는 통과해야 한다"
-want allow "테스트 파일 읽기 + 리다이렉트"       'cat src/x.test.ts 2>&1'
+want allow "테스트 파일 읽기 + 리다이렉트"       "cat $TESTFILE 2>&1"
 want allow "부분 읽기"                           'sed -n 1,5p src/a.ts'
 want allow "git diff"                            'git diff'
 want allow "hooksPath 조회"                      'git config core.hooksPath'
@@ -57,7 +76,7 @@ package.json 을 고치려면 Edit 도구를 쓴다
 .claude/hooks/protect-bash.sh 가 막는다
 EOF'
 want allow "커밋 메시지에 테스트 파일명 언급" \
-  'git commit -m "test(x): src/x.test.ts 추가"'
+  "git commit -m 'test(x): $TESTFILE 추가'"
 # 실측(2026-08-31): tasks.md 를 heredoc 으로 쓰다 거부됨 — 본문의 `.claude/hooks/...` 언급과
 # 플레이스홀더 `<develop-setup>` 의 `>` 가 겹쳐 "보호 파일에 리다이렉트 쓰기"로 읽혔다.
 want allow "heredoc 본문의 파일명 + 꺾쇠 플레이스홀더" \
@@ -86,9 +105,9 @@ want allow "worktree 사본의 보호 파일(절대경로)" \
   "echo '{}' > $DIR/.claude/worktrees/probe-b/package.json"
 
 want allow "worktree 사본의 테스트 파일 생성" \
-  'cat > .claude/worktrees/probe-a/src/x.test.ts <<EOF
+  "cat > .claude/worktrees/probe-a/$TESTFILE <<EOF
 export const a = 1;
-EOF'
+EOF"
 
 echo
 echo "## 위 완화가 진짜 차단을 뚫지 않았는가"
