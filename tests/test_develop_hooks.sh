@@ -26,6 +26,22 @@ check "setup_check bypass warn"     "승인자" "$(hook $C '{"session_id":"t2","
 # adr/0023: advisory 경고는 세션당 1회 — 같은 세션 두 번째 호출은 무경고
 check "setup_check bypass warn once" ""     "$(hook $C '{"session_id":"t2","cwd":"'$E'","permission_mode":"bypassPermissions","tool_input":{}}')"
 check "setup_check default no warn" ""     "$(hook $C '{"session_id":"t3","cwd":"'$E'","permission_mode":"default","tool_input":{}}')"
+
+# 훅 드리프트: 정수 마커가 아니라 내용으로 본다. 옛 로직은 두 겹으로 깨져 있었다 —
+# (1) `# cgamja-hooks v<N>` 을 손으로 올려야 해서 2026-09-01 세 번의 수정에서 안 올랐고
+# (2) 템플릿 경로가 상대경로라 `cd "$d"` 뒤에 해석되지 않아 애초에 비교가 안 됐다.
+D=$(mktemp -d); mkdir -p $D/.claude/rules $D/.claude/hooks $D/openspec
+echo '{"scripts":{"verify":"x"}}' > $D/package.json; touch $D/openspec/config.yaml $D/.claude/rules/a.md
+echo '{"hooks":{"Stop":[]}}' > $D/.claude/settings.json; echo '{"commands":{"verify":"x"}}' > $D/.claude/cgamja.json
+cp skills/develop-setup/templates/hooks/*.sh $D/.claude/hooks/
+check "drift: 최신 사본이면 조용" "" "$(hook $C '{"session_id":"d1","cwd":"'$D'","tool_input":{}}')"
+# 마커는 그대로 두고 내용만 바꾼다 — 옛 로직이 못 잡던 바로 그 형태
+printf '\n# drifted\n' >> $D/.claude/hooks/protect-bash.sh
+check "drift: 마커 같아도 내용 다르면 경고" "플러그인과 다르다" "$(hook $C '{"session_id":"d2","cwd":"'$D'","tool_input":{}}')"
+check "drift: 어느 파일인지 지목" "protect-bash.sh" "$(hook $C '{"session_id":"d3","cwd":"'$D'","tool_input":{}}')"
+rm $D/.claude/hooks/red-mark.sh
+check "drift: 없는 훅도 잡는다" "red-mark.sh(없음)" "$(hook $C '{"session_id":"d4","cwd":"'$D'","tool_input":{}}')"
+check "drift: /develop-update 로 안내" "develop-update" "$(hook $C '{"session_id":"d5","cwd":"'$D'","tool_input":{}}')"
 N=skills/develop-fe/hooks/test_nudge.sh
 check "test nudge without tdd skill" "test-driven-development" "$(hook $N '{"session_id":"tn1","tool_input":{"file_path":"src/a/B.browser.test.tsx"}}')"
 check "test nudge non-test silent"  ""        "$(hook $N '{"session_id":"tn1","tool_input":{"file_path":"src/a/B.tsx"}}')"

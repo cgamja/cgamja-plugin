@@ -36,6 +36,7 @@ ln -s ~/cgamja-plugin ~/.claude/skills/cgamja
 ```
 /cgamja:develop-setup      # 프로젝트당 1회 — 읽고, 대조하고, 없는 강제 수단만 붙인다
 /cgamja:develop-fe <작업>   # 이후 모든 코드 변경은 여기로
+/cgamja:develop-update     # 플러그인이 바뀌었을 때 — 레포에 복사된 훅·선언을 현재 버전으로
 ```
 
 ## 스킬
@@ -43,6 +44,7 @@ ln -s ~/cgamja-plugin ~/.claude/skills/cgamja
 | 스킬 | 역할 | 사람 게이트 |
 |---|---|---|
 | [`develop-setup`](skills/develop-setup/SKILL.md) | 프로젝트를 읽어(스택 불문·brownfield) 철학의 강제 수단을 대조 → 없는 것만 최소 제안 → 프로브로 "진짜 막나" 확인 → `.claude/cgamja.json` 선언 | 질문 ≤5개 묶음 1회 |
+| [`develop-update`](skills/develop-update/SKILL.md) | 이미 세팅된 프로젝트를 플러그인 현재 버전으로 — 복사본 4축(훅 내용·훅 등록·선언 슬롯·rules 구조)을 **내용으로** 대조하고 갱신(adr/0033) | 커밋 전 보고 |
 | [`develop-fe`](skills/develop-fe/SKILL.md) | 오케스트레이터(v2, adr/0026) — 티어 판정(1/2) → OpenSpec → TDD → 구현 → 증거 → 리뷰 2축 → 비주얼 QA → 커밋/PR. 디자인 플래그 `--only-wf`/`--only-design`/`--wf-and-design` | 질문 1회 + red 승인 1회 |
 | [`develop-baby-fe`](skills/develop-baby-fe/SKILL.md) | MVP·프로토타입·데모용 경량 루프 — 절차를 끄고 비용·속도 우선(목표 <$5), API 계약이 걸리면 develop-fe로 에스컬레이션 | 질문 ≤1회 |
 | [`test-driven-development`](skills/test-driven-development/SKILL.md) | vendored TDD 스킬(addyosmani, MIT) — 실패 테스트 먼저, 버그는 재현 테스트 먼저(Prove-It) | red 승인(세션당 1회, workflow가 얹음) |
@@ -86,7 +88,7 @@ v1에서 Tier-2 비용의 절반 이상이 렌즈 리뷰였다(연구상 리뷰 
 ## 구조
 
 ```
-skills/            절차 — develop-setup · develop-fe(+workflow.md, hooks/, templates/git-hooks/) · develop-baby-fe · review-cgamja · qa-cgamja · test-driven-development(vendored) · browser-testing-with-devtools(vendored) · retro-fe
+skills/            절차 — develop-setup · develop-update · develop-fe(+workflow.md, hooks/, templates/git-hooks/) · develop-baby-fe · review-cgamja · qa-cgamja · test-driven-development(vendored) · browser-testing-with-devtools(vendored) · retro-fe
 agents/            reviewer-cgamja(철학 대조) · reviewer-correctness(baby용 L1)
 adr/               결정 기록 0001~0026 — 절차를 바꾸려면 ADR 먼저, 문서는 ADR을 참조
 reports/           실측 기록 — 시나리오·비용·모델·통과표·결함·렌즈 원장
