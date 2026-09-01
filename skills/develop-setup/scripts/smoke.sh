@@ -169,7 +169,13 @@ for p in sys.stdin.read().split('\n'):
 
   echo "# 10 병렬 전제 (adr/0030)"
   local wt; wt="$(cfg parallel.worktrees)"
-  if [ -z "$wt" ]; then skp "병렬(parallel 선언 없음)"; else
+  # "안 쓰기로 정했다"와 "아무도 안 정했다"는 다르다 — adr/0030 의 요점이 그 구분이다.
+  # 키가 아예 없으면 세팅이 안 끝난 것이고, 명시적 null 이면 결정이다.
+  if [ -z "$wt" ]; then
+    if python3 -c 'import json,sys;sys.exit(0 if "parallel" in json.load(open(".claude/cgamja.json")) else 1)' 2>/dev/null
+    then skp "병렬(parallel: null — 안 쓰기로 선언됨)"
+    else bad "병렬 선언 없음" "parallel 키가 아예 없다 — 쓰면 값을, 안 쓰면 null 을 명시한다(adr/0030). 결정과 누락은 다르다"; fi
+  else
     [ -f .worktreeinclude ] && ok "exists: .worktreeinclude" || bad "exists: .worktreeinclude" "missing"
     grep -q "$wt" .gitignore 2>/dev/null && ok ".gitignore 가 $wt 를 무시" || bad ".gitignore 가 $wt 를 무시" "없음"
     local penv dev; penv="$(cfg parallel.port_env)"; dev="$(cfg commands.dev)"

@@ -63,7 +63,7 @@ develop-fe 스킬은 **절차**를, 프로젝트 저장소는 **사실**(선언�
 |---|---|
 | `scripts/preflight.sh` | 발견 표 + 대조표(종료코드 0=✗ 없음, 1=✗ 있음) |
 | `scripts/smoke.sh check` | 자가 검증 프로브(LLM 없음) |
-| `scripts/hook-cases.sh` | 훅 케이스 표 — 진짜 차단·읽기 통과·오탐 31건(adr/0028·0031). 훅을 고칠 땐 **케이스를 먼저 추가해 빨강을 보고** 고친다. `hook-cases.sh <dir> [hook-path]` 로 설치 전 템플릿도 검증 |
+| `scripts/hook-cases.sh` | 훅 케이스 표 — 진짜 차단·읽기 통과·오탐·회귀 방지 36건(adr/0028·0031). 테스트 경로는 `tests.patterns` 에서 만든다. 훅을 고칠 땐 **케이스를 먼저 추가해 빨강을 보고** 고친다. `hook-cases.sh <dir> [hook-path]` 로 설치 전 템플릿도 검증 |
 | `templates/` | 스택 무관 조각: `cgamja.json`, `CLAUDE.md`, `rules/`, `hooks/`, `settings.json`, `lefthook.yml`, `adr-0001`, `conventions.md`, `check-docs.sh`, `openapi.draft.yaml`(OpenAPI일 때) |
 | `templates/react/` | 특정 스택에서 **검증된** 조각(각 파일 머리에 스택·날짜; `docs/guides/*` 검증 구현 절이 가리킨다) — 발견한 스택이 맞을 때만 |
 | cgamja `docs/guides/project-conventions.md` | 배치표·훅 표·brownfield 규칙 |
