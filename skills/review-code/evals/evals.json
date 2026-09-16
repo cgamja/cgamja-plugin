@@ -1,0 +1,17 @@
+{
+  "skill_name": "review-code",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "~/simsimeestudio-intro feat/landing-immersion 브랜치에 애니메이션 컴포넌트를 여러 개 새로 만들었어(Playable·Handwrite·Appear, paper/ 쪽 수정). 내 철학(~/cgamja-philosophy/docs)에 맞는지 리뷰해서 고칠 거 고쳐줘. base는 origin/main.",
+      "expected_output": "reviewer-cgamja(+정확성 리뷰어)를 스폰하고, 매직 넘버·경로 분리·상수 위치 같은 should를 고친 뒤 재검사 1회, 규칙 없는 영역은 사용자에게 넘기고 verify 통과 후 커밋 규칙에 맞게 정리한다.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "커밋 전에 지금 스테이징된 변경 좀 봐줘. 버그만 보면 돼, 철학은 이미 봤어.",
+      "expected_output": "정확성 축만 돌리고(철학 리뷰 생략을 존중) 확인된 버그만 고치며 추정 건은 사용자 판단으로 넘긴다.",
+      "files": []
+    }
+  ]
+}

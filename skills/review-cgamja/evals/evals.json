@@ -1,0 +1,17 @@
+{
+  "skill_name": "review-cgamja",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "~/simsimeestudio-intro 브랜치 작업 다 했어. PR 올리기 전에 리뷰해줘 — 내 철학이랑 SEO 둘 다. 이 랜딩은 SEO가 최우선이야.",
+      "expected_output": "빌드·로컬 서빙 후 철학·정확성 리뷰어와 claude-seo 에이전트를 한 메시지에 스폰, 겹치는 파일을 한 번에 고치고 축마다 재검사 1회, verify 한 번, 종합 보고 한 장에 팀 판정 목록을 모은다.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "이 유틸 함수 하나 고친 거 리뷰해줘. 웹 페이지랑은 상관없어.",
+      "expected_output": "SEO 축을 빼고 review-code만 돌린다(불필요한 에이전트 스폰 없음).",
+      "files": []
+    }
+  ]
+}

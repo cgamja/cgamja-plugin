@@ -49,7 +49,9 @@ ln -s ~/cgamja-plugin ~/.claude/skills/cgamja
 | [`develop-baby-fe`](skills/develop-baby-fe/SKILL.md) | MVP·프로토타입·데모용 경량 루프 — 절차를 끄고 비용·속도 우선(목표 <$5), API 계약이 걸리면 develop-fe로 에스컬레이션 | 질문 ≤1회 |
 | [`test-driven-development`](skills/test-driven-development/SKILL.md) | vendored TDD 스킬(addyosmani, MIT) — 실패 테스트 먼저, 버그는 재현 테스트 먼저(Prove-It) | red 승인(세션당 1회, workflow가 얹음) |
 | [`browser-testing-with-devtools`](skills/browser-testing-with-devtools/SKILL.md) | vendored(addyosmani, MIT) — Chrome DevTools MCP로 런타임 검증(콘솔 0·DOM·네트워크·성능) | — |
-| [`review-cgamja`](skills/review-cgamja/SKILL.md) | 철학·SPEC(`docs/spec/`) 대조 게이트 — reviewer-cgamja 서브에이전트가 문서 조항 인용 판정, FAIL이면 수정 → 재검사 1회 | — |
+| [`review-code`](skills/review-code/SKILL.md) | 철학·SPEC(`docs/spec/`) 대조(reviewer-cgamja) + 정확성(code-review-opus) 두 축을 한 메시지에 — 위반 수정 → 철학 재검사 1회(adr/0034) | — |
+| [`review-seo`](skills/review-seo/SKILL.md) | SEO·AI 검색 감사 — 빌드 결과를 로컬로 띄우고 claude-seo 에이전트를 상황에 맞게 골라 병렬, 보고를 코드로 고침/팀 판정/사이트 밖으로 합쳐 수정, `inspect_html.py`로 전후 비교(adr/0034) | 팀 판정 목록 |
+| [`review-cgamja`](skills/review-cgamja/SKILL.md) | 종합 리뷰 — review-code + review-seo를 한 메시지에 스폰, 겹치는 파일을 한 번에 수정, 축마다 재검사 1회, 검증·커밋·보고 한 번(adr/0034) | — |
 | [`qa-cgamja`](skills/qa-cgamja/SKILL.md) | 비주얼 회귀 QA — 동작 플로우 THEN 시점 스냅샷(웹 Playwright / 앱 Maestro), baseline 사람 승인 | baseline 승인 |
 | [`retro-fe`](skills/retro-fe/SKILL.md) | 실사용 세션 트랜스크립트를 감사해 마찰(훅 차단·인터럽트·되물음)을 집계하고 개선을 **제안까지만** — 반영은 ADR로 | — |
 
@@ -88,7 +90,7 @@ v1에서 Tier-2 비용의 절반 이상이 렌즈 리뷰였다(연구상 리뷰 
 ## 구조
 
 ```
-skills/            절차 — develop-setup · develop-update · develop-fe(+workflow.md, hooks/, templates/git-hooks/) · develop-baby-fe · review-cgamja · qa-cgamja · test-driven-development(vendored) · browser-testing-with-devtools(vendored) · retro-fe
+skills/            절차 — develop-setup · develop-update · develop-fe(+workflow.md, hooks/, templates/git-hooks/) · develop-baby-fe · review-code · review-seo · review-cgamja · qa-cgamja · test-driven-development(vendored) · browser-testing-with-devtools(vendored) · retro-fe
 agents/            reviewer-cgamja(철학 대조) · reviewer-correctness(baby용 L1)
 adr/               결정 기록 0001~0026 — 절차를 바꾸려면 ADR 먼저, 문서는 ADR을 참조
 reports/           실측 기록 — 시나리오·비용·모델·통과표·결함·렌즈 원장

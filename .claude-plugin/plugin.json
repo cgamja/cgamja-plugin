@@ -1,6 +1,6 @@
 {
   "name": "cgamja",
-  "description": "kangr 개인 Claude Code 플러그인(프론트엔드) — develop-setup(프로젝트 1회 세팅), develop-update(설치본을 플러그인 현재 버전으로 갱신), develop-fe v2(오케스트레이터: 티어 2단계 → OpenSpec → TDD → 증거 → 리뷰 2축 → QA → PR, 디자인 플래그 --only-wf/--only-design/--wf-and-design), develop-baby-fe(MVP 경량 루프, <$5), review-cgamja(철학·SPEC 대조), qa-cgamja(비주얼 회귀 QA), test-driven-development·browser-testing-with-devtools(vendored, MIT), retro-fe(세션 감사). 공유 docs/(spec: 코드 철학 SPEC · guides: 작업 지식)·adr/·agents/",
+  "description": "kangr 개인 Claude Code 플러그인(프론트엔드) — develop-setup(프로젝트 1회 세팅), develop-update(설치본을 플러그인 현재 버전으로 갱신), develop-fe v2(오케스트레이터: 티어 2단계 → OpenSpec → TDD → 증거 → 리뷰 2축 → QA → PR, 디자인 플래그 --only-wf/--only-design/--wf-and-design), develop-baby-fe(MVP 경량 루프, <$5), review-code(철학·SPEC 대조 + 정확성), review-seo(claude-seo 렌즈 선택 SEO 감사), review-cgamja(둘을 합친 종합 리뷰), qa-cgamja(비주얼 회귀 QA), test-driven-development·browser-testing-with-devtools(vendored, MIT), retro-fe(세션 감사). 공유 docs/(spec: 코드 철학 SPEC · guides: 작업 지식)·adr/·agents/",
   "version": "0.3.0",
   "author": {
     "name": "kangr"
