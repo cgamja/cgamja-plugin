@@ -1,6 +1,6 @@
 ---
 name: develop-fe
-description: 프론트엔드 개발 작업(기능 추가, 화면 구현, 버그 수정, 리팩토링, Figma 디자인 구현)을 티어 판정(Tier-1 바로 / Tier-2 OpenSpec) → 테스트 먼저(TDD) → 구현 → 브라우저·스크린샷 증거 → 리뷰(review-cgamja+code-review) → 비주얼 QA(qa-cgamja) → 커밋/PR까지 끌고 가는 워크플로우. 사용자가 "이 기능 만들어줘", "이 화면 구현해줘", "이거 고쳐줘", "PR 올려줘", "작업 시작하자"처럼 코드를 바꾸는 요청을 하거나 /develop-fe 를 호출하면 반드시 사용한다. 한 줄짜리 수정이라도 이 스킬을 거친다(Tier-1로 빠르게 끝난다). Figma 디자인 구현, "디자인이 아직 없는" 부분(후보 → 확정 → 구현)도 담당. 디자인 산출만 하는 플래그 --only-wf(와이어프레임만 보고 와이어프레임 제작) / --only-design(디자인만 보고 디자인 제작) / --wf-and-design(와이어프레임 보고 디자인 제작)도 이 스킬로 진입한다.
+description: 프론트엔드 개발 작업(기능 추가, 화면 구현, 버그 수정, 리팩토링, Figma 디자인 구현)을 티어 판정(Tier-1 바로 / Tier-2 OpenSpec) → 테스트 먼저(TDD) → 구현 → 브라우저·스크린샷 증거 → 리뷰(review-cgamja+code-review-opus) → 비주얼 QA(qa-cgamja) → 커밋/PR까지 끌고 가는 워크플로우. 사용자가 "이 기능 만들어줘", "이 화면 구현해줘", "이거 고쳐줘", "PR 올려줘", "작업 시작하자"처럼 코드를 바꾸는 요청을 하거나 /develop-fe 를 호출하면 반드시 사용한다. 한 줄짜리 수정이라도 이 스킬을 거친다(Tier-1로 빠르게 끝난다). Figma 디자인 구현, "디자인이 아직 없는" 부분(후보 → 확정 → 구현)도 담당. 디자인 산출만 하는 플래그 --only-wf(와이어프레임만 보고 와이어프레임 제작) / --only-design(디자인만 보고 디자인 제작) / --wf-and-design(와이어프레임 보고 디자인 제작)도 이 스킬로 진입한다.
 hooks:
   PreToolUse:
     - matcher: "Skill"
@@ -29,7 +29,7 @@ hooks:
 프론트엔드 작업을 받아서 PR까지 가는 **오케스트레이터** — 메인 세션은 티어 판정·스펙·task 분해·결과 통합·커밋만 소유하고, **구현·테스트 작성은 unit packet 서브에이전트로 위임**한다(adr/0027; inline 예외는 Tier-1·1~2파일 trivial). 절차 전체는 `workflow.md`에 있고, 이 파일은 **언제 무엇을 읽고 어떤 스킬을 부를지**만 정한다. 독립 change 병렬 작업은 `workflow.md` 2-P(터미널별 `claude --worktree <slug>`). `docs/guides/`·`adr/`·`agents/`·`docs/spec/` 경로는 **플러그인 루트** 기준이다.
 
 ## 왜 이런 구조인가 (한 문단)
-에이전트 개발 방법론은 전부 같은 다섯 동작으로 환원된다 — 의도를 글로 고정, 편집 전 계획, **돌릴 수 있는 체크를 먼저**, 작성자와 검증자 분리, 컨텍스트 작게. v2는 그 다섯을 자작 대신 **검증된 외부 스킬 조합**으로 채운다(adr/0026): 스펙·tasks는 OpenSpec, TDD는 `test-driven-development`(vendored), 런타임 검증은 `browser-testing-with-devtools`, 비주얼 QA는 `qa-cgamja`, 리뷰는 `review-cgamja`(철학 대조) + `/code-review`(신뢰도 스코어링 버그 리뷰) 2축. 코드 작성 기준(SPEC)은 `docs/spec/`가 원천이고, 커밋·푸시 품질은 git pre-commit/pre-push 훅이 강제한다.
+에이전트 개발 방법론은 전부 같은 다섯 동작으로 환원된다 — 의도를 글로 고정, 편집 전 계획, **돌릴 수 있는 체크를 먼저**, 작성자와 검증자 분리, 컨텍스트 작게. v2는 그 다섯을 자작 대신 **검증된 외부 스킬 조합**으로 채운다(adr/0026): 스펙·tasks는 OpenSpec, TDD는 `test-driven-development`(vendored), 런타임 검증은 `browser-testing-with-devtools`, 비주얼 QA는 `qa-cgamja`, 리뷰는 `review-cgamja`(철학 대조) + `code-review-opus`(Opus 고정 버그 리뷰 — 내장 `/code-review`는 fork라 세션 모델을 물려받아 Fable로 돈다, 2026-09-09) 2축. 코드 작성 기준(SPEC)은 `docs/spec/`가 원천이고, 커밋·푸시 품질은 git pre-commit/pre-push 훅이 강제한다.
 
 ## 시작 절차
 -1. **Fast-path**(adr/0019): 즉시 실행 가능한 첫 행동이 있으면 그것이 첫 도구 호출. 첫 가시 보고(티어 한 줄)는 30초 안에.
@@ -40,10 +40,10 @@ hooks:
 4. 끝나면 5장(커밋 — pre-push 게이트) · 6장(PR). 삽질이 있었으면 `/ce-compound`.
 
 ## 단계별 스킬 호출 (전체 표는 `workflow.md` 배치표)
-- **테스트 task**: `cgamja:test-driven-development` 로드 — 실패하는 테스트 먼저, 버그는 재현 테스트 먼저. red 게이트·`test(scope):` 커밋 분리는 workflow 3-2가 강제.
+- **테스트 task**: `cgamja:test-driven-development` 로드 — 실패하는 테스트 먼저, 버그는 재현 테스트 먼저. red 게이트·`test(scope):` 커밋 분리·**테스트 예산**(시나리오를 덮는 최소, adr/0034)은 workflow 3-2.
 - **UI 검증**: `cgamja:browser-testing-with-devtools`(콘솔 0·DOM·네트워크) → 스크린샷 증거(`docs/guides/evidence-capture.md`).
 - **비주얼 QA**: `cgamja:qa-cgamja` — 동작 플로우 THEN 시점 스냅샷, baseline은 사람 승인. Figma 실시간 픽셀 대조는 하지 않는다.
-- **리뷰 2축**: `cgamja:review-cgamja`(docs/spec 철학 대조, blocker → 수정 → 재검사 1회) + `/code-review`(Tier-1 low, Tier-2 medium). blocker는 모아서 수정 패스 1번 → `fix(review)` 커밋 1개.
+- **리뷰 2축**: `cgamja:review-cgamja`(docs/spec 철학 대조, blocker → 수정 → 재검사 1회) + `code-review-opus`(Agent 도구, `cgamja-private:code-review-opus` · Tier-1 low, Tier-2 medium — 에이전트가 없으면 `/code-review`로 대신하고 그렇게 했다고 말한다). **두 축은 한 메시지에서 동시에 띄운다**(adr/0035). blocker는 모아서 수정 패스 1번 → `fix(review)` 커밋 1개, 재검사는 지적이 나온 축만.
 - **디자인 산출**: `frontend-design` + `design-taste-frontend` + `frontend-ui-engineering`(설치 시) — 후보 2~3안, 토큰·기존 컴포넌트만.
 - **구현 보조**: 컴포넌트 합성 `vercel-composition-patterns`, 네이티브 `react-native-skills`, 성능 task `performance-optimization`, 계측 task `observability-and-instrumentation`(설치 시).
 
@@ -60,7 +60,7 @@ hooks:
 
 ## 절대 하지 않는 것 (앞 항목들은 훅 `hooks/skill_guard.sh`가 거부 — adr/0007)
 - `ce-plan` / `lfg` 호출 — OpenSpec change와 플랜이 두 군데 생긴다.
-- Agent 도구로 리뷰어·테스트 작성자를 즉석 제작 — `review-cgamja`/`code-review`/`test-driven-development`를 쓴다. 서브에이전트는 `model:` 명시(`docs/guides/model-routing.md`).
+- Agent 도구로 리뷰어·테스트 작성자를 즉석 제작 — `review-cgamja`/`code-review-opus`/`test-driven-development`를 쓴다. 서브에이전트는 `model:` 명시(`docs/guides/model-routing.md`).
 - 테스트를 초록으로 만들기 위한 assertion 완화·skip·snapshot 재생성. 못 만들면 실패 원문과 함께 멈춘다.
 - `git push --no-verify`·훅 삭제로 pre-push 게이트 우회 — 막히면 커밋을 고친다(fixup/reword, `workflow.md` 5장).
 - "됐습니다"만 보고하기. 테스트 출력·스크린샷 경로 없이는 완료가 아니다.

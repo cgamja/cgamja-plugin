@@ -15,7 +15,7 @@ MVP에는 절차의 무게가 곧 비용이다. 이 스킬은 develop-fe의 하�
 | 우선순위 | 비용·속도 | 정확성·증거·스펙 유지 |
 | 스펙 | 없음 | OpenSpec change |
 | 테스트 | 기존 초록 유지만 | red 게이트 → 구현 |
-| 리뷰 | L1 정확성 1회 | 리뷰 2축(review-cgamja + code-review) |
+| 리뷰 | L1 정확성 1회 | 리뷰 2축(review-cgamja + code-review-opus) |
 | 비용 | <$5 | Tier-2 ≈$30~45 |
 
 프로젝트 선언(`.claude/cgamja.json`)에 `"mode": "baby-default"`가 있으면 그 프로젝트의 코드 변경 요청은 기본으로 이 스킬로 진입한다 — 프로토타입 레포에서 매번 "MVP로"라고 말하지 않기 위한 선택 키다(사용자가 손으로 넣는다; 세팅 스킬은 묻지 않는다). **단, 표의 develop-fe 열 조건(프로덕션 티켓·API 계약 신설·다중 화면)은 `baby-default`보다 항상 우선한다** — 선언이 있어도 그 요청은 develop-fe로.
