@@ -4,6 +4,10 @@
 # 형식·혼입은 차단(exit 1), 커밋 수는 경고만 — 리뷰 라운드가 커밋을 정당하게 늘린다(adr/0031).
 set -uo pipefail
 base="${1:?base sha}"; head="${2:?head sha}"; fail=0
+# 없는 revision이면 아래 git log·rev-list가 조용히 비어 "commits OK"가 나온다 — 먼저 검증하고 실패로 끝낸다(CI 얕은 clone에서 base 미fetch가 대표 사례)
+for rev in "$base" "$head"; do
+  git rev-parse --verify --quiet "${rev}^{commit}" >/dev/null || { echo "✗ 존재하지 않는 revision: $rev (얕은 clone이면 fetch-depth 확인)" >&2; exit 1; }
+done
 bad_msg="$(git log --no-merges --format='%h %s' "$base..$head" | grep -vE '^[0-9a-f]+ (feat|fix|refactor|test|chore|docs|style|perf|ci|build|revert)(\([^)]+\))?!?: ' || true)"
 if [ -n "$bad_msg" ]; then echo "✗ 커밋 메시지 형식 위반 (docs/spec/COMMIT.md — type(scope): 요약):"; echo "$bad_msg"; fail=1; fi
 for sha in $(git rev-list --no-merges "$base..$head"); do

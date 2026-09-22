@@ -53,7 +53,7 @@ ln -s ~/cgamja-plugin ~/.claude/skills/cgamja
 | [`qa-cgamja`](skills/qa-cgamja/SKILL.md) | 비주얼 회귀 QA — 동작 플로우 THEN 시점 스냅샷(웹 Playwright / 앱 Maestro), baseline 사람 승인 | baseline 승인 |
 | [`retro-fe`](skills/retro-fe/SKILL.md) | 실사용 세션 트랜스크립트를 감사해 마찰(훅 차단·인터럽트·되물음)을 집계하고 개선을 **제안까지만** — 반영은 ADR로 | — |
 
-버그 리뷰 축은 공식 `code-review` 플러그인(`/code-review`)을 함께 쓴다. 구 `test-fe`·`review-fe`(렌즈 L1~L7)는 adr/0026으로 폐지 — git 이력에 있다.
+버그 리뷰 축은 `code-review-opus` 에이전트(`model: opus`, 현재 `cgamja-private`)를 Agent로 띄운다 — 내장 `/code-review`는 fork라 세션 모델을 물려받는다(adr/0037). 에이전트가 없을 때만 `/code-review`로 대신한다. 구 `test-fe`·`review-fe`(렌즈 L1~L7)는 adr/0026으로 폐지 — git 이력에 있다.
 
 ### develop-fe 흐름
 
@@ -66,7 +66,7 @@ flowchart LR
     D --> F[red 테스트 TDD<br/>세션당 1회 승인]
     F --> G[구현<br/>테스트 파일 읽기전용]
     G --> H[증거<br/>devtools · 스크린샷 · axe · verify]
-    H --> I[리뷰 2축<br/>review-cgamja + code-review]
+    H --> I[리뷰 2축<br/>review-cgamja + code-review-opus]
     I --> K[비주얼 QA<br/>qa-cgamja baseline]
     K --> J[커밋 4~8개 · pre-push 게이트 · PR]
     E --> D

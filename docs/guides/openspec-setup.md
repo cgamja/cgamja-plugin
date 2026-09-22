@@ -100,7 +100,7 @@ operations:
   archive:
     guidance:
       - Before archiving run the two review axes (cgamja:review-cgamja for philosophy/spec compliance,
-        /code-review for bugs — adr/0026). Resolve blockers first (one batched fix pass, one recheck).
+        code-review-opus agent for bugs — adr/0026·0037). Resolve blockers first (one batched fix pass, one recheck).
       - Confirm every `#### Scenario:` has a matching test or screenshot (Converge group) before archive
 ```
 CI: `openspec validate --archived --strict` — archive 누락이 "오래된 스펙을 믿는" 실패로 이어지므로 필수(adr/0001).
