@@ -16,6 +16,7 @@ R=skills/develop-fe/hooks/review_nudge.sh
 check "review nudge on Agent review" "review-cgamja" "$(hook $R '{"session_id":"t","tool_input":{"description":"Code review of todos","prompt":"review the diff"}}')"
 # adr/0031 — 2026-08-31 회고: 오탐 누적 10회와 미탐이 한 줄(예외목록)에서 나왔다. 판정은 subagent_type 기준.
 check "no nudge: reviewer-correctness (L1 정상 경로)" "" "$(hook $R '{"session_id":"rn1","tool_input":{"subagent_type":"cgamja:reviewer-correctness","description":"L1 정확성 리뷰","prompt":"diff 검토"}}')"
+check "no nudge: code-review-opus (②축 Opus 고정, adr/0037)" "" "$(hook $R '{"session_id":"rn-opus","tool_input":{"subagent_type":"cgamja-private:code-review-opus","description":"버그·회귀 리뷰","prompt":"diff 검토"}}')"
 check "NUDGE: reviewer-cgamja 스킬 없이 직접"  "Skill 없이" "$(hook $R '{"session_id":"rn2","tool_input":{"subagent_type":"cgamja:reviewer-cgamja","description":"철학 리뷰","prompt":"docs/spec 대조"}}')"
 hook skills/develop-fe/hooks/skill_guard.sh '{"session_id":"rn3","tool_input":{"skill":"cgamja:review-cgamja"}}' >/dev/null
 check "no nudge: reviewer-cgamja 스킬 경유"    ""     "$(hook $R '{"session_id":"rn3","tool_input":{"subagent_type":"cgamja:reviewer-cgamja","description":"철학 리뷰","prompt":"docs/spec 대조"}}')"
