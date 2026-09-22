@@ -2,7 +2,7 @@
 
 프론트엔드 작업을 받아서 PR까지 가는 절차. 결정 기록은 `adr/`(v2 전환은 adr/0026), 경로는 모두 **플러그인 루트** 기준. 코드 작성 기준(SPEC)은 **`docs/spec/`** — CLEAN-CODE·ARCHITECTURE·WEB-SPEC/APP-SPEC·GOOD-BAD-PATTERN·LIBRARY가 코드의 원천이고, COMMIT·PR·ISSUE가 산출물 형식의 원천이다.
 
-**구조**: OpenSpec이 아티팩트의 척추(스펙·tasks·아카이브, Tier-2만). 테스트는 `test-driven-development` 스킬, 브라우저 검증은 `browser-testing-with-devtools`, 비주얼 QA는 `cgamja:qa-cgamja`, 리뷰는 `cgamja:review-cgamja` + `code-review`. Compound Engineering은 주변부(brainstorm·commit·PR·debug·compound)만. `ce-plan`/`lfg` 금지(adr/0001).
+**구조**: OpenSpec이 아티팩트의 척추(스펙·tasks·아카이브, Tier-2만). 테스트는 `test-driven-development` 스킬, 브라우저 검증은 `browser-testing-with-devtools`, 비주얼 QA는 `cgamja:qa-cgamja`, 리뷰는 `cgamja:review-cgamja` + `code-review-opus`. Compound Engineering은 주변부(brainstorm·commit·PR·debug·compound)만. `ce-plan`/`lfg` 금지(adr/0001).
 **원칙**: 체크를 먼저 정하고, 빨간 불을 보고, 구현하고, 증거를 낸다. 규칙은 프롬프트가 아니라 훅·린트·git 훅으로 강제한다. 문서는 결정(WHAT)만, 코드(HOW)는 안 쓴다.
 **디자인**: 원천은 Figma, 작업 입력은 저장소의 `design/` 스냅샷(adr/0002). 미완성 표시(`📝 TODO:`/`🚧 WIP`/`⬜ PLACEHOLDER`)는 구현하지 않고 2-D 디자인 갭 루프로(adr/0003).
 
@@ -19,7 +19,7 @@
 | 테스트 | `cgamja:test-driven-development` (vendored, MIT) | — (내장, 항상 있음) |
 | 브라우저 검증 | `cgamja:browser-testing-with-devtools` (vendored — chrome-devtools MCP 필요) | 스크린샷 수단 탐색(`docs/guides/evidence-capture.md`) |
 | 비주얼 QA | `cgamja:qa-cgamja` | — (플러그인 내장, 항상 있음) |
-| 리뷰 | `cgamja:review-cgamja` + `/code-review`(공식 플러그인) | — (review-cgamja는 내장) |
+| 리뷰 | `cgamja:review-cgamja` + `code-review-opus`(에이전트 `cgamja-private:code-review-opus`, Opus 고정) | `/code-review`(공식 플러그인 — fork라 세션 모델로 돈다, 그렇게 했다고 말한다) |
 | 성능 task | `performance-optimization` | `docs/guides/platform-fit-frontend.md` 기준만 |
 | 관측 task | `observability-and-instrumentation` | 생략(스펙에 없으면 안 만든다) |
 | 보안 점검 | `claude-security` | 사용자 요청 시에만 |
@@ -85,7 +85,7 @@
 1. 관련 코드 읽기. **같은 걸 하는 컴포넌트/유틸 먼저 검색**(중복 생성이 에이전트 1위 실패, `docs/spec/GOOD-BAD-PATTERN.md` §6)
 2. 체크 정하기: 기존 테스트 수정/추가(`test-driven-development` 규칙) **또는** 스크린샷 1장. 순수 스타일이면 스크린샷만
 3. 고친다 → `commands.typecheck`·`commands.lint`·관련 테스트 실행 + 증거
-4. 리뷰: `code-review` 스킬 low 레벨 1회 (철학 리뷰는 생략 가능 — diff 한 문장짜리에 문서 대조는 과함) → 커밋 1개 → 5장
+4. 리뷰: `code-review-opus` low 레벨 1회 (철학 리뷰는 생략 가능 — diff 한 문장짜리에 문서 대조는 과함) → 커밋 1개 → 5장
 
 ### Tier-2 기능 — OpenSpec
 1. **탐색**: 관련 코드, 기존 컴포넌트, `openspec/specs/`, `docs/solutions/`, `design/screens/<slug>/`(있으면 Figma 안 연다). 긴 문서·티켓은 서브에이전트가 읽고 요약만(`context-engineering` 원칙). 코드가 이미 답하는 건 묻지 않는다
@@ -102,7 +102,7 @@
    - 마지막 Converge: spec 시나리오 ↔ 코드 대조, 빠진 건 task로 append
 5. **리뷰 (2축, adr/0026 §3)**:
    - ① `cgamja:review-cgamja` — 철학·SPEC(`docs/spec/`) 대조, blocker는 수정 → 재검사 1회
-   - ② `code-review` 스킬 (medium; PR이면 그 대상) — 버그·정확성
+   - ② `code-review-opus` 에이전트 (Agent 도구 `cgamja-private:code-review-opus`, medium; PR이면 그 대상) — 버그·정확성. 내장 `/code-review`는 fork라 세션 모델을 물려받으므로 쓰지 않는다(에이전트가 없을 때만 대체하고 판정 줄에 명시, adr/0037)
    - **두 축(과 선언 `review.extra_lenses`의 추가 축)은 한 메시지에서 동시에 띄운다**(adr/0035) — 입력이 같은 diff이고 서로의 결과를 읽지 않는다. 직렬로 돌리면 축당 ~6분이 그대로 쌓인다
    - blocker는 전부 모아 **수정 패스 1번 → `fix(review)` 커밋 1개 → 재검사 1회**(adr/0019) — 재검사는 **지적이 나온 축만**, 역시 동시에. 이후 새 수정 diff가 남으면 판정 줄에 명시
 6. **비주얼 QA** (UI change일 때): `cgamja:qa-cgamja` — 동작 플로우의 THEN 시점에 스냅샷 검증을 심는다(플로우당 ≤5장, baseline은 사람 승인 후 커밋). Figma와의 픽셀 실시간 대조는 하지 않는다(qa-cgamja 원칙 4 — 디자인 대조는 사람 리뷰 + 회귀 baseline)
@@ -195,7 +195,7 @@ Tier-2 3단계(propose) 전에 돈다. **허가를 묻지 않고 진입한다**(
 - [ ] 브라우저 검증(devtools) / Playwright+axe: <결과>
 - [ ] 스크린샷(프로필 뷰포트, 다크 해당 시): <PR 본문 첨부 또는 .claude/state/evidence/ 경로 — 저장소 커밋 아님>
 - [ ] 비주얼 QA: qa-cgamja 스냅샷 <n장> · baseline <신규/갱신 승인 여부>
-- [ ] 리뷰: review-cgamja <PASS/FAIL·수정 n건> · code-review <blocker 0 · should n>
+- [ ] 리뷰: review-cgamja <PASS/FAIL·수정 n건> · code-review-opus <blocker 0 · should n>
 ```
 
 ## 7. 재검토 조건 (10개 task마다 점검 — `/retro-fe`)

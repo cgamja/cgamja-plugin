@@ -41,3 +41,4 @@
 | [0034](0034-test-budget-and-push-after-review.md) | 테스트 예산 — 시나리오를 덮는 최소가 기본값(packet 네 줄), 첫 push는 리뷰 루프 뒤(fixup으로 접기), 수동 계약은 실제 응답 픽스처, 재검토 조건 2종. care-app 실측: test 커밋 42% 재작업·케이스 17% 목 어댑터·fix 6/10은 계층 밖 | 제안 | — |
 | [0035](0035-review-axes-run-concurrently.md) | 리뷰 축(2축 + `review.extra_lenses`)을 한 메시지에서 동시에, 재검사는 지적 나온 축만 — 축 내용은 불변, 순서만 | 제안 | — |
 | [0036](0036-checks-must-survive-without-git-hooks.md) | 커밋 범위 검사를 `templates/scripts/check-commits.sh`로도 제공 — 팀 소유 훅 레포에서 커밋 수 경고가 조용히 사라진 재발(care-app 12건 전원 초과) | 제안 | — |
+| [0037](0037-bug-review-runs-on-fixed-opus.md) | 리뷰 ②축(버그)은 `code-review-opus` 에이전트(`model: opus`)를 Agent로 — 내장 `/code-review`는 fork라 세션 모델을 물려받는다. 에이전트 없을 때만 `/code-review` 대체 + 명시, `review_nudge.sh` 통과 예외 | 제안 | — |
