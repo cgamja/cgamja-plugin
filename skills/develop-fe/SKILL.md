@@ -40,10 +40,10 @@ hooks:
 4. 끝나면 5장(커밋 — pre-push 게이트) · 6장(PR). 삽질이 있었으면 `/ce-compound`.
 
 ## 단계별 스킬 호출 (전체 표는 `workflow.md` 배치표)
-- **테스트 task**: `cgamja:test-driven-development` 로드 — 실패하는 테스트 먼저, 버그는 재현 테스트 먼저. red 게이트·`test(scope):` 커밋 분리는 workflow 3-2가 강제.
+- **테스트 task**: `cgamja:test-driven-development` 로드 — 실패하는 테스트 먼저, 버그는 재현 테스트 먼저. red 게이트·`test(scope):` 커밋 분리·**테스트 예산**(시나리오를 덮는 최소, adr/0034)은 workflow 3-2.
 - **UI 검증**: `cgamja:browser-testing-with-devtools`(콘솔 0·DOM·네트워크) → 스크린샷 증거(`docs/guides/evidence-capture.md`).
 - **비주얼 QA**: `cgamja:qa-cgamja` — 동작 플로우 THEN 시점 스냅샷, baseline은 사람 승인. Figma 실시간 픽셀 대조는 하지 않는다.
-- **리뷰 2축**: `cgamja:review-cgamja`(docs/spec 철학 대조, blocker → 수정 → 재검사 1회) + `/code-review`(Tier-1 low, Tier-2 medium). blocker는 모아서 수정 패스 1번 → `fix(review)` 커밋 1개.
+- **리뷰 2축**: `cgamja:review-cgamja`(docs/spec 철학 대조, blocker → 수정 → 재검사 1회) + `/code-review`(Tier-1 low, Tier-2 medium). **두 축은 한 메시지에서 동시에 띄운다**(adr/0035). blocker는 모아서 수정 패스 1번 → `fix(review)` 커밋 1개, 재검사는 지적이 나온 축만.
 - **디자인 산출**: `frontend-design` + `design-taste-frontend` + `frontend-ui-engineering`(설치 시) — 후보 2~3안, 토큰·기존 컴포넌트만.
 - **구현 보조**: 컴포넌트 합성 `vercel-composition-patterns`, 네이티브 `react-native-skills`, 성능 task `performance-optimization`, 계측 task `observability-and-instrumentation`(설치 시).
 

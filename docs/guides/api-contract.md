@@ -68,6 +68,7 @@ components:
 ② 경계 mock(`mock.boundary`) 핸들러 목록이 허용 요청의 **allowlist**다 — 핸들러 없는 요청은 여전히 에러. 새 엔드포인트는 코드보다 핸들러(+`contract.client` 타입)를 먼저 추가한다(상태 D의 수동판).
 ③ 세팅 대조표에 "계약 생성 없음"이 남아 다음 세팅 때 §5 retrofit을 제안한다. 계약 생성 도입은 기능 change와 섞지 않는다.
 `client`도 없으면(손 타입이 흩어져 있음) 수동 모드가 아니라 **상태 C** — retrofit change가 먼저다.
+④ **실제 응답 픽스처가 테스트의 원천이다**(adr/0034): 수동 모드에선 타입이 서버와 어긋나도 아무것도 깨지지 않는다 — 손으로 쓴 가짜 응답만 먹이는 HTTP 어댑터 테스트는 자기 가정을 검증할 뿐이다(2026-09 care-app: 출하 뒤 fix 표본 10건 중 2건이 계약 밖 블록 타입·서버 500). 엔드포인트마다 실서버 응답 JSON 1~2건을 픽스처로 저장해 `contract.client`에 먹이고, **모르는 필드·타입을 만나도 죽지 않는지**를 함께 본다. 스텁을 `as unknown as <Api>`로 캐스팅하지 않는다 — 계약이 늘면 타입 오류로 드러나야 한다.
 
 ## 8. 검증된 구현 — React + OpenAPI (orval 8.24.0 · msw 2.15 · zod 4.4 · @tanstack/react-query 5.101, 2026-08-21 스크래치 Vite)
 | | orval 8 | @hey-api/openapi-ts 0.99 |
