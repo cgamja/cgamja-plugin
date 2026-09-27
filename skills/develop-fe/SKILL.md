@@ -65,7 +65,7 @@ hooks:
 
 ## 절대 하지 않는 것 (앞 항목들은 훅 `hooks/skill_guard.sh`가 거부 — adr/0007)
 - `ce-plan` / `lfg` 호출 — OpenSpec change와 플랜이 두 군데 생긴다.
-- Agent 도구로 리뷰어·테스트 작성자를 즉석 제작 — `review-cgamja`/`code-review-opus`/`test-driven-development`를 쓴다. 서브에이전트는 `model:` 명시(`docs/guides/model-routing.md`).
+- Agent 도구로 리뷰어·테스트 작성자를 즉석 제작 — `review-cgamja`/`code-review-opus`/`test-driven-development`를 쓴다. 서브에이전트는 역할 에이전트(`explorer`·`unit-worker`·`test-worker`)를 `subagent_type`으로 — 모델·effort는 에이전트 파일이 고정한다(`docs/guides/model-routing.md`, adr/0040).
 - 테스트를 초록으로 만들기 위한 assertion 완화·skip·snapshot 재생성. 못 만들면 실패 원문과 함께 멈춘다.
 - `git push --no-verify`·훅 삭제로 pre-push 게이트 우회 — 막히면 커밋을 고친다(fixup/reword, `workflow.md` 5장).
 - "됐습니다"만 보고하기. 테스트 출력·스크린샷 경로 없이는 완료가 아니다.
