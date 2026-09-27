@@ -33,3 +33,12 @@ check "0030: protect-bash 가 worktree 사본 제외"  "worktree"             "$
 check "0030: smoke 에 병렬 프로브"                "병렬 전제"            "$(cat skills/develop-setup/scripts/smoke.sh)"
 check "0031: smoke 에 rules 무결성 프로브"        "rules 무결성"         "$(cat skills/develop-setup/scripts/smoke.sh)"
 check "0032: smoke 에 스택↔SPEC 프로브"           "스택 ↔ SPEC"          "$(cat skills/develop-setup/scripts/smoke.sh)"
+
+# adr/0040 — 역할별 모델·effort는 에이전트 파일로 고정
+for a in explorer unit-worker unit-worker-lite test-worker reviewer-cgamja reviewer-correctness; do
+  check "0040: agents/$a.md 에 effort" "effort:" "$(head -8 agents/$a.md)"
+done
+check "0040: workflow 가 역할 에이전트로 위임"   "cgamja:unit-worker" "$(cat $W)"
+check "0040: workflow 탐색은 explorer"            "cgamja:explorer"    "$(cat $W)"
+check "0040: model-routing 에 effort 열"          "모델 · effort"      "$(cat docs/guides/model-routing.md)"
+
