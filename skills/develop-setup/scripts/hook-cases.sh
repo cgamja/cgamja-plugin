@@ -56,6 +56,12 @@ want deny "테스트 파일 perl -pi"                 "perl -pi -e s/a/b/ $TESTF
 want deny "보호 파일 리다이렉트 쓰기"            'echo x > package.json'
 want deny "TDD_PHASE 인라인"                     'TDD_PHASE=red npx vitest run'
 want deny "core.hooksPath 설정"                  'git config core.hooksPath /dev/null'
+want deny "core.hooksPath 설정(-C)"              'git -C sub config core.hooksPath /dev/null'
+want deny "core.hooksPath -c 인라인"             'git -c core.hooksPath=/dev/null commit -m x'
+want deny "core.hooksPath --unset"               'git config --unset core.hooksPath'
+want deny "명세 사본 쓰기"                       'echo x > specs/a.md'
+want deny "명세 사본 쓰기(\$PWD/)"               'echo x > $PWD/specs/a.md'
+want deny "명세 사본 쓰기(docs/../)"             'sed -i s/a/b/ docs/../specs/a.md'
 
 echo
 echo "## 읽기·조회는 통과해야 한다"
@@ -63,6 +69,14 @@ want allow "테스트 파일 읽기 + 리다이렉트"       "cat $TESTFILE 2>&1
 want allow "부분 읽기"                           'sed -n 1,5p src/a.ts'
 want allow "git diff"                            'git diff'
 want allow "hooksPath 조회"                      'git config core.hooksPath'
+want allow "hooksPath 조회(-C · 리다이렉트)"     'git -C sub config core.hooksPath 2>/dev/null'
+want allow "hooksPath 조회 뒤 다른 명령"         'git config core.hooksPath; git status'
+want allow "hooksPath 조회(--get)"               'git config --get core.hooksPath'
+want allow "heredoc 본문에 hooksPath가 적혀 있을 뿐" \
+  'cat > notes.md <<EOF
+훅은 core.hooksPath 설정을 막는다
+EOF'
+want allow "openspec change 델타의 specs/ 폴더"  'echo x > openspec/changes/a/specs/b/spec.md'
 
 echo
 echo "## 오탐 — 명령의 '대상'이 아니라 '텍스트'에 반응하던 것들"

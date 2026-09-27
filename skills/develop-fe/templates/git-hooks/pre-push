@@ -50,15 +50,21 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
         fi;;
     esac
   done
-  # 2-c) change당 커밋 수 상한 경고 (workflow 5장: 4~8개, adr/0031)
+  # 2-c) PR당 커밋 수 상한 경고 (workflow 5장: 6개 이하, adr/0038 — 첫 push 차단은 스킬 훅 pr_gate.sh)
   # **차단하지 않는다** — 리뷰 라운드가 커밋을 정당하게 늘린다(fix(review) + test 재분리).
   # 다만 산문으로만 두면 아무도 세지 않는다: 2026-08-31 런은 5개 change 전원이 상한을 넘겼고
   # (12·16·12·9·9) 그 사실을 사람이 나중에야 발견했다. 세어서 보여주는 것까지가 이 훅의 몫이다.
+  # 첫 push(원격 브랜치 없음)면 범위가 브랜치 전체 = PR 전체, 이미 있는 브랜치면 범위는 이번 push뿐이다.
+  # 두 경우를 같은 "PR당" 문구로 세면 추가 push의 경고가 PR 전체를 말하는 것처럼 읽힌다(PR#14 CodeRabbit).
   n="$(git rev-list --count $range 2>/dev/null || echo 0)"
-  if [ "$n" -gt 8 ]; then
-    echo "[pre-push] 경고: 나가는 커밋 $n 개 — workflow 5장 상한(change당 4~8)을 넘었다."
-    echo "[pre-push]   단계 1개 = 커밋 1개인지 보라(docs(spec) 1 · test 1~3 · feat 1~3 · fix(review) 1)."
-    echo "[pre-push]   리뷰 라운드 때문이면 정상이다 — PR 본문에 사유 한 줄을 남겨라. (경고일 뿐 차단 아님)"
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    if [ "$n" -gt 6 ]; then
+      echo "[pre-push] 경고: 첫 push 커밋 $n 개 — PR당 상한 6(workflow 5장·adr/0038)을 넘었다. scripts/restack.sh로 재구성."
+      echo "[pre-push]   test 1 · chore(design) 0~1 · feat|fix 1 · docs(openspec) 1. (경고일 뿐 차단 아님 — 차단은 스킬 훅 pr_gate)"
+    fi
+  elif [ "$n" -gt 2 ]; then
+    echo "[pre-push] 경고: 이번 push로 커밋 $n 개 — push 뒤에는 라운드당 1~2개(adr/0038). 피드백을 라운드로 모아 올려라."
+    echo "[pre-push]   리뷰 라운드 사정이면 PR 본문에 사유 한 줄. (경고일 뿐 차단 아님)"
   fi
 done
 
