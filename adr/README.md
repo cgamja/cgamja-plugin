@@ -44,3 +44,4 @@
 | [0037](0037-bug-review-runs-on-fixed-opus.md) | 리뷰 ②축(버그)은 `code-review-opus` 에이전트(`model: opus`)를 Agent로 — 내장 `/code-review`는 fork라 세션 모델을 물려받는다. 에이전트 없을 때만 `/code-review` 대체 + 명시, `review_nudge.sh` 통과 예외 | 제안 | — |
 | [0038](0038-commit-count-one-tenth.md) | 커밋은 PR당 6개 이하 — 첫 push 전 경로 재구성 레시피, worktree 통합 `merge --squash`, 머지 방식은 merge commit 유지, 첫 push·`gh pr create` 훅 차단(6 초과) | 제안 | — |
 | [0039](0039-hook-rooted-globs-and-delegation-stops.md) | 보호 glob은 루트 기준(슬래시 든 glob)·hooksPath는 세그먼트 판정(heredoc·`-C` 조회 오탐 해소), unit packet에 멈춤 세 줄(방법 3개 실패·시간 예산·단계 보고) | 제안 | hook-cases 43/43 |
+| [0040](0040-effort-routing-by-measurement.md) | 역할별 모델·effort를 에이전트 파일(explorer·unit-worker·test-worker·리뷰어)로 고정 — 전부 opus·medium, lite는 sonnet·medium. 세션은 Opus medium / Fable high. 실측(탐색·구현·오케스트레이터) 근거, code-review-opus 각도 ⑨ | 제안 | 실측 4종 |
