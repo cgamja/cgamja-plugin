@@ -77,14 +77,15 @@ wseg() { local seg; while IFS= read -r seg; do
   done < <(sed -E 's/&&|\|\||;|\|/\n/g' <<<"$pathsafe"); return 1; }
 if grep -qE -- '--no-verify|git commit[^|]* -n |HUSKY=0|LEFTHOOK=0|push[^|]*(--force|-f )' <<<"$cmd"; then
   deny "[protect] 훅 우회 금지(--no-verify, LEFTHOOK=0, push --force). 막힌 이유를 고치거나 사용자에게 물어라."; fi
-# core.hooksPath: 값 설정·-c 인라인만 우회. 조회(git [-C dir] config [--flags] core.hooksPath [2>/dev/null])는 허용(adr/0017).
+# core.hooksPath: 값 설정·-c 인라인만 우회. 조회(git [-C dir] config [읽기 전용 플래그] core.hooksPath [2>/dev/null])는 허용(adr/0017).
+# 플래그는 읽기 전용만 허용 목록으로 — `--[a-z-]+` 였을 때 `--unset core.hooksPath` 가 조회로 통과했다(PR#14 CodeRabbit).
 # 세그먼트 단위로 heredoc 본문을 뺀 명령($nohere)만 본다(adr/0039) — 전체 텍스트($cmd)를 보던 때는 heredoc
 # 본문에 이름이 "적혀 있기만" 해도, `git -C <워크트리> config …` 조회도 막았다(2026-09-24 care-app 실측 3회).
 # 의도된 완화: `bash <<EOF … EOF`처럼 heredoc 본문으로 "실행되는" 설정은 이제 여기서 안 잡힌다 — pkgadd와 같은
 # 전제(adr/0028 「heredoc 본문은 데이터다」)다. 인용 문자열 안 언급(`grep "…hooksPath"`)은 여전히 deny(남은 오탐).
 hp_set() { local seg; while IFS= read -r seg; do
     grep -qE 'core\.hooksPath' <<<"$seg" || continue
-    grep -qE '^[[:space:]]*git([[:space:]]+-C[[:space:]]+[^[:space:]]+)*[[:space:]]+config([[:space:]]+--[a-z-]+)*[[:space:]]+core\.hooksPath[[:space:]]*([0-9]?>.*)?$' <<<"$seg" && continue
+    grep -qE '^[[:space:]]*git([[:space:]]+-C[[:space:]]+[^[:space:]]+)*[[:space:]]+config([[:space:]]+--(get|get-all|get-regexp|name-only|null|show-origin|show-scope|includes|local|global|system|worktree))*[[:space:]]+core\.hooksPath[[:space:]]*([0-9]?>.*)?$' <<<"$seg" && continue
     return 0
   done < <(sed -E 's/&&|\|\||;|\|/\n/g' <<<"$nohere"); return 1; }
 if hp_set; then
