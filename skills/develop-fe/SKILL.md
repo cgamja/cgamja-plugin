@@ -22,6 +22,11 @@ hooks:
         - type: command
           command: "${CLAUDE_PLUGIN_ROOT}/skills/develop-fe/hooks/review_nudge.sh"
           timeout: 10
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "${CLAUDE_PLUGIN_ROOT}/skills/develop-fe/hooks/pr_gate.sh"
+          timeout: 10
 ---
 
 # develop-fe (v2 — adr/0026)
@@ -37,7 +42,7 @@ hooks:
 1. `workflow.md` 0장(세션 시작 + **0-b git 훅 설치**)을 실행한다.
 2. 티어 판정(`workflow.md` 1장): diff 한 문장 → **Tier-1**(그냥 진행, 아티팩트 없음) / 파일 여러 개·새 컴포넌트·접근법 둘 이상 → **Tier-2**(OpenSpec change 1개). 큰 작업은 Tier-2 change 여러 개로 분해(Tier-3 폐지, adr/0026). 버그 → `/ce-debug` + 재현 테스트 먼저.
 3. 티어 절차(`workflow.md` 2장) + 공통 규칙(3장). 코드 기준은 **`docs/spec/`**(CLEAN-CODE·ARCHITECTURE·WEB/APP-SPEC·GOOD-BAD-PATTERN·LIBRARY).
-4. 끝나면 5장(커밋 — pre-push 게이트) · 6장(PR). 삽질이 있었으면 `/ce-compound`.
+4. 끝나면 5장(커밋 — PR당 6개 이하, 첫 push 전 `scripts/restack.sh` 재구성·`pr_gate` 훅이 초과 push를 막는다, adr/0038) · 6장(PR). 삽질이 있었으면 `/ce-compound`.
 
 ## 단계별 스킬 호출 (전체 표는 `workflow.md` 배치표)
 - **테스트 task**: `cgamja:test-driven-development` 로드 — 실패하는 테스트 먼저, 버그는 재현 테스트 먼저. red 게이트·`test(scope):` 커밋 분리·**테스트 예산**(시나리오를 덮는 최소, adr/0034)은 workflow 3-2.

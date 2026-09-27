@@ -93,7 +93,7 @@
    > 구 ⑤ "가정한 기본값 목록(반박만 받기)"은 폐지 — AskUserQuestion은 답이 올 때까지 턴이 끝나므로 "반박만 받기"가 성립하지 않았다. 가정은 3-0의 3줄로 낸다
 3. **`/opsx:propose`** → `openspec/changes/<slug>/` 에 spec delta(시나리오 = 테스트 원천) + `tasks.md`(task마다 `→ verify:`). `openspec validate <slug> --strict`. propose 중엔 프로젝트 코드를 편집하지 않는다(planning boundary, adr/0019)
 4. **`/opsx:apply`** — task 하나씩, **메인은 위임·판정·커밋만 한다(adr/0027)**:
-   - **위임 기본**: 구현·테스트 작성 unit은 서브에이전트 1개(fresh context, `model:` 명시 — 구현·테스트 sonnet)로 내린다. inline 예외: 1~2파일 trivial, 사용자 상호작용이 중간에 필요한 task. **unit packet**(위임 프롬프트)에 넣을 것: 해당 requirement 발췌 + 대상 파일 + 테스트 시나리오 + 검증 명령 + `docs/spec/` 절대 경로(서브에이전트는 대화 이력·로드된 스킬을 못 본다 — CLAUDE.md·rules·훅은 자동 적용) + "커밋 금지, 최종 메시지는 `{status, changed_files, evidence(red 관찰·검증 결과)}` JSON". "스펙 전체를 읽어라"는 금지
+   - **위임 기본**: 구현·테스트 작성 unit은 서브에이전트 1개(fresh context, `model:` 명시 — 구현·테스트 sonnet)로 내린다. inline 예외: 1~2파일 trivial, 사용자 상호작용이 중간에 필요한 task. **unit packet**(위임 프롬프트)에 넣을 것: 해당 requirement 발췌 + 대상 파일 + 테스트 시나리오 + 검증 명령 + `docs/spec/` 절대 경로(서브에이전트는 대화 이력·로드된 스킬을 못 본다 — CLAUDE.md·rules·훅은 자동 적용) + "커밋 금지, 최종 메시지는 `{status, changed_files, evidence(red 관찰·검증 결과)}` JSON" + **멈춤 세 줄**(adr/0039): ① 같은 증상에 고친 방법 3개가 실패하면(시각 버그·픽셀 대조·시뮬레이터 재시도 포함) 더 파지 말고 `status:"blocked"` + 시도한 3개와 관측값으로 반환 ② 시간 예산(기본 unit당 45분, 큰 수정 패스 90분)을 넘기면 한 일·남은 일로 반환 ③ 단계가 바뀔 때마다(구현 → 검증 → e2e → 캡처) `SendMessage(to:"main")`로 한 줄 진행 보고. "스펙 전체를 읽어라"는 금지
    - **수신·검증**: worker 리포트 JSON만 받고, diff 전문은 컨텍스트에 넣지 않는다 — `git diff --stat` + 검증 명령 재실행으로 실물 확인 후 메인이 커밋. `blocked`/`scope_expansion`이면 packet을 고쳐 1회 re-dispatch, 2회 실패 시 inline 강등. 깨진 트리 위에 다음 unit을 보내지 않는다
    - **테스트 unit**: `test-driven-development` 스킬 규칙(packet에 명시) — 실패하는 테스트 먼저, 버그는 재현 테스트 먼저. red 게이트는 세션당 1회 승인(adr/0018)이되, worker는 각 red의 **실패 출력 원문과 이유("기능 미구현", import 오류 아님)를 리포트로 반환**하고, 메인이 그것을 본문에 붙여 `test(scope):` 커밋을 만든다(커밋 주체는 항상 메인 — adr/0027). 쿼리 우선순위는 role/label > 텍스트 > testID(3-2). 승인자가 없으면 구현으로 넘어가지 말고 멈춘다. packet에는 **테스트 예산 네 줄(3-2)** 을 그대로 넣는다 — worker는 규칙 파일을 읽지만 "얼마나 쓸지"는 packet이 정한다(adr/0034)
    - **구현 unit**: 테스트 파일은 건드리지 않는다(Edit ask, Bash 쓰기 deny). 코드 기준은 `docs/spec/`(CLEAN-CODE·ARCHITECTURE·WEB/APP-SPEC — packet에 경로 포함). 컴포넌트 합성은 `vercel-composition-patterns`, 네이티브면 `react-native-skills`(packet에 명시). worker가 초록 + PASS_TO_PASS를 리포트로 반환 → 메인이 확인 후 `[x]` → `feat(scope):` 커밋(커밋 주체는 메인)
@@ -123,7 +123,7 @@ Tier-2 3단계(propose) 전에 돈다. **허가를 묻지 않고 진입한다**(
 3. 환경 싱글턴 충돌 — dev server 포트·브라우저 세션·패키지 설치가 필요한 unit은 한 번에 하나
 4. 동시 상한 3
 
-**머지**: 의존성 순서로 **1개씩 integrate → verify → commit**. clean merge는 호환 증명이 아니다 — 전진한 트리에서 재검증하고, 충돌 unit은 새 base에 re-dispatch.
+**머지**: 의존성 순서로 **1개씩 integrate → verify → commit** — integrate는 `git merge --squash <워커 브랜치>`(워커 커밋·`Merge branch 'worktree-agent-…'` 커밋을 들이지 않는다, adr/0038). 워커 packet: "커밋은 네 브랜치에서 자유, push 금지". clean merge는 호환 증명이 아니다 — 전진한 트리에서 재검증하고, 충돌 unit은 새 base에 re-dispatch.
 
 **세팅은 `develop-setup`이 깐다**(adr/0030) — 선언 `parallel.{worktrees, port_env, max_concurrent}`, `.gitignore`의 `.claude/worktrees/`·`.env`, `.worktreeinclude`(worktree별 `.env`), dev 포트를 `port_env`로 파라미터화 + **strictPort**. strictPort가 핵심이다: 포트가 잡혔을 때 조용히 옆 포트로 옮겨 뜨면 증거 캡처가 엉뚱한 포트를 때린다 — 자동 이동은 사람에겐 편의지만 에이전트에겐 관측 불가능한 상태다.
 
@@ -173,6 +173,7 @@ Tier-2 3단계(propose) 전에 돈다. **허가를 묻지 않고 진입한다**(
 ### 3-4. 컨텍스트 규칙 (`context-engineering` 원칙)
 - **컨텍스트 예산(adr/0027 §2)**: 페이즈 경계(스펙 확정 후·구현 완료 후)에서 컨텍스트 ~50% 초과면 보존 지시 포함 `/compact` 또는 handoff 문서 작성 후 **새 세션에서 리뷰~PR**. 구현 diff·테스트 로그 전문을 메인에 들이지 않는 것이 수치 관리보다 우선
 - 같은 수정 2번 실패 → `/clear`, `docs/solutions/` 확인, 접근 변경 — "더 열심히"가 아니라 빠진 도구/규칙을 찾는다
+- **위임 중 사용자에게 보이는 상태(adr/0039)**: 백그라운드 위임을 띄울 때 "무엇을·언제쯤" 한 줄, 서브에이전트의 단계 보고가 오면 한 줄 전달. 사용자가 진행을 묻기 전에 알린다 — 2026-09-24 한 세션에서 "진행도?"·"지금 뭐 해?"가 5회, 수정 패스 하나가 픽셀 대조 루프로 95분을 썼다
 - 탐색은 Explore 서브에이전트로, 본 컨텍스트에 파일 덤프 금지. 서브에이전트는 `model:` 명시(`docs/guides/model-routing.md`): 탐색 haiku / 구현 sonnet / 리뷰 opus
 - 에이전트가 규칙을 어기면 CLAUDE.md에 줄을 늘리지 말고 린트·훅·config rules로 내린다
 
@@ -180,11 +181,12 @@ Tier-2 3단계(propose) 전에 돈다. **허가를 묻지 않고 진입한다**(
 - **살아있는 스펙** = `openspec/specs/`(archive가 갱신) · **학습** = `/ce-compound` → `docs/solutions/` · **결정** = 프로젝트 `docs/adr/`(형식은 `docs/spec/ADR` 규약과 philosophy 레포 ADR.md) · **디자인** = `design/`(스냅샷 덮어쓰기 = 이력) · **일회용** = `docs/plans/`, archive, 후보 캔버스
 
 ## 5. 커밋 — pre-commit/pre-push가 게이트
-- 형식은 `docs/spec/COMMIT.md`: `feat|fix|refactor|test|chore|docs(scope): 요약`. **단계 1개 = 커밋 1개**(change당 4~8개): `docs(spec)` 1 · `test` 1~3 · `feat` 1~3 · `fix(review)` 1. task마다 커밋하지 않는다 **[pre-push 경고 — adr/0031]**
-  > 2026-08-31 런은 5개 change 전원이 상한을 넘겼다(12·16·12·9·9). 산문으로만 있어서 아무도 세지 않았다. 이제 pre-push가 나가는 커밋을 세어 초과면 **경고**한다(차단 아님 — 리뷰 라운드가 정당하게 커밋을 늘린다). 초과 시 사유를 PR 본문에 한 줄
+- 형식은 `docs/spec/COMMIT.md`: `feat|fix|refactor|test|chore|docs(scope): 요약`. **PR당 6개 이하**(adr/0038): 첫 push 시점에 `test` 1 · `chore(design)` 0~1 · `feat|fix` 1 · `docs(openspec)` 1(스펙+아카이브, 마지막). push 뒤에는 라운드(CI·사용자 피드백 배치)당 1개, 테스트가 바뀐 라운드만 `test`+`fix` 2개 **[첫 push·`gh pr create` 차단 — hooks/pr_gate.sh · CI 경고 — check-commits.sh]**
+  > 2026-09-22~24 care-app 리디자인 PR 5개가 89·75·69·25·41개를 main에 남겼다(사흘 310개). 「change당 4~8」은 있었지만 경고뿐이었고, worktree 워커 커밋이 merge로 통째로 들어왔고, 체크박스·재캡처·피드백 반영이 제각각 커밋됐다. 목표는 그때의 10%
+- **작업 중 커밋은 자유**(WIP·tasks 체크·재캡처 전부) — 세는 건 나가는 커밋뿐이다. 첫 push(또는 `gh pr create`) 직전에 **`scripts/restack.sh`로 재구성**한다: `bash <플러그인>/skills/develop-fe/scripts/restack.sh [-C <dir>] [--base <아래 PR 브랜치>] [--type fix] <scope> "<feat 요약>"`(스택 PR이면 `--base`) — origin/main을 병합한 뒤 경로로 test · chore(design) · feat · docs(openspec)을 다시 쌓고, 트리가 그대로인지 확인한다. red 원문·리뷰 반영 요약은 `BODY_TEST`/`BODY_FEAT`로 커밋 본문에 옮긴다(정보는 본문으로, 개수는 줄인다)
 - 테스트 변경은 **별도 커밋**(pre-push가 feat/fix 커밋의 테스트 혼입을 차단한다)
 - **pre-push에 막히면**: 커밋을 고치는 게 정답이다 — verify 실패면 `git commit --fixup <실패 원인 sha>` → `git rebase --autosquash`, 메시지 형식이면 `git rebase -i`로 reword, 테스트 혼입이면 커밋 분리. `--no-verify`·훅 삭제로 우회하지 않는다(스킬 훅이 거부)
-- `/ce-commit` 사용. 푸시는 change 단위 — **첫 push는 리뷰 루프(2장 5번)가 끝난 뒤**다. 리뷰 반영으로 생긴 테스트·코드 수정은 push 전에 fixup → autosquash로 원 커밋에 접는다(강제 push 없이 접을 수 있는 건 push 전뿐). push 뒤의 수정은 접지 않고 커밋을 더한다(adr/0034)
+- 푸시는 change 단위 — **첫 push는 리뷰 루프(2장 5번)와 사용자 실기 확인이 끝난 뒤**다. 그 전의 수정은 전부 restack이 접는다(강제 push 없이 접을 수 있는 건 push 전뿐). push 뒤의 수정은 접지 않고 라운드당 1~2개를 더한다(adr/0034·0038). 이미 main에 들어간 커밋은 다시 쓰지 않는다
 
 ## 6. PR
 - Tier-1: 모아서 1개 / Tier-2: change 1개 = PR 1개. 형식은 `docs/spec/PR.md` + 아래 증거 블록. `/ce-commit-push-pr`, 대기 중 `/ce-babysit-pr`
@@ -203,7 +205,7 @@ Tier-2 3단계(propose) 전에 돈다. **허가를 묻지 않고 진입한다**(
 - 외부 스킬 미설치 대체 경로 3회 → vendoring 검토
 - Tier-2 분해가 change 4개 초과 2회 → 에픽 절차 부분 복원
 - pre-push 실패→fixup 루프 세션당 3회 → pre-commit 게이트 강화
-- change당 커밋 10개 초과 2회 → 단계 커밋 규칙 위반 지점 점검
+- PR당 커밋 6개 초과 2회 → pr_gate 우회 경로(훅 미로드·restack 실패·push 뒤 라운드 과다) 점검(adr/0038)
 - 브라우저 계층 테스트 주 2회 flaky → 단위 계층 기본 복귀(adr/0004)
 - 오래된 스냅샷으로 잘못 구현 2번 → 세션 시작 `get_metadata` 변경 감지 추가(adr/0002)
 - fix 커밋 표본(10개)의 과반이 단위·컴포넌트 계층이 **원리적으로 못 잡는 종류**(실서버 계약 불일치·실기기·시각) → 테스트를 더 쓰지 말고 계층을 보강(실제 응답 픽스처, E2E를 CI로) (adr/0034)

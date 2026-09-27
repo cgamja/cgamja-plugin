@@ -19,6 +19,6 @@ for sha in $(git rev-list --no-merges "$base..$head"); do
   esac
 done
 n="$(git rev-list --count --no-merges "$base..$head" 2>/dev/null || echo 0)"
-[ "$n" -gt 8 ] && echo "⚠ 커밋 ${n}개 — workflow 5장 기준(change당 4~8)을 넘었다(경고일 뿐 차단 아님). 리뷰 반영 때문이면 PR 본문에 사유 한 줄."
+[ "$n" -gt 6 ] && echo "⚠ 커밋 ${n}개 — workflow 5장 기준(PR당 6 이하, adr/0038)을 넘었다. 첫 push 전이면 scripts/restack.sh로 재구성, push 뒤 라운드 때문이면 PR 본문에 사유 한 줄."
 [ $fail -eq 0 ] && echo "commits OK"
 exit $fail
