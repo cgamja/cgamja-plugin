@@ -13,15 +13,20 @@ br="$(git rev-parse --abbrev-ref HEAD)"
 git fetch -q origin
 if git rev-parse --verify -q "origin/$br" >/dev/null; then echo "✗ origin/$br 이 이미 있다 — push된 브랜치는 다시 쓰지 않는다(adr/0034)" >&2; exit 1; fi
 git diff --quiet && git diff --cached --quiet || { echo "✗ 커밋 안 된 변경이 있다 — 먼저 커밋하거나 치워라" >&2; exit 1; }
+# 추적 안 되는 파일도 막는다 — 재구성 커밋에 섞이고, 실패 시 안내하는 `reset --hard` 가 지운다(PR#14 CodeRabbit).
+[ -z "$(git ls-files --others --exclude-standard)" ] || { echo "✗ 추적 안 되는 파일이 있다 — 커밋하거나 .gitignore·다른 곳으로 옮긴 뒤 다시" >&2; git ls-files --others --exclude-standard | head -5 >&2; exit 1; }
 git merge -q --no-edit origin/$base || { echo "✗ origin/$base 병합 충돌 — 해소·커밋 후 다시" >&2; exit 1; }
 before="$(git rev-parse HEAD)"
 git reset -q --soft origin/$base && git restore --staged .
-changed() { { git diff --name-only origin/$base --; git ls-files --others --exclude-standard; } | sort -u; }
+# 경로는 따옴표 없이(한글 파일명) 받고, git add 에는 --pathspec-from-file 로 넘긴다 — xargs 는 공백 든 파일명을 쪼갠다(PR#14 CodeRabbit).
+# reset --soft 뒤 새 파일은 untracked 로 돌아온다 — 시작 전 untracked 0 을 확인했으므로 여기 목록은 전부 재구성 대상이다.
+changed() { { git -c core.quotePath=false diff --name-only origin/$base --; git -c core.quotePath=false ls-files --others --exclude-standard; } | sort -u; }
+addp() { git add -A --pathspec-from-file=- ; }
 msg() { printf '%s\n' "$1"; [ -n "${2:-}" ] && printf '\n%s\n' "$2"; [ -n "${TRAILER:-}" ] && printf '\n%s\n' "$TRAILER"; }
 t="$(changed | grep -E '\.(test|spec)\.[a-z]+$|^(test|e2e|\.maestro)/|/e2e/|/__tests__/' || true)"
-[ -n "$t" ] && { printf '%s\n' "$t" | xargs git add -A --; git commit -q -m "$(msg "test($scope): $tsum" "${BODY_TEST:-}")"; }
+[ -n "$t" ] && { printf '%s\n' "$t" | addp; git commit -q -m "$(msg "test($scope): $tsum" "${BODY_TEST:-}")"; }
 d="$(changed | grep -E '^design/' || true)"
-[ -n "$d" ] && { printf '%s\n' "$d" | xargs git add -A --; git commit -q -m "$(msg "chore(design): $dsum")"; }
+[ -n "$d" ] && { printf '%s\n' "$d" | addp; git commit -q -m "$(msg "chore(design): $dsum")"; }
 git add -A -- . ':!openspec/'; git diff --cached --quiet || git commit -q -m "$(msg "$type($scope): $feat" "${BODY_FEAT:-}")"
 git add -A -- openspec/ 2>/dev/null || true; git diff --cached --quiet || git commit -q -m "$(msg "docs(openspec): $osum")"
 [ "$(git rev-parse HEAD^{tree})" = "$(git rev-parse "$before^{tree}")" ] || { echo "✗ 트리가 달라졌다 — 되돌림: git reset --hard $before" >&2; exit 1; }
