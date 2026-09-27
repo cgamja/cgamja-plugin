@@ -48,3 +48,17 @@ check "test nudge without tdd skill" "test-driven-development" "$(hook $N '{"ses
 check "test nudge non-test silent"  ""        "$(hook $N '{"session_id":"tn1","tool_input":{"file_path":"src/a/B.tsx"}}')"
 hook $G '{"session_id":"tn2","tool_input":{"skill":"cgamja:test-driven-development"}}' >/dev/null
 check "test nudge silent after tdd skill" "" "$(hook $N '{"session_id":"tn2","tool_input":{"file_path":"e2e/x.spec.ts"}}')"
+
+# adr/0038 pr_gate — PR#14 CodeRabbit: -C 인자를 eval 하지 않는다 · refspec 의 소스 브랜치를 센다
+P=skills/develop-fe/hooks/pr_gate.sh
+PG=$(mktemp -d); git init -q --bare $PG/o.git; git -C $PG clone -q o.git w 2>/dev/null; W=$PG/w
+git -C $W -c user.email=t@t -c user.name=t commit -q --allow-empty -m "chore: init"; git -C $W push -q origin HEAD:main 2>/dev/null; git -C $W fetch -q origin
+git -C $W switch -q -c big; for i in 1 2 3 4 5 6 7; do git -C $W -c user.email=t@t -c user.name=t commit -q --allow-empty -m "feat: c$i"; done
+git -C $W switch -q -c small main 2>/dev/null || git -C $W switch -q -c small origin/main
+check "pr_gate: 현재 브랜치 커밋 7개 첫 push deny" "deny" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"git switch big && git push -u origin big"}}')"
+check "pr_gate: 다른 브랜치에서 refspec 으로 push 해도 소스를 센다" "deny" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"git push origin big"}}')"
+check "pr_gate: 작은 브랜치는 통과" "" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"git push -u origin small"}}')"
+rm -f $PG/pwned; hook $P '{"cwd":"'$W'","tool_input":{"command":"git -C $(touch${IFS}'$PG'/pwned) push origin big"}}' >/dev/null
+check "pr_gate: -C 인자의 명령 치환을 실행하지 않는다" "" "$([ -e $PG/pwned ] && echo EXECUTED)"
+check "pr_gate: -C 상대 경로" "deny" "$(hook $P '{"cwd":"'$PG'","tool_input":{"command":"git -C w push origin big"}}')"
+
