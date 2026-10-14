@@ -109,7 +109,8 @@ row "CLAUDE.md (@import 없음)"     $( (has CLAUDE.md && ! grep -qE '^@|[[:spac
 row ".claude/rules/*.md"           $(ls .claude/rules/*.md >/dev/null 2>&1 && echo 0 || echo 1) "templates/rules/"
 row "docs/adr/0001 + conventions"  $( (has docs/adr/0001-domain-structure.md && has docs/conventions.md) && echo 0 || echo 1) "templates/adr-0001-domain-structure.md, conventions.md"
 row "OpenSpec feature 스키마"      $(has openspec/schemas/feature/schema.yaml && echo 0 || echo 1) "openspec init → schema fork spec-driven feature"
-row "CI에 verify"                  $(grep -lE "verify" .github/workflows/*.yml .gitlab-ci.yml 2>/dev/null | grep -q . && echo 0 || echo 1) "기존 CI에 verify·commitlint·openspec validate 단계 추가"
+# adr/0041 — PR 직전 검사는 로컬: pre-push 훅에 verify가 있거나 commands.verify_pr 선언
+row "PR 직전 검사(로컬)"           $( (grep -qs "verify" .githooks/pre-push .husky/pre-push lefthook.yml || cfgkey commands.verify_pr) && echo 0 || echo 1) "pre-push 훅(templates/git-hooks) 또는 commands.verify_pr(verify + check-commits) — 개인 CI 아님"
 
 echo
 if [ $missing -eq 0 ]; then echo "대조표 ✗ 없음. /develop-fe 로 진행."; exit 0; else echo "✗ 항목만 develop-setup 1장 질문 → 2장 순서로 붙인다. 스택은 바꾸지 않는다."; exit 1; fi

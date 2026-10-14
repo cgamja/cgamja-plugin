@@ -2,6 +2,7 @@
 # 첫 push·PR 생성 게이트(adr/0038) — 아직 origin에 없는 브랜치를 내보낼 때 기준 브랜치 이후 비머지 커밋이
 # 6개를 넘으면 막는다. 첫 push 전이라 강제 push 없이 재구성할 수 있으므로 차단이 정당하다. 이미 origin에
 # 있는 브랜치는 다시 쓸 수 없으니 막지 않는다(0034 — push 뒤 수정은 커밋을 더한다).
+# `gh pr create` 직전에는 `.claude/cgamja.json` commands.verify_pr 를 돌려 실패하면 막는다(adr/0041 — 개인 CI 대신).
 source "$(dirname "$0")/_lib.sh"
 cmd="$(j tool_input.command)"
 case "$cmd" in *"gh pr create"*|*"git "*push*) ;; *) exit 0;; esac
@@ -65,4 +66,11 @@ for p in "${pairs[@]}"; do
   bash $script -C $dir --base ${base#origin/} [--type fix] <scope> \"<feat 요약>\" [\"<test 요약>\"] [\"<design 요약>\"] [\"<openspec 요약>\"]
 test · chore(design) · feat|fix · docs(openspec) 최대 4개로 경로 재구성한다(트리 불변 확인·되돌리는 명령 출력). 커밋 본문은 BODY_TEST/BODY_FEAT, 트레일러는 TRAILER 환경변수. 그다음 다시 push."
 done
-exit 0
+
+# PR 직전 검사(adr/0041) — 선언이 없거나 null 이면 지나간다(pre-push 훅이 같은 검사를 하는 레포).
+grep -q 'gh pr create' <<<"$seg" || exit 0
+vpr="$(python3 -c 'import json,sys;print((json.load(open(sys.argv[1])).get("commands") or {}).get("verify_pr") or "")' "$dir/.claude/cgamja.json" 2>/dev/null)"
+[ -n "$vpr" ] || exit 0
+out="$(cd "$dir" && bash -c "$vpr" 2>&1)" && exit 0
+deny "[verify_pr] \`$vpr\` 실패 — PR 전에 고친다(adr/0041). 마지막 20줄:
+$(printf '%s' "$out" | tail -20)"

@@ -26,7 +26,7 @@ hooks:
       hooks:
         - type: command
           command: "${CLAUDE_PLUGIN_ROOT}/skills/develop-fe/hooks/pr_gate.sh"
-          timeout: 10
+          timeout: 900
 ---
 
 # develop-fe (v2 — adr/0026)

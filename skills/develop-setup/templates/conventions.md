@@ -24,4 +24,4 @@
 - `type(scope): 요약`. 테스트 커밋과 구현 커밋 분리(테스트 약화가 diff에 보이게)
 
 ## 이 문서의 rot 방지
-CI `scripts/check-docs.sh`가 여기·CLAUDE.md·rules가 가리키는 경로와 명령이 존재하는지 검사한다. 깨지면 문서를 고치거나 지운다.
+`verify`의 `scripts/check-docs.sh`가 여기·CLAUDE.md·rules가 가리키는 경로와 명령이 존재하는지 검사한다. 깨지면 문서를 고치거나 지운다.

@@ -9,7 +9,7 @@
 | [0002](0002-figma-snapshot-not-live.md) | Figma는 원천, `design/` 스냅샷이 입력 — 새 화면·변경 때만 호출 | 제안 | — |
 | [0003](0003-design-gap-artifact-loop.md) | 미완성 디자인: Artifact 후보 → 확정 → 코드 먼저 → Figma엔 평면 캡처 거울 | 제안 | — |
 | [0004](0004-tdd-as-gate-not-quality.md) | TDD = 리뷰 게이트+변조 방지; 인터랙션 테스트는 Vitest Browser Mode | 제안 | — |
-| [0005](0005-rule-placement.md) | 규칙 배치 — path-scoped rules, `@` import 금지, DoD는 `pnpm verify` 한 곳, 훅은 Bash까지 | 제안 | — |
+| [0005](0005-rule-placement.md) | 규칙 배치 — path-scoped rules, `@` import 금지, DoD는 `pnpm verify` 한 곳, 훅은 Bash까지 | 제안(CI 백스톱·문서 검사 위치 → 0041) | — |
 | [0006](0006-domain-structure.md) | bulletproof-react features + FSD 세그먼트, 도메인 간 import 기본 금지, ADR+린트 | 제안 | — |
 | [0007](0007-skill-hooks.md) | 스킬 frontmatter 훅 — 금지 스킬 호출 차단(Skill 매처), 세팅 누락 경고(once) | 제안 | — |
 | [0008](0008-api-contract.md) | API 계약 — 원천은 `api/openapi.yaml` 하나, 상태 A/B/C/D 판정, orval 생성물만 import, retrofit은 별도 change | 제안 | — |
@@ -40,8 +40,9 @@
 | [0033](0033-copies-need-an-update-path.md) | 복사본에는 갱신 경로가 있어야 한다 — `develop-update` 스킬, 드리프트를 정수 마커가 아니라 **내용**으로 판정(0023 개정), 선언 없는 프로젝트는 setup 대상, 덮는 것과 보존하는 것 구분 | 제안 | — |
 | [0034](0034-test-budget-and-push-after-review.md) | 테스트 예산 — 시나리오를 덮는 최소가 기본값(packet 네 줄), 첫 push는 리뷰 루프 뒤(fixup으로 접기), 수동 계약은 실제 응답 픽스처, 재검토 조건 2종. care-app 실측: test 커밋 42% 재작업·케이스 17% 목 어댑터·fix 6/10은 계층 밖 | 제안 | — |
 | [0035](0035-review-axes-run-concurrently.md) | 리뷰 축(2축 + `review.extra_lenses`)을 한 메시지에서 동시에, 재검사는 지적 나온 축만 — 축 내용은 불변, 순서만 | 제안 | — |
-| [0036](0036-checks-must-survive-without-git-hooks.md) | 커밋 범위 검사를 `templates/scripts/check-commits.sh`로도 제공 — 팀 소유 훅 레포에서 커밋 수 경고가 조용히 사라진 재발(care-app 12건 전원 초과) | 제안 | — |
+| [0036](0036-checks-must-survive-without-git-hooks.md) | 커밋 범위 검사를 `templates/scripts/check-commits.sh`로도 제공 — 팀 소유 훅 레포에서 커밋 수 경고가 조용히 사라진 재발(care-app 12건 전원 초과) | 제안(CI 경로 → 0041) | — |
 | [0037](0037-bug-review-runs-on-fixed-opus.md) | 리뷰 ②축(버그)은 `code-review-opus` 에이전트(`model: opus`)를 Agent로 — 내장 `/code-review`는 fork라 세션 모델을 물려받는다. 에이전트 없을 때만 `/code-review` 대체 + 명시, `review_nudge.sh` 통과 예외 | 제안 | — |
 | [0038](0038-commit-count-one-tenth.md) | 커밋은 PR당 6개 이하 — 첫 push 전 경로 재구성 레시피, worktree 통합 `merge --squash`, 머지 방식은 merge commit 유지, 첫 push·`gh pr create` 훅 차단(6 초과) | 제안 | — |
 | [0039](0039-hook-rooted-globs-and-delegation-stops.md) | 보호 glob은 루트 기준(슬래시 든 glob)·hooksPath는 세그먼트 판정(heredoc·`-C` 조회 오탐 해소), unit packet에 멈춤 세 줄(방법 3개 실패·시간 예산·단계 보고) | 제안 | hook-cases 43/43 |
 | [0040](0040-effort-routing-by-measurement.md) | 역할별 모델·effort를 에이전트 파일(explorer·unit-worker·test-worker·리뷰어)로 고정 — 전부 opus·medium, lite는 sonnet·medium. 세션은 Opus medium / Fable high. 실측(탐색·구현·오케스트레이터) 근거, code-review-opus 각도 ⑨ | 제안 | 실측 4종 |
+| [0041](0041-local-first-checks-no-personal-ci.md) | 검사는 로컬이 기본, 개인 CI 워크플로는 만들지 않는다 — verify에 openspec validate·문서 검사, PR 직전 `commands.verify_pr`(+check-commits)를 pr_gate가 `gh pr create` 전에 실행·실패 시 deny, 기존 CI는 대체 안 함·`templates/react/ci.yml`은 선택 예시 | 제안 | hook-cases |

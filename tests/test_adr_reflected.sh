@@ -42,3 +42,8 @@ check "0040: workflow 가 역할 에이전트로 위임"   "cgamja:unit-worker" 
 check "0040: workflow 탐색은 explorer"            "cgamja:explorer"    "$(cat $W)"
 check "0040: model-routing 에 effort 열"          "모델 · effort"      "$(cat docs/guides/model-routing.md)"
 
+# adr/0041 — 검사는 로컬, PR 직전은 commands.verify_pr + pr_gate
+check "0041: pr_gate 가 verify_pr 를 돌린다"   "verify_pr"         "$(cat skills/develop-fe/hooks/pr_gate.sh)"
+check "0041: workflow 0-b 가 verify_pr 로"     "commands.verify_pr" "$(cat $W)"
+check "0041: setup 행 10 이 개인 CI 를 안 만든다" "개인 CI 워크플로는 만들지 않는다" "$(cat $S)"
+check "0041: 선언 템플릿에 verify_pr 슬롯"     "verify_pr"         "$(cat skills/develop-setup/templates/cgamja.json)"
