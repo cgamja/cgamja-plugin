@@ -32,7 +32,7 @@
 ## 0. 세션 시작 (매번 — fast-path 먼저, 점검은 뒤이어)
 **Fast-path (adr/0019)**: 사용자 지시에 즉시 실행 가능한 첫 행동(브랜치 생성, "바로 X부터")이 있으면 그것이 첫 도구 호출이다. **첫 가시 보고(티어 한 줄)는 30초 안에**, 아래 점검은 그 뒤에(가능한 것은 병렬로).
 0. 세팅 확인: `package.json`의 `verify` 스크립트 · `openspec/config.yaml` · `.claude/rules/` · `.claude/cgamja.json` 중 없는 게 있으면 **멈추고 `/develop-setup` 안내**. Tier-1 한 줄 수정은 예외로 진행 가능
-0-b. **git 훅 확인/설치**: `git config core.hooksPath`가 비어 있거나 pre-push가 없으면 — `mkdir -p .githooks && cp <플러그인>/skills/develop-fe/templates/git-hooks/* .githooks/ && chmod +x .githooks/* && git config core.hooksPath .githooks`. 이미 husky 등이 있으면 덮지 말고 기존 훅에 같은 검사가 있는지 대조만 하고 보고. **팀이 git 훅을 소유한 레포**(훅 파일을 바꿀 수 없음)면 설치하지 말고 `templates/scripts/check-commits.sh`를 프로젝트 `scripts/`에 두어 CI·Stop 훅에서 부른다 — 훅을 못 깐다고 검사(메시지 형식·테스트 혼입·커밋 수 경고)가 조용히 사라지면 안 된다(adr/0036). **pre-push가 막으면 커밋을 고친다**(5장) — `--no-verify` 금지(스킬 훅이 거부)
+0-b. **git 훅 확인/설치**: `git config core.hooksPath`가 비어 있거나 pre-push가 없으면 — `mkdir -p .githooks && cp <플러그인>/skills/develop-fe/templates/git-hooks/* .githooks/ && chmod +x .githooks/* && git config core.hooksPath .githooks`. 이미 husky 등이 있으면 덮지 말고 기존 훅에 같은 검사가 있는지 대조만 하고 보고. **팀이 git 훅을 소유한 레포**(훅 파일을 바꿀 수 없음)면 설치하지 말고 `templates/scripts/check-commits.sh`를 프로젝트 `scripts/`에 두고 `commands.verify_pr`(verify + check-commits)로 선언한다 — pr_gate가 `gh pr create` 전에 돌린다. 훅을 못 깐다고 검사(메시지 형식·테스트 혼입·커밋 수 경고)가 조용히 사라지면 안 된다(adr/0036·0041, 개인 CI는 만들지 않는다). **pre-push가 막으면 커밋을 고친다**(5장) — `--no-verify` 금지(스킬 훅이 거부)
 1. `git status` / `git log --oneline -10`
 2. `openspec list` — 열린 change 있으면 그 `tasks.md`부터
 3. `docs/solutions/` 를 task 키워드로 grep — 이미 푼 문제인가
@@ -181,7 +181,7 @@ Tier-2 3단계(propose) 전에 돈다. **허가를 묻지 않고 진입한다**(
 - **살아있는 스펙** = `openspec/specs/`(archive가 갱신) · **학습** = `/ce-compound` → `docs/solutions/` · **결정** = 프로젝트 `docs/adr/`(형식은 `docs/spec/ADR` 규약과 philosophy 레포 ADR.md) · **디자인** = `design/`(스냅샷 덮어쓰기 = 이력) · **일회용** = `docs/plans/`, archive, 후보 캔버스
 
 ## 5. 커밋 — pre-commit/pre-push가 게이트
-- 형식은 `docs/spec/COMMIT.md`: `feat|fix|refactor|test|chore|docs(scope): 요약`. **PR당 6개 이하**(adr/0038): 첫 push 시점에 `test` 1 · `chore(design)` 0~1 · `feat|fix` 1 · `docs(openspec)` 1(스펙+아카이브, 마지막). push 뒤에는 라운드(CI·사용자 피드백 배치)당 1개, 테스트가 바뀐 라운드만 `test`+`fix` 2개 **[첫 push·`gh pr create` 차단 — hooks/pr_gate.sh · CI 경고 — check-commits.sh]**
+- 형식은 `docs/spec/COMMIT.md`: `feat|fix|refactor|test|chore|docs(scope): 요약`. **PR당 6개 이하**(adr/0038): 첫 push 시점에 `test` 1 · `chore(design)` 0~1 · `feat|fix` 1 · `docs(openspec)` 1(스펙+아카이브, 마지막). push 뒤에는 라운드(CI·사용자 피드백 배치)당 1개, 테스트가 바뀐 라운드만 `test`+`fix` 2개 **[첫 push·`gh pr create` 차단 — hooks/pr_gate.sh · 경고 — check-commits.sh(pre-push 또는 verify_pr)]**
   > 2026-09-22~24 care-app 리디자인 PR 5개가 89·75·69·25·41개를 main에 남겼다(사흘 310개). 「change당 4~8」은 있었지만 경고뿐이었고, worktree 워커 커밋이 merge로 통째로 들어왔고, 체크박스·재캡처·피드백 반영이 제각각 커밋됐다. 목표는 그때의 10%
 - **작업 중 커밋은 자유**(WIP·tasks 체크·재캡처 전부) — 세는 건 나가는 커밋뿐이다. 첫 push(또는 `gh pr create`) 직전에 **`scripts/restack.sh`로 재구성**한다: `bash <플러그인>/skills/develop-fe/scripts/restack.sh [-C <dir>] [--base <아래 PR 브랜치>] [--type fix] <scope> "<feat 요약>"`(스택 PR이면 `--base`) — origin/main을 병합한 뒤 경로로 test · chore(design) · feat · docs(openspec)을 다시 쌓고, 트리가 그대로인지 확인한다. red 원문·리뷰 반영 요약은 `BODY_TEST`/`BODY_FEAT`로 커밋 본문에 옮긴다(정보는 본문으로, 개수는 줄인다)
 - 테스트 변경은 **별도 커밋**(pre-push가 feat/fix 커밋의 테스트 혼입을 차단한다)
@@ -190,6 +190,7 @@ Tier-2 3단계(propose) 전에 돈다. **허가를 묻지 않고 진입한다**(
 
 ## 6. PR
 - Tier-1: 모아서 1개 / Tier-2: change 1개 = PR 1개. 형식은 `docs/spec/PR.md` + 아래 증거 블록. `/ce-commit-push-pr`, 대기 중 `/ce-babysit-pr`
+- `commands.verify_pr`이 선언된 레포는 `gh pr create` 전에 pr_gate가 그것을 돌린다 — 실패하면 PR이 막히니 먼저 직접 돌려 통과시킨다(adr/0041) **[pr_gate deny]**
 
 ```md
 ## 검증 증거

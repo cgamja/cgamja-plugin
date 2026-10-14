@@ -1,6 +1,6 @@
 {
   "$schema": "cgamja project declaration v1 — adr/0014 §슬롯. 플러그인의 훅·스모크·리뷰어가 읽는 사실. 없는 강제 수단은 null(세팅 스킬의 제안 목록이 된다). ≤40줄.",
-  "commands": { "verify": "pnpm verify", "typecheck": "pnpm typecheck", "test": "pnpm test", "lint": "pnpm lint", "dev": "pnpm dev", "perf": null },
+  "commands": { "verify": "pnpm verify", "typecheck": "pnpm typecheck", "test": "pnpm test", "lint": "pnpm lint", "dev": "pnpm dev", "perf": null, "verify_pr": null },
   "tests": {
     "patterns": ["**/*.test.*", "**/*.browser.test.*", "**/*.spec.*", "e2e/**", "**/*.stories.*"],
     "layers": { "unit": "pnpm test:unit", "browser": "pnpm test:browser", "e2e": "pnpm e2e" }

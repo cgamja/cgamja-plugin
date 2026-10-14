@@ -1,3 +1,4 @@
+# 선택 예시(adr/0041) — 기본 세팅은 개인 CI를 만들지 않는다(검사는 로컬 verify·verify_pr). 사용자가 CI를 원할 때만 쓴다.
 # .github/workflows/ci.yml — verify는 package.json의 같은 스크립트. 여기서 목록을 다시 쓰지 않는다.
 name: ci
 on: [push, pull_request]

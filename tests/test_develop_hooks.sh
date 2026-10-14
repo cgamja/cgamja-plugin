@@ -63,4 +63,11 @@ check "pr_gate: 작은 브랜치는 통과" "" "$(hook $P '{"cwd":"'$W'","tool_i
 rm -f $PG/pwned; hook $P '{"cwd":"'$W'","tool_input":{"command":"git -C $(touch${IFS}'$PG'/pwned) push origin big"}}' >/dev/null
 check "pr_gate: -C 인자의 명령 치환을 실행하지 않는다" "" "$([ -e $PG/pwned ] && echo EXECUTED)"
 check "pr_gate: -C 상대 경로" "deny" "$(hook $P '{"cwd":"'$PG'","tool_input":{"command":"git -C w push origin big"}}')"
+# adr/0041 — gh pr create 직전 commands.verify_pr (현재 브랜치 small = 커밋 0개라 커밋 수 게이트는 지나간다)
+check "pr_gate: verify_pr 미선언이면 통과" "" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"gh pr create --fill"}}')"
+mkdir -p $W/.claude; echo '{"commands":{"verify_pr":"echo boom-out; exit 1"}}' > $W/.claude/cgamja.json
+check "pr_gate: verify_pr 실패면 gh pr create deny" "boom-out" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"gh pr create --fill"}}')"
+check "pr_gate: verify_pr 는 push 에선 돌지 않는다" "" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"git push -u origin small"}}')"
+echo '{"commands":{"verify_pr":"true"}}' > $W/.claude/cgamja.json
+check "pr_gate: verify_pr 성공이면 통과" "" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"gh pr create --fill"}}')"
 

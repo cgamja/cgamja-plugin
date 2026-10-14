@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 커밋 범위 검사 — pre-push 템플릿의 "나가는 커밋 검사"와 같은 세 가지를 훅 밖에서 돌린다(adr/0036).
-# 팀이 git 훅을 소유해 pre-push를 깔 수 없는 레포에서 CI·Stop 훅이 부른다. 사용: check-commits.sh <base-sha> <head-sha>
+# 팀이 git 훅을 소유해 pre-push를 깔 수 없는 레포에서 commands.verify_pr 가 부른다(adr/0041). 사용: check-commits.sh <base-sha> <head-sha>
 # 형식·혼입은 차단(exit 1), 커밋 수는 경고만 — 리뷰 라운드가 커밋을 정당하게 늘린다(adr/0031).
 set -uo pipefail
 base="${1:?base sha}"; head="${2:?head sha}"; fail=0
