@@ -5,13 +5,18 @@ source "$(dirname "$0")/_lib.sh"
 [ "$(j stop_hook_active)" = "true" ] && exit 0
 cd "$ROOT" 2>/dev/null || exit 0
 verify="$(cfg commands.verify)"; [ -z "$verify" ] && { echo "[stop] commands.verify 선언 없음 — 완료 정의가 없습니다(/develop-setup)" >&2; exit 0; }
-changed="$( { git diff --name-only; git diff --cached --name-only; git ls-files --others --exclude-standard; } 2>/dev/null | grep -vE '^(openspec|docs|design)/|\.md$' || true)"
+changed="$( { git diff --name-only; git diff --cached --name-only; git ls-files --others --exclude-standard; } 2>/dev/null | grep -vE '^(openspec|docs|design)/|^\.claude/state/|\.md$' || true)"
 [ -z "$changed" ] && exit 0
 if [ -f .claude/state/handoff ]; then
   reason="$(head -c 500 .claude/state/handoff)"; rm -f .claude/state/handoff
   echo "[stop] verify 미해결 상태로 사용자에게 넘김: ${reason:-사유 없음} — 로그 .claude/state/verify.last.log" >&2; exit 0; fi
 if git diff --name-only 2>/dev/null | grep -qE "$(cfg protected | globs_to_regex | anchor_rooted)"; then
   echo "[stop] 보호 파일(의존성·설정)이 바뀌었습니다 — 사용자 확인이 필요합니다." >&2; fi
+# 이미 통과한 작업 트리면 건너뛴다 — 정리 안 된 파일(빌드 캐시 등) 하나로 대답만 한 턴마다 verify 전체가 돌았다.
+# 지문 = HEAD + verify 명령 + 바뀐 파일 각각의 내용. 한 글자라도 다르면 다시 돈다. 실패는 기억하지 않는다.
+fp="$( { git rev-parse HEAD 2>/dev/null; echo "$verify"; while IFS= read -r f; do
+  if [ -f "$f" ]; then git hash-object -- "$f" 2>/dev/null; else echo "gone"; fi; echo "$f"; done <<<"$changed"; } | git hash-object --stdin)"
+[ -n "$fp" ] && [ "$(cat .claude/state/verify.pass 2>/dev/null)" = "$fp" ] && exit 0
 out="$(bash -c "$verify" 2>&1)"; code=$?
 mkdir -p .claude/state; { echo "# $(date -u +%FT%TZ) \`$verify\` exit $code"; echo "$out" | tail -200; } > .claude/state/verify.last.log   # 증거 보존(리뷰 2축 — review-cgamja·code-review — 이 읽는다). 커밋하지 않는다(.gitignore)
 [ $code -eq 0 ] || {
@@ -20,4 +25,5 @@ mkdir -p .claude/state; { echo "# $(date -u +%FT%TZ) \`$verify\` exit $code"; ec
   echo "— 전체는 .claude/state/verify.last.log · 마지막 50줄:" >&2; echo "$out" | tail -50 >&2
   echo "에이전트가 고칠 수 없는 원인(보호 파일·환경)이면 이유 한 줄을 .claude/state/handoff 에 쓰고 멈춰 사용자에게 알려라(다음 Stop 1회 통과, 사유는 기록에 남는다)." >&2
   exit 2; }
+echo "$fp" > .claude/state/verify.pass
 exit 0

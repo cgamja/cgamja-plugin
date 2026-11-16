@@ -75,6 +75,16 @@ check "stop: handoff → pass with reason"  "넘김" "$out"
 check "stop: handoff consumed"            ""     "$(ls "$P/.claude/state/handoff" 2>/dev/null)"
 out="$(printf '{"session_id":"h","cwd":"%s"}' "$P" | bash $S 2>&1)"; code=$?
 check "stop: verify fail blocks (exit 2)" "2"    "$code"
+# 같은 작업 트리로 이미 통과했으면 다시 돌리지 않는다 — 정리 안 된 파일 하나로 대답만 한 턴마다 verify 전체가 돌던 문제
+(cd "$P" && printf '{"commands":{"verify":"echo run >> .claude/state/runs"}}' > .claude/cgamja.json); rm -f "$P/.claude/state/runs" "$P/.claude/state/verify.pass"
+stop(){ printf '{"session_id":"h","cwd":"%s"}' "$P" | bash $S >/dev/null 2>&1; }
+stop; stop
+check "stop: unchanged tree after pass → verify once" "1" "$(wc -l < "$P/.claude/state/runs" | tr -d ' ')"
+echo z > "$P/src/changed.ts"; stop
+check "stop: content change → verify again" "2" "$(wc -l < "$P/.claude/state/runs" | tr -d ' ')"
+(cd "$P" && printf '{"commands":{"verify":"false"}}' > .claude/cgamja.json); echo w > "$P/src/changed.ts"; stop
+(cd "$P" && printf '{"commands":{"verify":"echo run >> .claude/state/runs; false"}}' > .claude/cgamja.json); stop; stop
+check "stop: failed verify is not remembered" "4" "$(wc -l < "$P/.claude/state/runs" | tr -d ' ')"
 cp skills/develop-setup/templates/cgamja.json "$P/.claude/cgamja.json"
 # adr/0018: red 게이트 세션당 1회 — 첫 편집 ask → 승인(편집 성공 = red-mark) → 같은 세션은 묻지 않음
 M=skills/develop-setup/templates/hooks/red-mark.sh
