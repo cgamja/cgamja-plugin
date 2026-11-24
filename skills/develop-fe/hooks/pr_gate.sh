@@ -9,15 +9,30 @@ case "$cmd" in *"gh pr create"*|*"git "*push*) ;; *) exit 0;; esac
 # push·pr create가 든 세그먼트 하나만 본다(다른 명령의 인자를 refspec으로 읽지 않게)
 seg="$(printf '%s' "$cmd" | tr ';&|' '\n\n\n' | grep -m1 -E '(^|[[:space:]])git( -C [^ ]+)? push([[:space:]]|$)|gh pr create')" || exit 0
 
-# -C 경로는 문자열로만 해석한다 — eval 하면 `$(…)` 같은 명령 치환이 훅 안에서 실행된다(PR#14 CodeRabbit, CWE-78).
+# -C·cd 경로는 문자열로만 해석한다 — eval 하면 `$(…)` 같은 명령 치환이 훅 안에서 실행된다(PR#14 CodeRabbit, CWE-78).
+resolve() {
+  local p="$1"
+  p="${p#[\"\']}"; p="${p%[\"\']}"
+  case "$p" in "~"|"~/"*) p="$HOME${p#\~}";; esac
+  case "$p" in /*) printf '%s' "$p";; *) printf '%s' "$dir/$p";; esac
+}
 dir="$(j cwd)"
+# 명령 앞 `cd <경로> &&|;` — 세션 cwd(메인 폴더)와 다른 워크트리에서 push·PR을 내보낼 때 그 폴더를 본다.
+# 세그먼트로 자르면 cd 가 떨어져 나가 메인 폴더에서 verify_pr 을 돌리던 문제(2026-11-24 care-app #464).
+cdp="$(printf '%s' "$cmd" | sed -nE 's/^[[:space:]]*cd[[:space:]]+([^ ;&|]+)[[:space:]]*(&&|;).*/\1/p')"
+[ -n "$cdp" ] && dir="$(resolve "$cdp")"
 c="$(printf '%s' "$seg" | sed -nE 's/.*git -C ([^ ]+) push.*/\1/p')"
-if [ -n "$c" ]; then
-  c="${c#[\"\']}"; c="${c%[\"\']}"
-  case "$c" in "~"|"~/"*) c="$HOME${c#\~}";; esac
-  case "$c" in /*) dir="$c";; *) dir="$dir/$c";; esac
-fi
+[ -n "$c" ] && dir="$(resolve "$c")"
 [ -d "$dir" ] || exit 0
+# `gh pr create --head <브랜치>` 의 브랜치가 다른 워크트리에 체크아웃돼 있으면 그 워크트리를 본다 — cd 없이
+# 메인 폴더에서 불러도 그 브랜치의 트리로 커밋 수·verify_pr 를 잰다.
+if grep -q 'gh pr create' <<<"$seg"; then
+  hb="$(printf '%s' "$seg" | sed -nE 's/.*--head[ =]([^ ]+).*/\1/p')"; hb="${hb#[\"\']}"; hb="${hb%[\"\']}"
+  if [ -n "$hb" ]; then
+    wt="$(git -C "$dir" worktree list --porcelain 2>/dev/null | awk -v b="refs/heads/$hb" '/^worktree /{p=substr($0,10)} $0=="branch "b{print p; exit}')"
+    [ -n "$wt" ] && [ -d "$wt" ] && dir="$wt"
+  fi
+fi
 g() { git -C "$dir" "$@" 2>/dev/null; }
 g rev-parse --verify -q origin/main >/dev/null || exit 0
 

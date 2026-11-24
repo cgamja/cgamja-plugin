@@ -70,4 +70,10 @@ check "pr_gate: verify_pr 실패면 gh pr create deny" "boom-out" "$(hook $P '{"
 check "pr_gate: verify_pr 는 push 에선 돌지 않는다" "" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"git push -u origin small"}}')"
 echo '{"commands":{"verify_pr":"true"}}' > $W/.claude/cgamja.json
 check "pr_gate: verify_pr 성공이면 통과" "" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"gh pr create --fill"}}')"
+# 세션 cwd(메인 폴더)와 다른 워크트리에서 PR을 낼 때 그 워크트리에서 verify_pr 를 돈다(care-app #464)
+WT=$PG/wt; git -C $W worktree add -q -b wtb $WT small 2>/dev/null
+mkdir -p $WT/.claude; echo '{"commands":{"verify_pr":"echo wt-boom; exit 1"}}' > $WT/.claude/cgamja.json
+check "pr_gate: cd <워크트리> && gh pr create 는 그 워크트리에서 verify_pr" "wt-boom" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"cd '$WT' && gh pr create --fill"}}')"
+check "pr_gate: --head 브랜치가 다른 워크트리면 그 워크트리에서 verify_pr" "wt-boom" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"gh pr create --head wtb --fill"}}')"
+check "pr_gate: cd·--head 없으면 세션 cwd 그대로" "" "$(hook $P '{"cwd":"'$W'","tool_input":{"command":"gh pr create --fill"}}')"
 
